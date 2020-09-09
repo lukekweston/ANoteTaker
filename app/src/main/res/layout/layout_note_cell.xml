@@ -7,7 +7,7 @@
     android:layout_height="wrap_content">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layoutcelltext"
+        android:id="@+id/layoutTextCell"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/border"

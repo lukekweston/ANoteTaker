@@ -7,7 +7,7 @@
     android:layout_height="wrap_content">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layoutcelltext"
+        android:id="@+id/layoutImageCell"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/border"
@@ -89,6 +89,13 @@
             android:text="TextView"
             app:layout_constraintStart_toEndOf="@+id/editTextTitle"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/fileLocation"
+            android:visibility="invisible"
+            android:text="null"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content" />
 
 
 

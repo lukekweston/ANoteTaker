@@ -6,6 +6,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
@@ -14,10 +16,15 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -43,17 +50,19 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 
 public class NoteActivity extends AppCompatActivity {
 
-    Button buttonAdd;
+    ImageButton buttonAdd;
     ScrollView scrollView;
-    LinearLayout layout, layoutAllNotes,layoutcell;
+    LinearLayout layout, layoutAllNotes;
     String currentFolder = "";
 
     //For importing image
-    private static final String IMAGE_DIRECTORY = "/YourDirectName";
+    private static final String IMAGE_DIRECTORY = "/data/data/com.example.anotetaker/files";
     private Context mContext;
     private ImageView displayImage;  // imageview
     private int GALLERY = 1, CAMERA = 2;
 
+
+    public String lastImageAddedLocation = "null";
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -70,11 +79,11 @@ public class NoteActivity extends AppCompatActivity {
 
         layout = (LinearLayout) findViewById(R.id.layout);
 
-        layoutcell = (LinearLayout) findViewById(R.id.layoutcelltext);
+
 
         layoutAllNotes = (LinearLayout) findViewById(R.id.layoutItems);
 
-        buttonAdd = (Button) findViewById(R.id.buttonAdd);
+        buttonAdd = (ImageButton) findViewById(R.id.buttonAdd);
 
         loadFolder(currentFolder);
 
@@ -156,22 +165,39 @@ public class NoteActivity extends AppCompatActivity {
 
         final Button addImageFromFile = layoutNoteBeingAdded.findViewById(R.id.buttonImageFromFile);
         final Button addImageFromCamera = layoutNoteBeingAdded.findViewById(R.id.buttonImageFromCamera);
+
         displayImage = layoutNoteBeingAdded.findViewById(R.id.imageView);
+        final TextView fileLocationSave = layoutNoteBeingAdded.findViewById(R.id.fileLocation);
+
+        //Listener that updates when the image size updates
+        final ImageView myImageView = (ImageView) layoutNoteBeingAdded.findViewById(R.id.imageView);
+        final ViewTreeObserver observer = myImageView.getViewTreeObserver();
+        observer.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                int height = myImageView.getHeight();
+                //Set buttons to invisible if the image displayed is not the empty image
+                if(myImageView.getDrawable().getConstantState() != getResources().getDrawable(R.drawable.emptyimage).getConstantState()) {
+                    addImageFromFile.setVisibility(View.GONE);
+                    addImageFromCamera.setVisibility(View.GONE);
+                    if(fileLocationSave.getText().equals("null") && !lastImageAddedLocation.equals("null")){
+                        fileLocationSave.setText(lastImageAddedLocation);
+                        lastImageAddedLocation = "null";
+                    }
+
+                    // Remove the layout listener so we don't waste time on future passes
+                    myImageView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                    //observer.removeOnGlobalLayoutListener(this);
+                }
+
+            }
+        });
+
 
         addImageFromFile.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-
                 displayImage = layoutNoteBeingAdded.findViewById(R.id.imageView);
-
-
-                choosePhotoFromGallary();
-
-                //Set buttons to invisible if the image displayed is not the empty image
-                if(displayImage.getDrawable().getConstantState() != getResources().getDrawable(R.drawable.emptyimage).getConstantState()){
-                    addImageFromFile.setVisibility(View.GONE);
-                    addImageFromCamera.setVisibility(View.GONE);
-                }
-
+                choosePhotoFromGallery();
             }
         });
 
@@ -208,6 +234,45 @@ public class NoteActivity extends AppCompatActivity {
 
     }
 
+    //Create the menu
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.note_menu, menu);
+        return true;
+    }
+
+    //Control the menu
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.ant_connection:
+                handleReset();
+                //startActivity(new Intent(this, About.class));
+                return true;
+            case R.id.EnterEmail:
+                startActivity(new Intent(this, EmailIntent.class));
+                return true;
+            case R.id.RandomHeartRate:
+                useRandomHeartRate = !useRandomHeartRate;
+                if(useRandomHeartRate) {
+                    item.setTitle("Disable Random Heart Rate");
+                    status.setTextColor(Color.BLUE);
+                    startResume.setEnabled(true);
+                    status.setText("Random Heart Rate enabled");
+                }
+                else {
+                    item.setTitle("Enable Random Heart Rate");
+                    status.setTextColor(Color.RED);
+                    status.setText("ANT+ Device not connected");
+                    startResume.setEnabled(false);
+                }
+
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
     @SuppressLint("ResourceType")
     public void loadFolder(String folderName) {
 
@@ -233,10 +298,10 @@ public class NoteActivity extends AppCompatActivity {
                             line = reader.readLine();
 
                             //Todo: make this work with more layouts
-                            if(line.equals("2131230896")) {
+                            //Title and text note
+                            if(line.equals("2131230898")) {
                                 layoutNoteInserting = LayoutInflater.from(NoteActivity.this).inflate(R.layout.layout_note_cell, layoutAllNotes, false);
                                 //Is of this type of layout so this stuff can be inside the if statement
-                                Log.e("hello","hello");
                                 //Bool for checking if it is multiline textData for the note feild
                                 Boolean keepFillingData = false;
                                 while(!line.equals("Layout end")) {
@@ -277,18 +342,142 @@ public class NoteActivity extends AppCompatActivity {
                                         line = line.replace("2131230855 ", "");
                                         title.setText(line);
                                     }
+                                    //Fill out the text box
                                     if(line.split(" ")[0].equals("2131230854")){
                                         keepFillingData = true;
                                         line = line.replace("2131230854 ", "" );
-                                        note.append(line + "\n");
-
-
+                                                                       note.append(line + "\n");
                                     }
+                                    //keep filling multiline text if no id
                                     else if(keepFillingData){
                                         note.append(line + "\n");
                                         //note.setText(line);
                                     }
                                 }
+                            }
+
+                            //Title and image note
+                            if(line.equals("2131230896")){
+
+                                layoutNoteInserting = LayoutInflater.from(NoteActivity.this).inflate(R.layout.layout_image_cell, layoutAllNotes, false);
+                                //Is of this type of layout so this stuff can be inside the if statement
+                                //Bool for checking if it is multiline textData for the note feild
+                                while(!line.equals("Layout end")) {
+                                    line = reader.readLine();
+                                    Log.e("test", line);
+                                    //view that will be filled with note data
+                                    EditText note = layoutNoteInserting.findViewById(R.id.editTextTextMultiLine);
+
+                                    //set up remove Button
+                                    if(line.split(" ")[0].equals("2131230810")) {
+                                        Button removeButton = layoutNoteInserting.findViewById(R.id.buttonRemove);
+
+                                        final View finalLayoutNoteInserting = layoutNoteInserting;
+                                        removeButton.setOnClickListener(new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View view) {
+                                                layoutAllNotes.removeView(finalLayoutNoteInserting);
+                                                saveItems(layoutAllNotes);
+
+                                            }
+                                        });
+
+
+                                    }
+                                    //put in the saved title to the note
+                                    if(line.split(" ")[0].equals("2131230855")){
+                                        TextView title = layoutNoteInserting.findViewById(R.id.editTextTitle);
+                                        line = line.replace("2131230855 ", "");
+                                        title.setText(line);
+                                    }
+
+                                    //put in the date
+                                    if (line.split(" ")[0].equals("2131230722")) {
+                                        TextView dateTimeCreated = layoutNoteInserting.findViewById(R.id.DateTimeCreated);
+                                        //@SuppressLint("ResourceType") TextView test = layout2.findViewById(2131165186);
+                                        dateTimeCreated.setText(line.split(" ")[1] + " " + line.split(" ")[2]);
+                                        //test.setText("hello");
+
+                                    }
+
+                                    //insert the image and set up the buttons
+                                    if (line.split(" ")[0].equals("2131230863")) {
+                                        {
+                                            //set up buttons and imageview as if no image has been added
+
+                                            final Button addImageFromFile = layoutNoteInserting.findViewById(R.id.buttonImageFromFile);
+                                            final Button addImageFromCamera = layoutNoteInserting.findViewById(R.id.buttonImageFromCamera);
+
+                                            final TextView fileLocationSave = layoutNoteInserting.findViewById(R.id.fileLocation);
+
+                                            displayImage = layoutNoteInserting.findViewById(R.id.imageView);
+                                            //Listener that updates when the image size updates
+                                            final ImageView myImageView = (ImageView) layoutNoteInserting.findViewById(R.id.imageView);
+                                            final ViewTreeObserver observer = myImageView.getViewTreeObserver();
+                                            observer.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                                                @Override
+                                                public void onGlobalLayout() {
+                                                    int height = myImageView.getHeight();
+                                                    //Set buttons to invisible if the image displayed is not the empty image
+                                                    if (myImageView.getDrawable().getConstantState() != getResources().getDrawable(R.drawable.emptyimage).getConstantState()) {
+                                                        addImageFromFile.setVisibility(View.GONE);
+                                                        addImageFromCamera.setVisibility(View.GONE);
+                                                        if (fileLocationSave.getText().equals("null") && !lastImageAddedLocation.equals("null")) {
+                                                            fileLocationSave.setText(lastImageAddedLocation);
+                                                            lastImageAddedLocation = "null";
+                                                        }
+
+                                                        // Remove the layout listener so we don't waste time on future passes
+                                                        myImageView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                                                        //observer.removeOnGlobalLayoutListener(this);
+                                                    }
+
+                                                }
+                                            });
+                                            final View finalLayoutNoteInserting1 = layoutNoteInserting;
+                                            addImageFromFile.setOnClickListener(new View.OnClickListener() {
+                                                public void onClick(View v) {
+                                                    displayImage = finalLayoutNoteInserting1.findViewById(R.id.imageView);
+                                                    choosePhotoFromGallery();
+                                                }
+                                            });
+                                            addImageFromCamera.setOnClickListener(new View.OnClickListener() {
+                                                public void onClick(View v) {
+                                                    displayImage = finalLayoutNoteInserting1.findViewById(R.id.imageView);
+                                                    takePhotoFromCamera();
+                                                }
+                                            });
+
+
+                                            //Check if an image has already been loaded (set up buttons can be reused if this image gets removed in the future)
+                                            if (!line.split(" ")[1].equals("null")) {
+                                                addImageFromFile.setVisibility(View.INVISIBLE);
+                                                addImageFromCamera.setVisibility(View.INVISIBLE);
+                                                //TODO: remove the size change listener to increase performance, also should remove button listeners
+                                                //observer.removeOnGlobalLayoutListener();
+                                                Log.e("sdasd",line.split(" ")[1]);
+                                                File imgFile = new  File(line.split(" ")[1]);
+
+                                                if(imgFile.exists()){
+                                                    displayImage = layoutNoteInserting.findViewById(R.id.imageView);
+                                                    Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+                                                    displayImage.setImageBitmap(myBitmap);
+
+                                                }
+
+
+                                            }
+                                        }
+
+
+
+
+                                    }
+
+
+
+                                }
+
                             }
 
                         }
@@ -341,7 +530,6 @@ public class NoteActivity extends AppCompatActivity {
                                 outputStreamWriter.write(Integer.toString(v.getId()) + " " + ((TextView) v).getText() + "\n");
                                 Log.e("save", Integer.toString(v.getId()) + " " + ((TextView) v).getText());
 
-
                             }
 
 
@@ -380,7 +568,7 @@ public class NoteActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         switch (which) {
                             case 0:
-                                choosePhotoFromGallary();
+                                choosePhotoFromGallery();
                                 break;
                             case 1:
                                 takePhotoFromCamera();
@@ -391,7 +579,7 @@ public class NoteActivity extends AppCompatActivity {
         pictureDialog.show();
     }
 
-    public void choosePhotoFromGallary() {
+    public void choosePhotoFromGallery() {
         Intent galleryIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(galleryIntent, GALLERY);
     }
@@ -435,22 +623,28 @@ public class NoteActivity extends AppCompatActivity {
     public String saveImage(Bitmap myBitmap) {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         myBitmap.compress(Bitmap.CompressFormat.JPEG, 90, bytes);
-        File wallpaperDirectory = new File(Environment.getExternalStorageDirectory() + IMAGE_DIRECTORY);
+
+        //File wallpaperDirectory = new File(Environment.getExternalStorageDirectory() + IMAGE_DIRECTORY);
+        File wallpaperDirectory = new File(IMAGE_DIRECTORY);
         if (!wallpaperDirectory.exists()) {  // have the object build the directory structure, if needed.
             wallpaperDirectory.mkdirs();
         }
 
         try {
-            File f = new File(wallpaperDirectory, Calendar.getInstance().getTimeInMillis() + ".jpg");
+            File f = new File(IMAGE_DIRECTORY + "/"+ Calendar.getInstance().getTimeInMillis() + ".jpg");
             f.createNewFile();
+
             FileOutputStream fo = new FileOutputStream(f);
             fo.write(bytes.toByteArray());
+
             MediaScannerConnection.scanFile(this,
                     new String[]{f.getPath()},
                     new String[]{"image/jpeg"}, null);
             fo.close();
             Log.d("TAG", "File Saved::---&gt;" + f.getAbsolutePath());
 
+            lastImageAddedLocation = f.getAbsolutePath();
+            fo.close();
             return f.getAbsolutePath();
         } catch (IOException e1) {
             e1.printStackTrace();

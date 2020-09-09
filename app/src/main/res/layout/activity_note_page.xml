@@ -34,13 +34,15 @@
                 tools:layout_editor_absoluteY="0dp"/>
 
 
-            <Button
+            <ImageButton
                 android:id="@+id/buttonAdd"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="75dp"
+                android:layout_height="75dp"
                 android:layout_marginStart="312dp"
                 android:layout_marginTop="7dp"
+                android:backgroundTint="@color/cardview_shadow_end_color"
                 android:text="Add"
+                android:src="@drawable/add"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
         </LinearLayout>
