@@ -16,9 +16,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -51,40 +54,70 @@ import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
 
+    //LIST OF ARRAY STRINGS WHICH WILL SERVE AS LIST ITEMS
+    ArrayList<String> listItems=new ArrayList<String>();
 
+    //DEFINING A STRING ADAPTER WHICH WILL HANDLE THE DATA OF THE LISTVIEW
+    ArrayAdapter<String> adapter;
+
+    //RECORDING HOW MANY TIMES THE BUTTON HAS BEEN CLICKED
+    int clickCounter=0;
+
+
+    ListView noteBooks;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main_menu);
 
         requestMultiplePermissions();
 
+        adapter=new ArrayAdapter<String>(this,
+                android.R.layout.simple_list_item_1,
+                listItems);
+        //setListAdapter(adapter);
 
-        Button notebook1 = (Button) findViewById(R.id.buttonNote1);
-        notebook1.setOnClickListener(new View.OnClickListener() {
-                                       @Override
-                                       public void onClick(View view) {
-                                           SharedPreferences mPrefs = getSharedPreferences("IDvalue", 0);
-                                           SharedPreferences.Editor editor = mPrefs.edit();
-                                           editor.putString(getString(R.string.curWorkingFolder), "NoteBook1");
-                                           editor.commit();
-                                           startActivity(new Intent(MainActivity.this, NoteActivity.class));
-                                       }
-                                   }
-        );
 
-        Button notebook2 = (Button) findViewById(R.id.buttonNote2);
-        notebook2.setOnClickListener(new View.OnClickListener() {
-                                         @Override
-                                         public void onClick(View view) {
-                                             SharedPreferences mPrefs = getSharedPreferences("IDvalue", 0);
-                                             SharedPreferences.Editor editor = mPrefs.edit();
-                                             editor.putString(getString(R.string.curWorkingFolder), "NoteBook2");
-                                             editor.commit();
-                                             startActivity(new Intent(MainActivity.this, NoteActivity.class));
-                                         }
-                                     }
-        );
+        //TODO: https://stackoverflow.com/questions/4540754/how-do-you-dynamically-add-elements-to-a-listview-on-android
+
+        //ImageButton b1 = (ImageButton) findViewById(R.id.buttonAdd);
+
+
+
+//        b1.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//
+//
+//
+//            }
+//        });
+
+//        Button notebook1 = (Button) findViewById(R.id.buttonNote1);
+//        notebook1.setOnClickListener(new View.OnClickListener() {
+//                                       @Override
+//                                       public void onClick(View view) {
+//                                           SharedPreferences mPrefs = getSharedPreferences("IDvalue", 0);
+//                                           SharedPreferences.Editor editor = mPrefs.edit();
+//                                           editor.putString(getString(R.string.curWorkingFolder), "NoteBook1");
+//                                           editor.commit();
+//                                           startActivity(new Intent(MainActivity.this, NoteActivity.class));
+//                                       }
+//                                   }
+//        );
+//
+//        Button notebook2 = (Button) findViewById(R.id.buttonNote2);
+//        notebook2.setOnClickListener(new View.OnClickListener() {
+//                                         @Override
+//                                         public void onClick(View view) {
+//                                             SharedPreferences mPrefs = getSharedPreferences("IDvalue", 0);
+//                                             SharedPreferences.Editor editor = mPrefs.edit();
+//                                             editor.putString(getString(R.string.curWorkingFolder), "NoteBook2");
+//                                             editor.commit();
+//                                             startActivity(new Intent(MainActivity.this, NoteActivity.class));
+//                                         }
+//                                     }
+//        );
 
 
     }
@@ -123,5 +156,11 @@ public class MainActivity extends AppCompatActivity {
                 .check();
     }
 
+    //METHOD WHICH WILL HANDLE DYNAMIC INSERTION
+    public void addItems(View v) {
+        listItems.add("Clicked : "+clickCounter++);
+        adapter.notifyDataSetChanged();
     }
+
+}
 

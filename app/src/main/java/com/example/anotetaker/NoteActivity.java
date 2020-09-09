@@ -1,6 +1,7 @@
 package com.example.anotetaker;
 
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -14,6 +15,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -41,12 +43,14 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.time.LocalDateTime;
 import java.util.Calendar;
+import java.util.Random;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.fragment.app.DialogFragment;
 
 public class NoteActivity extends AppCompatActivity {
 
@@ -245,27 +249,92 @@ public class NoteActivity extends AppCompatActivity {
     //Control the menu
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.ant_connection:
-                handleReset();
-                //startActivity(new Intent(this, About.class));
+            case R.id.rename_notebook:
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+
+                builder.setTitle("Rename notebook");
+
+                // Set up the input
+
+                //TODO: update the layout
+
+                //Check this https://stackoverflow.com/questions/10903754/input-text-dialog-android
+
+                final EditText input = new EditText(this);
+                input.setHint(currentFolder);
+//                input.setPadding(
+//                        19, // if you look at android alert_dialog.xml, you will see the message textview have margin 14dp and padding 5dp. This is the reason why I use 19 here
+//                        0,
+//                        19,
+//                        0
+//                );
+
+                input.setInputType(InputType.TYPE_CLASS_TEXT);
+                builder.setView(input);
+
+                //builder.set
+
+
+
+                builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // User clicked OK button
+                    }
+                });
+
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // User cancelled the dialog
+                    }
+                });
+
+
+                builder.show();
+
+
                 return true;
-            case R.id.EnterEmail:
-                startActivity(new Intent(this, EmailIntent.class));
+                //TODO: make this change the primary dark colour, so the whole theme can change, also make the colour save/loadable
+            case R.id.setColour:
+                int[] androidColors = getResources().getIntArray(R.array.androidcolors);
+                int randomAndroidColor = androidColors[new Random().nextInt(androidColors.length)];
+                getTheme().applyStyle(randomAndroidColor, true);
+
+                layout.setBackgroundColor(randomAndroidColor);
+                layoutAllNotes.setBackgroundColor(randomAndroidColor);
+
+                ///startActivity(new Intent(this, EmailIntent.class));
                 return true;
-            case R.id.RandomHeartRate:
-                useRandomHeartRate = !useRandomHeartRate;
-                if(useRandomHeartRate) {
-                    item.setTitle("Disable Random Heart Rate");
-                    status.setTextColor(Color.BLUE);
-                    startResume.setEnabled(true);
-                    status.setText("Random Heart Rate enabled");
-                }
-                else {
-                    item.setTitle("Enable Random Heart Rate");
-                    status.setTextColor(Color.RED);
-                    status.setText("ANT+ Device not connected");
-                    startResume.setEnabled(false);
-                }
+            case R.id.delete:
+
+                builder = new AlertDialog.Builder(this);
+
+
+                builder.setMessage("Are you sure you want to delete this notebook?")
+                        .setTitle("Delete notebook");
+
+                builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // User clicked OK button
+                    }
+                });
+                builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // User cancelled the dialog
+                    }
+                });
+
+                AlertDialog dialog = builder.create();
+
+                dialog.show();
+
+                Log.e("dsad","hello");
+
+                //DeleteFileDialogFragment delete = new DeleteFileDialogFragment().onCreateDialog();
+                return true;
+
+
 
 
             default:
@@ -652,8 +721,7 @@ public class NoteActivity extends AppCompatActivity {
         return "";
     }
 
-
-
-
     ////####################################################################################################################################
 }
+
+

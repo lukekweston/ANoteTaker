@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/ant_connection"
+    <item android:id="@+id/rename_notebook"
         android:title="Rename Notebook" />
-    <item android:id="@+id/EnterEmail"
+    <item android:id="@+id/setColour"
         android:title="Set Notebook colour" />
-    <item android:id="@+id/RandomHeartRate"
+    <item android:id="@+id/delete"
         android:title="Delete Notebook" />
 
 </menu>

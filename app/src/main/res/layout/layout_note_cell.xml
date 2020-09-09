@@ -37,7 +37,8 @@
 
             android:ems="10"
 
-            android:text="Title"
+            android:text=""
+            android:hint="Title"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
