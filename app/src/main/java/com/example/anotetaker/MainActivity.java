@@ -12,10 +12,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -54,31 +58,39 @@ import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
 
-    //LIST OF ARRAY STRINGS WHICH WILL SERVE AS LIST ITEMS
-    ArrayList<String> listItems=new ArrayList<String>();
 
-    //DEFINING A STRING ADAPTER WHICH WILL HANDLE THE DATA OF THE LISTVIEW
-    ArrayAdapter<String> adapter;
+    ListView simpleList;
 
-    //RECORDING HOW MANY TIMES THE BUTTON HAS BEEN CLICKED
-    int clickCounter=0;
+    ArrayList<String> notebooks = new ArrayList<>();
+
+    String NOTEBOOK_DIRECTORY = "/data/data/com.example.anotetaker/files/notebooks";
+
+    LinearLayout layoutItems;
 
 
-    ListView noteBooks;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_menu);
 
+    layoutItems = (LinearLayout) findViewById(R.id.layout);
+
+//        for (int i =0; i <12; i++){
+//            test.add(Integer.toString(i));
+//        }
+
+        loadNoteBooks();
+
         requestMultiplePermissions();
+//
 
-        adapter=new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_1,
-                listItems);
-        //setListAdapter(adapter);
-
+//
+//        countryList[0] = "sdas";
 
         //TODO: https://stackoverflow.com/questions/4540754/how-do-you-dynamically-add-elements-to-a-listview-on-android
+
+        //https://abhiandroid.com/ui/listview#:~:text=List%20of%20scrollable%20items%20can%20be%20displayed%20in%20Android%20using%20ListView.&text=ListView%20in%20Android%20Studio%3A%20Listview,XML%20code%20to%20create%20it.
+
 
         //ImageButton b1 = (ImageButton) findViewById(R.id.buttonAdd);
 
@@ -156,11 +168,70 @@ public class MainActivity extends AppCompatActivity {
                 .check();
     }
 
-    //METHOD WHICH WILL HANDLE DYNAMIC INSERTION
-    public void addItems(View v) {
-        listItems.add("Clicked : "+clickCounter++);
-        adapter.notifyDataSetChanged();
+
+    public void loadNoteBooks(){
+
+        File wallpaperDirectory = new File(NOTEBOOK_DIRECTORY);
+        if (!wallpaperDirectory.exists()) {  // have the object build the directory structure, if needed.
+            wallpaperDirectory.mkdirs();
+        }
+        ArrayList<String> notebooks = new ArrayList<String>();
+
+        String path = NOTEBOOK_DIRECTORY;
+        Log.d("Files", "Path: " + path);
+        File directory = new File(path);
+        File[] files = directory.listFiles();
+        Log.d("Files", "Size: "+ files.length);
+        for (int i = 0; i < files.length; i++)
+        {
+           notebooks.add(files[i].getName());
+        }
+
+       // simpleList = (ListView)findViewById(R.id.list);
+
+        final View layoutNoteBeingAdded = LayoutInflater.from(MainActivity.this).inflate(R.layout.activity_listview, layoutItems, false);
+        TextView test = (TextView) findViewById(R.id.textView);
+        //test.setText("hello");
+
+        ImageButton b1 = layoutNoteBeingAdded.findViewById(R.id.imageButton);
+
+        b1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(getApplicationContext(), ("asdsadasdasd"),
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        layoutItems.addView(layoutNoteBeingAdded);
+
+
+//        ListView items = (ListView) layoutNoteBeingAdded.findViewById(R.id.list);
+//
+//        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, R.layout.activity_listview, R.id.textView, notebooks);
+//        items.setAdapter(arrayAdapter);
+//        items.setClickable(true);
+//
+//
+//        items.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+//                Log.e("hele", Integer.toString(i));
+//                Toast.makeText(getApplicationContext(), ((TextView) view).getText(),
+//                        Toast.LENGTH_SHORT).show();
+//
+//            }
+//        });
+//
+//        layoutItems.addView(layoutNoteBeingAdded);
+
+
+
+
+
     }
+
+
 
 }
 

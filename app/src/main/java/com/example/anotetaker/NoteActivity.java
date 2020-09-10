@@ -59,8 +59,9 @@ public class NoteActivity extends AppCompatActivity {
     LinearLayout layout, layoutAllNotes;
     String currentFolder = "";
 
-    //For importing image
-    private static final String IMAGE_DIRECTORY = "/data/data/com.example.anotetaker/files";
+
+    private static final String IMAGE_DIRECTORY = "/data/data/com.example.anotetaker/files/images";
+    private static final String NOTEBOOK_DIRECTORY = "/data/data/com.example.anotetaker/files/notebooks";
     private Context mContext;
     private ImageView displayImage;  // imageview
     private int GALLERY = 1, CAMERA = 2;
@@ -348,7 +349,7 @@ public class NoteActivity extends AppCompatActivity {
         try {
             FileInputStream is;
             BufferedReader reader;
-            final File file = new File("/data/data/com.example.anotetaker/files/" + folderName);
+            final File file = new File(NOTEBOOK_DIRECTORY +"/" + folderName);
 
             if (file.exists()) {
                 is = new FileInputStream(file);
@@ -576,7 +577,7 @@ public class NoteActivity extends AppCompatActivity {
         try {
 
 
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(NoteActivity.this.openFileOutput(fileName, NoteActivity.this.MODE_PRIVATE));
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(NoteActivity.this.openFileOutput(NOTEBOOK_DIRECTORY +"/" + fileName, NoteActivity.this.MODE_PRIVATE));
 
             for (int i = 0; i < itemCount; i++) {
                 outputStreamWriter.write("Layout start" + "\n");
