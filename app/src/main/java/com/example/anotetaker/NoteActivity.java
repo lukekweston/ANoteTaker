@@ -34,16 +34,20 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -71,11 +75,15 @@ public class NoteActivity extends AppCompatActivity {
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_note_page);
 
+        //Set the animation for opening this intent
+        this.overridePendingTransition(R.anim.anim_slide_in_left, R.anim.anim_slide_out_left);
+
         //Get the folder/file we are currently working on
-        SharedPreferences mPrefs = getSharedPreferences("IDvalue",0);
+        SharedPreferences mPrefs = getSharedPreferences("NotebookNameValue",0);
         String defaultValue = getResources().getString(R.string.workingFolder_default);
         currentFolder = mPrefs.getString(getString(R.string.curWorkingFolder), defaultValue);
 
@@ -104,12 +112,12 @@ public class NoteActivity extends AppCompatActivity {
 
 
 //        Todo make this listener work better
-//        new Timer().scheduleAtFixedRate(new TimerTask() {
-//            @Override
-//            public void run() {
-//                saveItems(layoutItems);
-//            }
-//        }, 0, 500);
+        new Timer().scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                saveItems(layoutAllNotes);
+            }
+        }, 0, 500);
 
 
 
@@ -122,7 +130,7 @@ public class NoteActivity extends AppCompatActivity {
     private void selectNoteTypeDialog() {
         AlertDialog.Builder pictureDialog = new AlertDialog.Builder(this);
         pictureDialog.setTitle("Select Note to add");
-        String[] pictureDialogItems = {"Add text note and title", "Add image and title"};
+        String[] pictureDialogItems = {"Add text note and title", "Add image and title", "Add exta notebook"};
         pictureDialog.setItems(pictureDialogItems,
                 new DialogInterface.OnClickListener() {
                     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -134,6 +142,46 @@ public class NoteActivity extends AppCompatActivity {
                                 break;
                             case 1:
                                 addImageCell();
+                                break;
+                            case 2:
+                                //TODO:
+                            {
+                                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+
+
+                                builder.setTitle("New notebook");
+                                final EditText input = new EditText(this);
+                                input.setHint("Notebook name");
+
+
+                                input.setInputType(InputType.TYPE_CLASS_TEXT);
+                                builder.setView(input);
+
+
+
+
+
+                                builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+
+                                        createNoteBookEntry(input.getText().toString());
+
+
+
+                                    }
+                                });
+
+                                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        // User cancelled the dialog
+                                    }
+                                });
+
+
+                                builder.show();
+                        }
+
+                                addNoteBook();
                                 break;
                         }
                     }
@@ -224,8 +272,13 @@ public class NoteActivity extends AppCompatActivity {
                 saveItems(layoutAllNotes);
             }
         });
+
+        saveItems(layoutAllNotes);
     }
 
+    private void addNoteBook(){
+
+    }
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         saveItems(layoutAllNotes);
@@ -369,7 +422,7 @@ public class NoteActivity extends AppCompatActivity {
 
                             //Todo: make this work with more layouts
                             //Title and text note
-                            if(line.equals("2131230898")) {
+                            if(line.equals("2131296435")) {
                                 layoutNoteInserting = LayoutInflater.from(NoteActivity.this).inflate(R.layout.layout_note_cell, layoutAllNotes, false);
                                 //Is of this type of layout so this stuff can be inside the if statement
                                 //Bool for checking if it is multiline textData for the note feild
@@ -381,7 +434,7 @@ public class NoteActivity extends AppCompatActivity {
                                     EditText note = layoutNoteInserting.findViewById(R.id.editTextTextMultiLine);
 
                                     //put in the date
-                                    if(line.split(" ")[0].equals("2131230722")){
+                                    if(line.split(" ")[0].equals("2131296258")){
                                         keepFillingData = false;
                                         TextView dateTimeCreated = layoutNoteInserting.findViewById(R.id.DateTimeCreated);
                                         //@SuppressLint("ResourceType") TextView test = layout2.findViewById(2131165186);
@@ -390,7 +443,7 @@ public class NoteActivity extends AppCompatActivity {
 
                                     }
                                     //set up remove Button
-                                    if(line.split(" ")[0].equals("2131230810")) {
+                                    if(line.split(" ")[0].equals("2131296345")) {
                                         Button removeButton = layoutNoteInserting.findViewById(R.id.buttonRemove);
 
                                         final View finalLayoutNoteInserting = layoutNoteInserting;
@@ -406,16 +459,16 @@ public class NoteActivity extends AppCompatActivity {
 
                                     }
                                     //put in the saved title to the note
-                                    if(line.split(" ")[0].equals("2131230855")){
+                                    if(line.split(" ")[0].equals("2131296391")){
                                         keepFillingData = false;
                                         TextView title = layoutNoteInserting.findViewById(R.id.editTextTitle);
-                                        line = line.replace("2131230855 ", "");
+                                        line = line.replace("2131296391 ", "");
                                         title.setText(line);
                                     }
                                     //Fill out the text box
-                                    if(line.split(" ")[0].equals("2131230854")){
+                                    if(line.split(" ")[0].equals("2131296390")){
                                         keepFillingData = true;
-                                        line = line.replace("2131230854 ", "" );
+                                        line = line.replace("2131296390 ", "" );
                                                                        note.append(line + "\n");
                                     }
                                     //keep filling multiline text if no id
@@ -427,7 +480,7 @@ public class NoteActivity extends AppCompatActivity {
                             }
 
                             //Title and image note
-                            if(line.equals("2131230896")){
+                            if(line.equals("2131296433")){
 
                                 layoutNoteInserting = LayoutInflater.from(NoteActivity.this).inflate(R.layout.layout_image_cell, layoutAllNotes, false);
                                 //Is of this type of layout so this stuff can be inside the if statement
@@ -439,7 +492,7 @@ public class NoteActivity extends AppCompatActivity {
                                     EditText note = layoutNoteInserting.findViewById(R.id.editTextTextMultiLine);
 
                                     //set up remove Button
-                                    if(line.split(" ")[0].equals("2131230810")) {
+                                    if(line.split(" ")[0].equals("2131296345")) {
                                         Button removeButton = layoutNoteInserting.findViewById(R.id.buttonRemove);
 
                                         final View finalLayoutNoteInserting = layoutNoteInserting;
@@ -455,14 +508,14 @@ public class NoteActivity extends AppCompatActivity {
 
                                     }
                                     //put in the saved title to the note
-                                    if(line.split(" ")[0].equals("2131230855")){
+                                    if(line.split(" ")[0].equals("2131296391")){
                                         TextView title = layoutNoteInserting.findViewById(R.id.editTextTitle);
-                                        line = line.replace("2131230855 ", "");
+                                        line = line.replace("2131296391 ", "");
                                         title.setText(line);
                                     }
 
                                     //put in the date
-                                    if (line.split(" ")[0].equals("2131230722")) {
+                                    if (line.split(" ")[0].equals("2131296258")) {
                                         TextView dateTimeCreated = layoutNoteInserting.findViewById(R.id.DateTimeCreated);
                                         //@SuppressLint("ResourceType") TextView test = layout2.findViewById(2131165186);
                                         dateTimeCreated.setText(line.split(" ")[1] + " " + line.split(" ")[2]);
@@ -471,7 +524,7 @@ public class NoteActivity extends AppCompatActivity {
                                     }
 
                                     //insert the image and set up the buttons
-                                    if (line.split(" ")[0].equals("2131230863")) {
+                                    if (line.split(" ")[0].equals("2131296399")) {
                                         {
                                             //set up buttons and imageview as if no image has been added
 
@@ -573,14 +626,26 @@ public class NoteActivity extends AppCompatActivity {
     public void saveItems(LinearLayout layoutItems){
         //todo: make folders and save files as the folder name
         String fileName = currentFolder;
+        Log.e("filename", fileName);
         int itemCount = layoutItems.getChildCount();
         try {
 
+            //Check directory exists
+            File noteBookDirectory = new File(NOTEBOOK_DIRECTORY);
+            if (!noteBookDirectory.exists()) {  // have the object build the directory structure, if needed.
+                noteBookDirectory.mkdirs();
+            }
+            //make or edit existing file
+            File noteBookFile = new File(noteBookDirectory, fileName);
 
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(NoteActivity.this.openFileOutput(NOTEBOOK_DIRECTORY +"/" + fileName, NoteActivity.this.MODE_PRIVATE));
+            Log.e("hmm",NOTEBOOK_DIRECTORY +"/" + fileName);
+
+            BufferedWriter bw = new BufferedWriter(new FileWriter(noteBookFile));
+
+            //OutputStreamWriter outputStreamWriter = new OutputStreamWriter(NoteActivity.this.openFileOutput(NOTEBOOK_DIRECTORY +"/" + fileName, NoteActivity.this.MODE_PRIVATE));
 
             for (int i = 0; i < itemCount; i++) {
-                outputStreamWriter.write("Layout start" + "\n");
+                bw.write("Layout start" + "\n");
 
                 Log.e("save", "Layout start");
                 if (layoutItems.getChildAt(i) instanceof ConstraintLayout) {
@@ -590,33 +655,33 @@ public class NoteActivity extends AppCompatActivity {
                     for (int j = 0; j < count; j++) {
 
                         ConstraintLayout cellLayout = (ConstraintLayout) cell.getChildAt(j);
-                        outputStreamWriter.write(Integer.toString(cellLayout.getId()) + "\n");
+                        bw.write(Integer.toString(cellLayout.getId()) + "\n");
                         Log.e("save", Integer.toString(cellLayout.getId()));
                         int count2 = cellLayout.getChildCount();
                         View v = null;
                         for (int m = 0; m < count2; m++) {
                             v = cellLayout.getChildAt(m);
                             if (v instanceof TextView || v instanceof EditText) {
-                                outputStreamWriter.write(Integer.toString(v.getId()) + " " + ((TextView) v).getText() + "\n");
+                                bw.write(Integer.toString(v.getId()) + " " + ((TextView) v).getText() + "\n");
                                 Log.e("save", Integer.toString(v.getId()) + " " + ((TextView) v).getText());
 
                             }
 
-
-                            //do something with your child element
                         }
                     }
                 }
-                outputStreamWriter.write("Layout end" + "\n");
+                bw.write("Layout end" + "\n");
 
                 Log.e("save", "Layout wnd");
 
             }
-            outputStreamWriter.close();
+            bw.close();
         }
         catch (Exception e) {
             Log.e("Exception", "File write failed: " + e.toString());
         }
+
+
 
 
 

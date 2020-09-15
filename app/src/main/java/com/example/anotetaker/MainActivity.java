@@ -2,17 +2,20 @@ package com.example.anotetaker;
 
 import androidx.annotation.LayoutRes;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -73,63 +76,68 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_menu);
 
-    layoutItems = (LinearLayout) findViewById(R.id.layout);
+        //Set the animation for opening this intent
+        this.overridePendingTransition(R.anim.anim_slide_in_right, R.anim.anim_slide_out_right);
 
-//        for (int i =0; i <12; i++){
-//            test.add(Integer.toString(i));
-//        }
+        layoutItems = (LinearLayout) findViewById(R.id.layoutItems);
 
         loadNoteBooks();
 
         requestMultiplePermissions();
-//
 
-//
-//        countryList[0] = "sdas";
+        ImageButton addButton = (ImageButton) findViewById(R.id.addBtn);
 
-        //TODO: https://stackoverflow.com/questions/4540754/how-do-you-dynamically-add-elements-to-a-listview-on-android
-
-        //https://abhiandroid.com/ui/listview#:~:text=List%20of%20scrollable%20items%20can%20be%20displayed%20in%20Android%20using%20ListView.&text=ListView%20in%20Android%20Studio%3A%20Listview,XML%20code%20to%20create%20it.
-
-
-        //ImageButton b1 = (ImageButton) findViewById(R.id.buttonAdd);
+        addButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
 
 
+                builder.setTitle("New notebook");
 
-//        b1.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//
-//
-//
-//            }
-//        });
+                // Set up the input
 
-//        Button notebook1 = (Button) findViewById(R.id.buttonNote1);
-//        notebook1.setOnClickListener(new View.OnClickListener() {
-//                                       @Override
-//                                       public void onClick(View view) {
-//                                           SharedPreferences mPrefs = getSharedPreferences("IDvalue", 0);
-//                                           SharedPreferences.Editor editor = mPrefs.edit();
-//                                           editor.putString(getString(R.string.curWorkingFolder), "NoteBook1");
-//                                           editor.commit();
-//                                           startActivity(new Intent(MainActivity.this, NoteActivity.class));
-//                                       }
-//                                   }
-//        );
-//
-//        Button notebook2 = (Button) findViewById(R.id.buttonNote2);
-//        notebook2.setOnClickListener(new View.OnClickListener() {
-//                                         @Override
-//                                         public void onClick(View view) {
-//                                             SharedPreferences mPrefs = getSharedPreferences("IDvalue", 0);
-//                                             SharedPreferences.Editor editor = mPrefs.edit();
-//                                             editor.putString(getString(R.string.curWorkingFolder), "NoteBook2");
-//                                             editor.commit();
-//                                             startActivity(new Intent(MainActivity.this, NoteActivity.class));
-//                                         }
-//                                     }
-//        );
+                //TODO: update the layout
+
+                //Check this https://stackoverflow.com/questions/10903754/input-text-dialog-android
+
+                final EditText input = new EditText(MainActivity.this);
+                input.setHint("Notebook name");
+//                input.setPadding(
+//                        19, // if you look at android alert_dialog.xml, you will see the message textview have margin 14dp and padding 5dp. This is the reason why I use 19 here
+//                        0,
+//                        19,
+//                        0
+//                );
+
+                input.setInputType(InputType.TYPE_CLASS_TEXT);
+                builder.setView(input);
+
+                //builder.set
+
+
+
+                builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+
+                        createNoteBookEntry(input.getText().toString());
+
+
+
+                    }
+                });
+
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // User cancelled the dialog
+                    }
+                });
+
+
+                builder.show();
+            }
+        });
+
 
 
     }
@@ -175,7 +183,7 @@ public class MainActivity extends AppCompatActivity {
         if (!wallpaperDirectory.exists()) {  // have the object build the directory structure, if needed.
             wallpaperDirectory.mkdirs();
         }
-        ArrayList<String> notebooks = new ArrayList<String>();
+        final ArrayList<String> notebooks = new ArrayList<String>();
 
         String path = NOTEBOOK_DIRECTORY;
         Log.d("Files", "Path: " + path);
@@ -189,48 +197,45 @@ public class MainActivity extends AppCompatActivity {
 
        // simpleList = (ListView)findViewById(R.id.list);
 
-        final View layoutNoteBeingAdded = LayoutInflater.from(MainActivity.this).inflate(R.layout.activity_listview, layoutItems, false);
-        TextView test = (TextView) findViewById(R.id.textView);
-        //test.setText("hello");
+        for (String nb : notebooks) {
 
-        ImageButton b1 = layoutNoteBeingAdded.findViewById(R.id.imageButton);
-
-        b1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(getApplicationContext(), ("asdsadasdasd"),
-                        Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        layoutItems.addView(layoutNoteBeingAdded);
-
-
-//        ListView items = (ListView) layoutNoteBeingAdded.findViewById(R.id.list);
-//
-//        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, R.layout.activity_listview, R.id.textView, notebooks);
-//        items.setAdapter(arrayAdapter);
-//        items.setClickable(true);
-//
-//
-//        items.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-//                Log.e("hele", Integer.toString(i));
-//                Toast.makeText(getApplicationContext(), ((TextView) view).getText(),
-//                        Toast.LENGTH_SHORT).show();
-//
-//            }
-//        });
-//
-//        layoutItems.addView(layoutNoteBeingAdded);
-
+            createNoteBookEntry(nb);
+        }
 
 
 
 
     }
 
+    public void createNoteBookEntry(String noteBookFile){
+
+            final View noteBookBeingAdded = LayoutInflater.from(MainActivity.this).inflate(R.layout.activity_listview, layoutItems, false);
+            final TextView noteBookName = noteBookBeingAdded.findViewById(R.id.textView);
+            noteBookName.setText(noteBookFile);
+
+            ImageButton openButton = noteBookBeingAdded.findViewById(R.id.imageButton);
+
+
+            //Listener to open activity
+            View.OnClickListener openNotebook = new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    SharedPreferences mPrefs = getSharedPreferences("NotebookNameValue", 0);
+                    SharedPreferences.Editor editor = mPrefs.edit();
+                    editor.putString(getString(R.string.curWorkingFolder), (String) noteBookName.getText());
+                    editor.commit();
+                    startActivity(new Intent(MainActivity.this, NoteActivity.class));
+
+                }
+
+            };
+
+            openButton.setOnClickListener(openNotebook);
+            noteBookName.setOnClickListener(openNotebook);
+
+            layoutItems.addView(noteBookBeingAdded);
+
+        }
 
 
 }
