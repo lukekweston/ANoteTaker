@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layoutOpenNoteCell"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/border"
+        android:orientation="horizontal"
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="0dp">
+
+
+    <TextView
+        android:id="@+id/noteNametextView"
+        android:clickable="false"
+        android:layout_width="328dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left"
+        android:padding="15dp"
+        android:text="hello123"
+        android:textColor="@color/colorPrimaryDark"
+        android:textSize="20dp" />
+
+
+        <ImageButton
+            android:id="@+id/openNoteImageButton"
+            android:layout_width="57dp"
+            android:layout_height="57dp"
+            android:layout_weight="1"
+            android:backgroundTint="@color/cardview_shadow_end_color"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/noteNametextView"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/arrow" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

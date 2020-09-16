@@ -1,19 +1,16 @@
 package com.example.anotetaker;
 
 import android.annotation.SuppressLint;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.text.InputType;
 import android.util.Log;
@@ -42,19 +39,15 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.fragment.app.DialogFragment;
 
 public class NoteActivity extends AppCompatActivity {
 
@@ -79,13 +72,28 @@ public class NoteActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_note_page);
 
-        //Set the animation for opening this intent
-        this.overridePendingTransition(R.anim.anim_slide_in_left, R.anim.anim_slide_out_left);
+        //get if the animation direction has been stored
+        Intent intent = getIntent();
+        String direction = intent.getStringExtra("activity");
+
+        //Set the animation direction if right has been stored, else left
+        if(direction != null && direction.equals("right")){
+            this.overridePendingTransition(R.anim.anim_slide_in_right, R.anim.anim_slide_out_right);
+        }
+        else {
+            //Set the animation for opening this intent
+            this.overridePendingTransition(R.anim.anim_slide_in_left, R.anim.anim_slide_out_left);
+        }
 
         //Get the folder/file we are currently working on
         SharedPreferences mPrefs = getSharedPreferences("NotebookNameValue",0);
         String defaultValue = getResources().getString(R.string.workingFolder_default);
         currentFolder = mPrefs.getString(getString(R.string.curWorkingFolder), defaultValue);
+
+//        if(currentFolder.split("/").length > 1){
+//            //Set the animation for opening this intent
+//            this.overridePendingTransition(R.anim.anim_slide_in_left, R.anim.anim_slide_out_right);
+//        }
 
         getSupportActionBar().setTitle(currentFolder);
 
@@ -112,12 +120,12 @@ public class NoteActivity extends AppCompatActivity {
 
 
 //        Todo make this listener work better
-        new Timer().scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                saveItems(layoutAllNotes);
-            }
-        }, 0, 500);
+//        new Timer().scheduleAtFixedRate(new TimerTask() {
+//            @Override
+//            public void run() {
+//                saveItems(layoutAllNotes);
+//            }
+//        }, 0, 500);
 
 
 
@@ -144,13 +152,13 @@ public class NoteActivity extends AppCompatActivity {
                                 addImageCell();
                                 break;
                             case 2:
-                                //TODO:
+                                //TODO: make this pop up better
                             {
-                                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                                AlertDialog.Builder builder = new AlertDialog.Builder(NoteActivity.this);
 
 
                                 builder.setTitle("New notebook");
-                                final EditText input = new EditText(this);
+                                final EditText input = new EditText(NoteActivity.this);
                                 input.setHint("Notebook name");
 
 
@@ -164,7 +172,7 @@ public class NoteActivity extends AppCompatActivity {
                                 builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
 
-                                        createNoteBookEntry(input.getText().toString());
+                                        addNoteBook(currentFolder + "/" + input.getText().toString());
 
 
 
@@ -181,7 +189,6 @@ public class NoteActivity extends AppCompatActivity {
                                 builder.show();
                         }
 
-                                addNoteBook();
                                 break;
                         }
                     }
@@ -276,20 +283,51 @@ public class NoteActivity extends AppCompatActivity {
         saveItems(layoutAllNotes);
     }
 
-    private void addNoteBook(){
+    private void addNoteBook(String noteBookFile){
+
+        final View noteBookBeingAdded = LayoutInflater.from(NoteActivity.this).inflate(R.layout.activity_open_note_cell, layoutAllNotes, false);
+        final TextView noteBookName = noteBookBeingAdded.findViewById(R.id.noteNametextView);
+        noteBookName.setText(noteBookFile);
+
+        ImageButton openButton = noteBookBeingAdded.findViewById(R.id.openNoteImageButton);
+
+
+        //Listener to open activity
+        View.OnClickListener openNotebook = new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                SharedPreferences mPrefs = getSharedPreferences("NotebookNameValue", 0);
+                SharedPreferences.Editor editor = mPrefs.edit();
+                editor.putString(getString(R.string.curWorkingFolder), (String) noteBookName.getText());
+                editor.commit();
+                startActivity(new Intent(NoteActivity.this, NoteActivity.class));
+
+            }
+
+        };
+
+        openButton.setOnClickListener(openNotebook);
+        noteBookName.setOnClickListener(openNotebook);
+
+        layoutAllNotes.addView(noteBookBeingAdded);
+        saveItems(layoutAllNotes);
+
+
+
 
     }
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        saveItems(layoutAllNotes);
-        return super.onTouchEvent(event);
-    }
+
 
     @Override
     protected void onDestroy() {
         //saveItems(layoutItems);
         super.onDestroy();
 
+    }
+
+
+    public void callCho() {
+        onBackPressed();
     }
 
     //Create the menu
@@ -303,6 +341,32 @@ public class NoteActivity extends AppCompatActivity {
     //Control the menu
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+
+            //Check if the back button has been pressed
+            case android.R.id.home:
+                if(currentFolder.contains("/")){
+                    //Split out the last notebook in the chain
+                    String previousFolder = currentFolder.substring(0, currentFolder.lastIndexOf("/"));
+                    //pass the new working notebook folder into memory
+                    SharedPreferences mPrefs = getSharedPreferences("NotebookNameValue", 0);
+                    SharedPreferences.Editor editor = mPrefs.edit();
+                    editor.putString(getString(R.string.curWorkingFolder), (String) previousFolder);
+                    editor.commit();
+
+                    Intent intent = new Intent(new Intent(NoteActivity.this, NoteActivity.class));
+                    //Store animation direction so it can be set in the next activity
+                    intent.putExtra("activity","right");
+                    startActivity(intent);
+
+
+                    return true;
+                }
+
+                startActivity(new Intent(NoteActivity.this, MainActivity.class));
+
+                return true;
+
+
             case R.id.rename_notebook:
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -398,13 +462,15 @@ public class NoteActivity extends AppCompatActivity {
 
     @SuppressLint("ResourceType")
     public void loadFolder(String folderName) {
-
+        //Add file extenstion
+        folderName = folderName + ".txt";
         try {
             FileInputStream is;
             BufferedReader reader;
             final File file = new File(NOTEBOOK_DIRECTORY +"/" + folderName);
 
             if (file.exists()) {
+                Log.e("loading", "loading");
                 is = new FileInputStream(file);
                 reader = new BufferedReader(new InputStreamReader(is));
                 String line = reader.readLine();
@@ -480,7 +546,7 @@ public class NoteActivity extends AppCompatActivity {
                             }
 
                             //Title and image note
-                            if(line.equals("2131296433")){
+                            if(line.equals("2131296432")){
 
                                 layoutNoteInserting = LayoutInflater.from(NoteActivity.this).inflate(R.layout.layout_image_cell, layoutAllNotes, false);
                                 //Is of this type of layout so this stuff can be inside the if statement
@@ -603,6 +669,28 @@ public class NoteActivity extends AppCompatActivity {
 
                             }
 
+                            //Extra noteBook note
+                            if(line.equals("2131296434")) {
+
+                                while(!line.equals("Layout end")) {
+                                    Log.e("lay", line);
+                                    line = reader.readLine();
+                                    if (line.split(" ")[0].equals("2131296454")) {
+                                        line = line.replace("2131296454 ", "");
+                                        try {
+                                            addNoteBook(line);
+                                            Log.e("reet","this good");
+                                        }
+                                        catch(Exception e){
+                                            Log.e("reet","this fucked up");
+                                        }
+                                    }
+
+
+                                }
+
+                            }
+
                         }
                         //End of note found so now insert it
                         layoutAllNotes.addView(layoutNoteInserting);
@@ -625,12 +713,19 @@ public class NoteActivity extends AppCompatActivity {
 
     public void saveItems(LinearLayout layoutItems){
         //todo: make folders and save files as the folder name
-        String fileName = currentFolder;
+        String fileName = currentFolder + ".txt";
         Log.e("filename", fileName);
         int itemCount = layoutItems.getChildCount();
         try {
 
             //Check directory exists
+            if(fileName.contains("/")){
+                Log.e("dir",NOTEBOOK_DIRECTORY + "/" + fileName.split("/")[0] );
+                File noteBookDirectory = new File(NOTEBOOK_DIRECTORY + "/" + fileName.split("/")[0]);
+                if (!noteBookDirectory.exists()) {  // have the object build the directory structure, if needed.
+                    noteBookDirectory.mkdirs();
+                }
+            }
             File noteBookDirectory = new File(NOTEBOOK_DIRECTORY);
             if (!noteBookDirectory.exists()) {  // have the object build the directory structure, if needed.
                 noteBookDirectory.mkdirs();

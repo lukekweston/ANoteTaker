@@ -1,36 +1,21 @@
 package com.example.anotetaker;
 
-import androidx.annotation.LayoutRes;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
-import android.app.ActionBar;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,22 +27,9 @@ import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.PermissionRequestErrorListener;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 
-import org.w3c.dom.Text;
-import org.xmlpull.v1.XmlPullParser;
-
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -192,7 +164,9 @@ public class MainActivity extends AppCompatActivity {
         Log.d("Files", "Size: "+ files.length);
         for (int i = 0; i < files.length; i++)
         {
-           notebooks.add(files[i].getName());
+            if(files[i].getName().endsWith(".txt")) {
+                notebooks.add(files[i].getName());
+            }
         }
 
        // simpleList = (ListView)findViewById(R.id.list);
@@ -209,11 +183,12 @@ public class MainActivity extends AppCompatActivity {
 
     public void createNoteBookEntry(String noteBookFile){
 
-            final View noteBookBeingAdded = LayoutInflater.from(MainActivity.this).inflate(R.layout.activity_listview, layoutItems, false);
-            final TextView noteBookName = noteBookBeingAdded.findViewById(R.id.textView);
-            noteBookName.setText(noteBookFile);
+            final View noteBookBeingAdded = LayoutInflater.from(MainActivity.this).inflate(R.layout.activity_open_note_cell, layoutItems, false);
+            final TextView noteBookName = noteBookBeingAdded.findViewById(R.id.noteNametextView);
+            //Display the file without .txt extension
+            noteBookName.setText(noteBookFile.substring(0, noteBookFile.length() - 4));
 
-            ImageButton openButton = noteBookBeingAdded.findViewById(R.id.imageButton);
+            ImageButton openButton = noteBookBeingAdded.findViewById(R.id.openNoteImageButton);
 
 
             //Listener to open activity
