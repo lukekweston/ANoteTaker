@@ -1,16 +1,19 @@
 package com.example.anotetaker;
 
 import android.annotation.SuppressLint;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.text.InputType;
 import android.util.Log;
@@ -39,8 +42,10 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -51,6 +56,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.FileProvider;
 
 public class NoteActivity extends AppCompatActivity {
 
@@ -58,6 +64,8 @@ public class NoteActivity extends AppCompatActivity {
     ScrollView scrollView;
     LinearLayout layout, layoutAllNotes;
     String currentFolder = "";
+
+    Uri imageUri = null;
 
 
     private static final String IMAGE_DIRECTORY = "/data/data/com.example.anotetaker/files/images";
@@ -846,7 +854,14 @@ public class NoteActivity extends AppCompatActivity {
     }
 
     private void takePhotoFromCamera() {
-        Intent intent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+//https://www.semicolonworld.com/question/45696/low-picture-image-quality-when-capture-from-camera
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.TITLE, "New Picture");
+        values.put(MediaStore.Images.Media.DESCRIPTION, "From your Camera");
+        imageUri = getContentResolver().insert(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
         startActivityForResult(intent, CAMERA);
     }
 
@@ -874,16 +889,46 @@ public class NoteActivity extends AppCompatActivity {
             }
 
         } else if (requestCode == CAMERA) {
-            Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
-            displayImage.setImageBitmap(thumbnail);
-            saveImage(thumbnail);
+            //Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
+                Bitmap thumbnail = null;
+            try {
+                thumbnail = MediaStore.Images.Media.getBitmap(
+                        getContentResolver(), imageUri);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            Log.e("thumbnail", Integer.toString(thumbnail.getWidth()) );
+
+            Bitmap rotatedBitmap = null;
+
+            //Check if width > height
+            if(thumbnail.getWidth() > thumbnail.getHeight()){
+                //Rotate the image 90
+                Matrix matrix = new Matrix();
+                matrix.postRotate(90);
+                //rotated bitmap
+                rotatedBitmap = Bitmap.createBitmap(thumbnail, 0, 0, thumbnail.getWidth(),thumbnail.getHeight(),matrix, true);
+            }
+            //Else dont rotate
+            else{
+                rotatedBitmap = thumbnail;
+            }
+
+
+
+            displayImage.setImageBitmap(rotatedBitmap);
+            saveImage(rotatedBitmap);
             Toast.makeText(getApplicationContext(), "Image Saved!", Toast.LENGTH_SHORT).show();
         }
     }
 
     public String saveImage(Bitmap myBitmap) {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        myBitmap.compress(Bitmap.CompressFormat.JPEG, 90, bytes);
+        Log.e("ds", Integer.toString(myBitmap.getWidth()));
+        myBitmap.compress(Bitmap.CompressFormat.PNG, 100, bytes);
+        Log.e("ds", Integer.toString(myBitmap.getWidth()));
+
 
         //File wallpaperDirectory = new File(Environment.getExternalStorageDirectory() + IMAGE_DIRECTORY);
         File wallpaperDirectory = new File(IMAGE_DIRECTORY);
@@ -912,6 +957,8 @@ public class NoteActivity extends AppCompatActivity {
         }
         return "";
     }
+
+
 
     ////####################################################################################################################################
 }
