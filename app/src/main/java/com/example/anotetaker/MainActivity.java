@@ -186,7 +186,11 @@ public class MainActivity extends AppCompatActivity {
             final View noteBookBeingAdded = LayoutInflater.from(MainActivity.this).inflate(R.layout.activity_open_note_cell, layoutItems, false);
             final TextView noteBookName = noteBookBeingAdded.findViewById(R.id.noteNametextView);
             //Display the file without .txt extension
-            noteBookName.setText(noteBookFile.substring(0, noteBookFile.length() - 4));
+            if(noteBookFile.contains(".txt")) {
+                noteBookFile = noteBookFile.substring(0, noteBookFile.length() - 4);
+
+            }
+            noteBookName.setText(noteBookFile);
 
             ImageButton openButton = noteBookBeingAdded.findViewById(R.id.openNoteImageButton);
 

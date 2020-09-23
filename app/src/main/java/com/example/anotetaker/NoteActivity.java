@@ -42,6 +42,9 @@ import java.io.InputStreamReader;
 import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
+
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -296,6 +299,7 @@ public class NoteActivity extends AppCompatActivity {
         View.OnClickListener openNotebook = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                saveItems(layoutAllNotes);
                 SharedPreferences mPrefs = getSharedPreferences("NotebookNameValue", 0);
                 SharedPreferences.Editor editor = mPrefs.edit();
                 editor.putString(getString(R.string.curWorkingFolder), (String) noteBookName.getText());
@@ -326,9 +330,9 @@ public class NoteActivity extends AppCompatActivity {
     }
 
 
-    public void callCho() {
-        onBackPressed();
-    }
+//    public void callCho() {
+//        onBackPressed();
+//    }
 
     //Create the menu
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -345,6 +349,7 @@ public class NoteActivity extends AppCompatActivity {
             //Check if the back button has been pressed
             case android.R.id.home:
                 if(currentFolder.contains("/")){
+                    saveItems(layoutAllNotes);
                     //Split out the last notebook in the chain
                     String previousFolder = currentFolder.substring(0, currentFolder.lastIndexOf("/"));
                     //pass the new working notebook folder into memory
@@ -481,10 +486,14 @@ public class NoteActivity extends AppCompatActivity {
 
                     if(line.equals("Layout start")){
 
+                        Boolean addingExtraNote = false;
                         View layoutNoteInserting = null;
                         //Set up the note that is being inserted
                         while(!line.equals("Layout end")) {
                             line = reader.readLine();
+
+                            //Bool to no use the layoutnotes.addview
+
 
                             //Todo: make this work with more layouts
                             //Title and text note
@@ -647,6 +656,9 @@ public class NoteActivity extends AppCompatActivity {
                                                 Log.e("sdasd",line.split(" ")[1]);
                                                 File imgFile = new  File(line.split(" ")[1]);
 
+                                                //Important - sets the file location of the image so that this layout can be saved and reloaded!
+                                                fileLocationSave.setText(imgFile.toString());
+
                                                 if(imgFile.exists()){
                                                     displayImage = layoutNoteInserting.findViewById(R.id.imageView);
                                                     Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
@@ -671,6 +683,7 @@ public class NoteActivity extends AppCompatActivity {
 
                             //Extra noteBook note
                             if(line.equals("2131296434")) {
+                                addingExtraNote = true;
 
                                 while(!line.equals("Layout end")) {
                                     Log.e("lay", line);
@@ -693,7 +706,11 @@ public class NoteActivity extends AppCompatActivity {
 
                         }
                         //End of note found so now insert it
-                        layoutAllNotes.addView(layoutNoteInserting);
+                        if(!addingExtraNote) {
+                            layoutAllNotes.addView(layoutNoteInserting);
+                        }
+
+
                     }
 
 
@@ -714,18 +731,32 @@ public class NoteActivity extends AppCompatActivity {
     public void saveItems(LinearLayout layoutItems){
         //todo: make folders and save files as the folder name
         String fileName = currentFolder + ".txt";
-        Log.e("filename", fileName);
+      //  Log.e("filename", fileName);
         int itemCount = layoutItems.getChildCount();
         try {
 
             //Check directory exists
             if(fileName.contains("/")){
+                Log.e("dir", fileName);
                 Log.e("dir",NOTEBOOK_DIRECTORY + "/" + fileName.split("/")[0] );
-                File noteBookDirectory = new File(NOTEBOOK_DIRECTORY + "/" + fileName.split("/")[0]);
+
+                //Get path to file ( splits off the last element, the file name)
+                //TODO: is there a simpler way to do this
+                String filePath = "";
+                String[] filePathSplit = fileName.split("/");
+                for(int i =0; i < filePathSplit.length - 1; i++){
+                    filePath += "/" + filePathSplit[i];
+                }
+                Log.e("dir", filePath);
+
+
+
+                File noteBookDirectory = new File(NOTEBOOK_DIRECTORY + filePath);
                 if (!noteBookDirectory.exists()) {  // have the object build the directory structure, if needed.
                     noteBookDirectory.mkdirs();
                 }
             }
+
             File noteBookDirectory = new File(NOTEBOOK_DIRECTORY);
             if (!noteBookDirectory.exists()) {  // have the object build the directory structure, if needed.
                 noteBookDirectory.mkdirs();
@@ -733,7 +764,7 @@ public class NoteActivity extends AppCompatActivity {
             //make or edit existing file
             File noteBookFile = new File(noteBookDirectory, fileName);
 
-            Log.e("hmm",NOTEBOOK_DIRECTORY +"/" + fileName);
+           Log.e("hmm",NOTEBOOK_DIRECTORY +"/" + fileName);
 
             BufferedWriter bw = new BufferedWriter(new FileWriter(noteBookFile));
 
@@ -742,10 +773,10 @@ public class NoteActivity extends AppCompatActivity {
             for (int i = 0; i < itemCount; i++) {
                 bw.write("Layout start" + "\n");
 
-                Log.e("save", "Layout start");
+          //      Log.e("save", "Layout start");
                 if (layoutItems.getChildAt(i) instanceof ConstraintLayout) {
                     ConstraintLayout cell = (ConstraintLayout) layoutItems.getChildAt(i);
-                    Log.e("save", Integer.toString(cell.getId()));
+            //        Log.e("save", Integer.toString(cell.getId()));
                     int count = cell.getChildCount();
                     for (int j = 0; j < count; j++) {
 
@@ -767,7 +798,7 @@ public class NoteActivity extends AppCompatActivity {
                 }
                 bw.write("Layout end" + "\n");
 
-                Log.e("save", "Layout wnd");
+            //    Log.e("save", "Layout wnd");
 
             }
             bw.close();
