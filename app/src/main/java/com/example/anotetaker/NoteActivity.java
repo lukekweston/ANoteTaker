@@ -1,6 +1,7 @@
 package com.example.anotetaker;
 
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -77,6 +78,7 @@ public class NoteActivity extends AppCompatActivity {
 
     public String lastImageAddedLocation = "null";
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
 
@@ -149,7 +151,7 @@ public class NoteActivity extends AppCompatActivity {
     private void selectNoteTypeDialog() {
         AlertDialog.Builder pictureDialog = new AlertDialog.Builder(this);
         pictureDialog.setTitle("Select Note to add");
-        String[] pictureDialogItems = {"Add text note and title", "Add image and title", "Add exta notebook"};
+        String[] pictureDialogItems = {"Add text note and title", "Add image", "Add image with title", "Add exta notebook"};
         pictureDialog.setItems(pictureDialogItems,
                 new DialogInterface.OnClickListener() {
                     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -157,35 +159,31 @@ public class NoteActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         switch (which) {
                             case 0:
-                                addNoteCell();
+                                addNoteCell(null, null, null);
                                 break;
                             case 1:
-                                addImageCell();
+                                addImageCell(true, null, null, null);
                                 break;
                             case 2:
+                                addImageCell(false, null, null, null);
+                                break;
+                            case 3:
                                 //TODO: make this pop up better
                             {
                                 AlertDialog.Builder builder = new AlertDialog.Builder(NoteActivity.this);
-
 
                                 builder.setTitle("New notebook");
                                 final EditText input = new EditText(NoteActivity.this);
                                 input.setHint("Notebook name");
 
-
                                 input.setInputType(InputType.TYPE_CLASS_TEXT);
                                 builder.setView(input);
-
-
-
 
 
                                 builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
 
                                         addNoteBook(currentFolder + "/" + input.getText().toString());
-
-
 
                                     }
                                 });
@@ -208,14 +206,31 @@ public class NoteActivity extends AppCompatActivity {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    private void addNoteCell(){
+    private void addNoteCell(String title, String date, String contents){
         final View layoutNoteBeingAdded = LayoutInflater.from(NoteActivity.this).inflate(R.layout.layout_note_cell, layoutAllNotes, false);
 
-        Button removeButton = layoutNoteBeingAdded.findViewById(R.id.buttonRemove);
-        TextView dateTimeCreated = layoutNoteBeingAdded.findViewById(R.id.DateTimeCreated);
-        dateTimeCreated.setText(LocalDateTime.now().toLocalDate() + " " + LocalDateTime.now().toLocalTime().toString().split(":")[0] + ":" + LocalDateTime.now().toLocalTime().toString().split(":")[1]);
+        if(title != null) {
+            TextView titleOnNote = layoutNoteBeingAdded.findViewById(R.id.editTextTitle);
+            titleOnNote.setText(title);
+        }
 
-        layoutAllNotes.addView(layoutNoteBeingAdded );
+
+        TextView dateTimeCreated = layoutNoteBeingAdded.findViewById(R.id.DateTimeCreated);
+        if(date != null){
+            dateTimeCreated.setText(date);
+        }
+        else {
+            dateTimeCreated.setText(LocalDateTime.now().toLocalDate() + " " + LocalDateTime.now().toLocalTime().toString().split(":")[0] + ":" + LocalDateTime.now().toLocalTime().toString().split(":")[1]);
+        }
+
+        if(contents != null){
+            EditText contentsOnNote = layoutNoteBeingAdded.findViewById(R.id.editTextTextMultiLine);
+            contentsOnNote.append(contents);
+        }
+
+
+
+        Button removeButton = layoutNoteBeingAdded.findViewById(R.id.buttonRemove);
         removeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -224,13 +239,24 @@ public class NoteActivity extends AppCompatActivity {
             }
         });
 
+        layoutAllNotes.addView(layoutNoteBeingAdded );
         saveItems(layoutAllNotes);
 
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    private void addImageCell(){
-        final View layoutNoteBeingAdded = LayoutInflater.from(NoteActivity.this).inflate(R.layout.layout_image_cell, layoutAllNotes, false);
+    private void addImageCell(Boolean noTitle, String fileLocation, String title, String date){
+
+        View layoutNoteBeingAdded = null;
+
+        if(noTitle){
+            layoutNoteBeingAdded = LayoutInflater.from(NoteActivity.this).inflate(R.layout.layout_image_cell_no_title, layoutAllNotes, false);
+        }
+        else{
+            layoutNoteBeingAdded = LayoutInflater.from(NoteActivity.this).inflate(R.layout.layout_image_cell, layoutAllNotes, false);
+        }
+
+
 
         Button removeButton = layoutNoteBeingAdded.findViewById(R.id.buttonRemove);
 
@@ -239,6 +265,23 @@ public class NoteActivity extends AppCompatActivity {
 
         displayImage = layoutNoteBeingAdded.findViewById(R.id.imageView);
         final TextView fileLocationSave = layoutNoteBeingAdded.findViewById(R.id.fileLocation);
+        if(fileLocation != null){
+            fileLocationSave.setText(fileLocation);
+            File imgFile = new  File(fileLocation);
+
+            //Important - sets the file location of the image so that this layout can be saved and reloaded!
+            fileLocationSave.setText(imgFile.toString());
+
+            if(imgFile.exists()){
+                displayImage = layoutNoteBeingAdded.findViewById(R.id.imageView);
+                Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+                displayImage.setImageBitmap(myBitmap);
+                addImageFromFile.setVisibility(View.INVISIBLE);
+                addImageFromCamera.setVisibility(View.INVISIBLE);
+
+            }
+
+        }
 
         //Listener that updates when the image size updates
         final ImageView myImageView = (ImageView) layoutNoteBeingAdded.findViewById(R.id.imageView);
@@ -265,34 +308,56 @@ public class NoteActivity extends AppCompatActivity {
         });
 
 
+        final View finalLayoutNoteBeingAdded = layoutNoteBeingAdded;
         addImageFromFile.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                displayImage = layoutNoteBeingAdded.findViewById(R.id.imageView);
+                displayImage = finalLayoutNoteBeingAdded.findViewById(R.id.imageView);
                 choosePhotoFromGallery();
             }
         });
 
+        final View finalLayoutNoteBeingAdded1 = layoutNoteBeingAdded;
         addImageFromCamera.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                displayImage = layoutNoteBeingAdded.findViewById(R.id.imageView);
+                displayImage = finalLayoutNoteBeingAdded1.findViewById(R.id.imageView);
                 takePhotoFromCamera();
             }
         });
 
-        TextView dateTimeCreated = layoutNoteBeingAdded.findViewById(R.id.DateTimeCreated);
-        dateTimeCreated.setText(LocalDateTime.now().toLocalDate() + " " + LocalDateTime.now().toLocalTime().toString().split(":")[0] + ":" + LocalDateTime.now().toLocalTime().toString().split(":")[1]);
+        //Creating with title
+        if(!noTitle) {
+            TextView dateTimeCreated = layoutNoteBeingAdded.findViewById(R.id.DateTimeCreated);
+            TextView titleOfNote = layoutNoteBeingAdded.findViewById(R.id.editTextTitle);
+            //First time creating so get current date time
+            if(date == null){
+                dateTimeCreated.setText(LocalDateTime.now().toLocalDate() + " " + LocalDateTime.now().toLocalTime().toString().split(":")[0] + ":" + LocalDateTime.now().toLocalTime().toString().split(":")[1]);
+            }
+            //Loading already created cell so put in saved date
+            else{
+                dateTimeCreated.setText(date);
+            }
+            //If loading file already has a title
+            if(title != null){
+                titleOfNote.setText(title);
+            }
+
+
+        }
 
         layoutAllNotes.addView(layoutNoteBeingAdded );
+        final View finalLayoutNoteBeingAdded2 = layoutNoteBeingAdded;
         removeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                layoutAllNotes.removeView(layoutNoteBeingAdded);
+                layoutAllNotes.removeView(finalLayoutNoteBeingAdded2);
                 saveItems(layoutAllNotes);
             }
         });
 
         saveItems(layoutAllNotes);
     }
+
+
 
     private void addNoteBook(String noteBookFile){
 
@@ -338,9 +403,7 @@ public class NoteActivity extends AppCompatActivity {
     }
 
 
-//    public void callCho() {
-//        onBackPressed();
-//    }
+
 
     //Create the menu
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -473,6 +536,7 @@ public class NoteActivity extends AppCompatActivity {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @SuppressLint("ResourceType")
     public void loadFolder(String folderName) {
         //Add file extenstion
@@ -494,8 +558,6 @@ public class NoteActivity extends AppCompatActivity {
 
                     if(line.equals("Layout start")){
 
-                        Boolean addingExtraNote = false;
-                        View layoutNoteInserting = null;
                         //Set up the note that is being inserted
                         while(!line.equals("Layout end")) {
                             line = reader.readLine();
@@ -505,206 +567,107 @@ public class NoteActivity extends AppCompatActivity {
 
                             //Todo: make this work with more layouts
                             //Title and text note
-                            if(line.equals("2131296435")) {
-                                layoutNoteInserting = LayoutInflater.from(NoteActivity.this).inflate(R.layout.layout_note_cell, layoutAllNotes, false);
-                                //Is of this type of layout so this stuff can be inside the if statement
-                                //Bool for checking if it is multiline textData for the note feild
+                            if(line.equals("2131296436")) {
+
+                                String title = null;
+                                String date = null;
+                                String contents = null;
+
                                 Boolean keepFillingData = false;
                                 while(!line.equals("Layout end")) {
                                     line = reader.readLine();
-                                    Log.e("test", line);
-                                    //view that will be filled with note data
-                                    EditText note = layoutNoteInserting.findViewById(R.id.editTextTextMultiLine);
 
                                     //put in the date
                                     if(line.split(" ")[0].equals("2131296258")){
                                         keepFillingData = false;
-                                        TextView dateTimeCreated = layoutNoteInserting.findViewById(R.id.DateTimeCreated);
-                                        //@SuppressLint("ResourceType") TextView test = layout2.findViewById(2131165186);
-                                        dateTimeCreated.setText(line.split(" ")[1] + " " + line.split(" ")[2]);
-                                        //test.setText("hello");
-
-                                    }
-                                    //set up remove Button
-                                    if(line.split(" ")[0].equals("2131296345")) {
-                                        Button removeButton = layoutNoteInserting.findViewById(R.id.buttonRemove);
-
-                                        final View finalLayoutNoteInserting = layoutNoteInserting;
-                                        removeButton.setOnClickListener(new View.OnClickListener() {
-                                            @Override
-                                            public void onClick(View view) {
-                                                layoutAllNotes.removeView(finalLayoutNoteInserting);
-                                                saveItems(layoutAllNotes);
-
-                                            }
-                                        });
+                                        date = (line.split(" ")[1] + " " + line.split(" ")[2]);
 
 
                                     }
                                     //put in the saved title to the note
                                     if(line.split(" ")[0].equals("2131296391")){
                                         keepFillingData = false;
-                                        TextView title = layoutNoteInserting.findViewById(R.id.editTextTitle);
-                                        line = line.replace("2131296391 ", "");
-                                        title.setText(line);
+                                        title = line.replace("2131296391 ", "");
+
                                     }
                                     //Fill out the text box
                                     if(line.split(" ")[0].equals("2131296390")){
                                         keepFillingData = true;
                                         line = line.replace("2131296390 ", "" );
-                                                                       note.append(line + "\n");
+                                        contents = line + "\n";
                                     }
                                     //keep filling multiline text if no id
                                     else if(keepFillingData){
-                                        note.append(line + "\n");
-                                        //note.setText(line);
+                                        contents += line + "\n";
                                     }
                                 }
+                                //Remove the last new line character from contents
+                                contents = contents.substring(0, contents.length()-1);
+                                addNoteCell(title, date, contents);
                             }
 
                             //Title and image note
                             if(line.equals("2131296432")){
 
-                                layoutNoteInserting = LayoutInflater.from(NoteActivity.this).inflate(R.layout.layout_image_cell, layoutAllNotes, false);
-                                //Is of this type of layout so this stuff can be inside the if statement
-                                //Bool for checking if it is multiline textData for the note feild
+                                String fileLocation = null;
+                                String title = null;
+                                String date = null;
+
                                 while(!line.equals("Layout end")) {
                                     line = reader.readLine();
-                                    Log.e("test", line);
-                                    //view that will be filled with note data
-                                    EditText note = layoutNoteInserting.findViewById(R.id.editTextTextMultiLine);
 
-                                    //set up remove Button
-                                    if(line.split(" ")[0].equals("2131296345")) {
-                                        Button removeButton = layoutNoteInserting.findViewById(R.id.buttonRemove);
-
-                                        final View finalLayoutNoteInserting = layoutNoteInserting;
-                                        removeButton.setOnClickListener(new View.OnClickListener() {
-                                            @Override
-                                            public void onClick(View view) {
-                                                layoutAllNotes.removeView(finalLayoutNoteInserting);
-                                                saveItems(layoutAllNotes);
-
-                                            }
-                                        });
-
-
-                                    }
-                                    //put in the saved title to the note
-                                    if(line.split(" ")[0].equals("2131296391")){
-                                        TextView title = layoutNoteInserting.findViewById(R.id.editTextTitle);
-                                        line = line.replace("2131296391 ", "");
-                                        title.setText(line);
+                                    //Get the title
+                                    if (line.split(" ")[0].equals("2131296391")) {
+                                        title = line.replace("2131296391 ", "");
                                     }
 
-                                    //put in the date
+                                    //Get the date
                                     if (line.split(" ")[0].equals("2131296258")) {
-                                        TextView dateTimeCreated = layoutNoteInserting.findViewById(R.id.DateTimeCreated);
-                                        //@SuppressLint("ResourceType") TextView test = layout2.findViewById(2131165186);
-                                        dateTimeCreated.setText(line.split(" ")[1] + " " + line.split(" ")[2]);
-                                        //test.setText("hello");
-
+                                        date = (line.split(" ")[1] + " " + line.split(" ")[2]);
                                     }
 
+                                    //Get the fileLocation
+                                    if (line.split(" ")[0].equals("2131296399")) {
+                                        fileLocation = line.split(" ")[1];
+                                    }
+                                }
+                                addImageCell(false, fileLocation, title, date);
+
+                            }
+                            //Image note with no title
+                            if(line.equals("2131296433")){
+
+                                String fileLocation = null;
+
+                                while(!line.equals("Layout end")) {
+                                    line = reader.readLine();
                                     //insert the image and set up the buttons
                                     if (line.split(" ")[0].equals("2131296399")) {
-                                        {
-                                            //set up buttons and imageview as if no image has been added
-
-                                            final Button addImageFromFile = layoutNoteInserting.findViewById(R.id.buttonImageFromFile);
-                                            final Button addImageFromCamera = layoutNoteInserting.findViewById(R.id.buttonImageFromCamera);
-
-                                            final TextView fileLocationSave = layoutNoteInserting.findViewById(R.id.fileLocation);
-
-                                            displayImage = layoutNoteInserting.findViewById(R.id.imageView);
-                                            //Listener that updates when the image size updates
-                                            final ImageView myImageView = (ImageView) layoutNoteInserting.findViewById(R.id.imageView);
-                                            final ViewTreeObserver observer = myImageView.getViewTreeObserver();
-                                            observer.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                                                @Override
-                                                public void onGlobalLayout() {
-                                                    int height = myImageView.getHeight();
-                                                    //Set buttons to invisible if the image displayed is not the empty image
-                                                    if (myImageView.getDrawable().getConstantState() != getResources().getDrawable(R.drawable.emptyimage).getConstantState()) {
-                                                        addImageFromFile.setVisibility(View.GONE);
-                                                        addImageFromCamera.setVisibility(View.GONE);
-                                                        if (fileLocationSave.getText().equals("null") && !lastImageAddedLocation.equals("null")) {
-                                                            fileLocationSave.setText(lastImageAddedLocation);
-                                                            lastImageAddedLocation = "null";
-                                                        }
-
-                                                        // Remove the layout listener so we don't waste time on future passes
-                                                        myImageView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                                                        //observer.removeOnGlobalLayoutListener(this);
-                                                    }
-
-                                                }
-                                            });
-                                            final View finalLayoutNoteInserting1 = layoutNoteInserting;
-                                            addImageFromFile.setOnClickListener(new View.OnClickListener() {
-                                                public void onClick(View v) {
-                                                    displayImage = finalLayoutNoteInserting1.findViewById(R.id.imageView);
-                                                    choosePhotoFromGallery();
-                                                }
-                                            });
-                                            addImageFromCamera.setOnClickListener(new View.OnClickListener() {
-                                                public void onClick(View v) {
-                                                    displayImage = finalLayoutNoteInserting1.findViewById(R.id.imageView);
-                                                    takePhotoFromCamera();
-                                                }
-                                            });
-
-
-                                            //Check if an image has already been loaded (set up buttons can be reused if this image gets removed in the future)
-                                            if (!line.split(" ")[1].equals("null")) {
-                                                addImageFromFile.setVisibility(View.INVISIBLE);
-                                                addImageFromCamera.setVisibility(View.INVISIBLE);
-                                                //TODO: remove the size change listener to increase performance, also should remove button listeners
-                                                //observer.removeOnGlobalLayoutListener();
-                                                Log.e("sdasd",line.split(" ")[1]);
-                                                File imgFile = new  File(line.split(" ")[1]);
-
-                                                //Important - sets the file location of the image so that this layout can be saved and reloaded!
-                                                fileLocationSave.setText(imgFile.toString());
-
-                                                if(imgFile.exists()){
-                                                    displayImage = layoutNoteInserting.findViewById(R.id.imageView);
-                                                    Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-                                                    displayImage.setImageBitmap(myBitmap);
-
-                                                }
-
-
-                                            }
+                                        String linesData = line.split(" ")[1];
+                                        if (!linesData.equals("null")){
+                                            fileLocation = linesData;
+                                            break;
                                         }
 
-
-
-
                                     }
-
-
-
                                 }
+                                addImageCell(true, fileLocation, null, null);
 
                             }
 
+
                             //Extra noteBook note
                             if(line.equals("2131296434")) {
-                                addingExtraNote = true;
 
                                 while(!line.equals("Layout end")) {
                                     Log.e("lay", line);
                                     line = reader.readLine();
                                     if (line.split(" ")[0].equals("2131296454")) {
-                                        line = line.replace("2131296454 ", "");
-                                        try {
-                                            addNoteBook(line);
-                                            Log.e("reet","this good");
-                                        }
-                                        catch(Exception e){
-                                            Log.e("reet","this fucked up");
-                                        }
+                                        String noteBookName = line.replace("2131296454 ", "");
+
+                                        //insert the noteBook
+                                        addNoteBook(noteBookName);
+
                                     }
 
 
@@ -713,11 +676,6 @@ public class NoteActivity extends AppCompatActivity {
                             }
 
                         }
-                        //End of note found so now insert it
-                        if(!addingExtraNote) {
-                            layoutAllNotes.addView(layoutNoteInserting);
-                        }
-
 
                     }
 
@@ -732,7 +690,6 @@ public class NoteActivity extends AppCompatActivity {
         catch(Exception e){
             Log.e("Exception", "File load failed: " + e.toString());
         }
-
 
     }
 
@@ -889,7 +846,15 @@ public class NoteActivity extends AppCompatActivity {
             }
 
         } else if (requestCode == CAMERA) {
-            //Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
+            //TODO: make this faster
+            //Try here
+            //https://stackoverflow.com/questions/32043222/how-to-get-full-size-picture-and-thumbnail-from-camera-in-the-same-intent
+           // Bitmap thumbnailSmall = (Bitmap) data.getExtras().get("data");
+            Log.e("processing", "processing");
+            //loading
+//            ProgressDialog dialog = ProgressDialog.show(this, "",
+//                    "Loading. Please wait...", true);
+            //
                 Bitmap thumbnail = null;
             try {
                 thumbnail = MediaStore.Images.Media.getBitmap(
