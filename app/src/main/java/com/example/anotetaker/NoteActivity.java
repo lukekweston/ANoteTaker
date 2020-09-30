@@ -419,27 +419,7 @@ public class NoteActivity extends AppCompatActivity {
 
             //Check if the back button has been pressed
             case android.R.id.home:
-                if(currentFolder.contains("/")){
-                    saveItems(layoutAllNotes);
-                    //Split out the last notebook in the chain
-                    String previousFolder = currentFolder.substring(0, currentFolder.lastIndexOf("/"));
-                    //pass the new working notebook folder into memory
-                    SharedPreferences mPrefs = getSharedPreferences("NotebookNameValue", 0);
-                    SharedPreferences.Editor editor = mPrefs.edit();
-                    editor.putString(getString(R.string.curWorkingFolder), (String) previousFolder);
-                    editor.commit();
-
-                    Intent intent = new Intent(new Intent(NoteActivity.this, NoteActivity.class));
-                    //Store animation direction so it can be set in the next activity
-                    intent.putExtra("activity","right");
-                    startActivity(intent);
-
-
-                    return true;
-                }
-
-                startActivity(new Intent(NoteActivity.this, MainActivity.class));
-
+                goBacktoPreviousLayout();
                 return true;
 
 
@@ -510,6 +490,8 @@ public class NoteActivity extends AppCompatActivity {
 
                 builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
+
+                        deleteNoteBook();
                         // User clicked OK button
                     }
                 });
@@ -657,13 +639,13 @@ public class NoteActivity extends AppCompatActivity {
 
 
                             //Extra noteBook note
-                            if(line.equals("2131296434")) {
+                            if(line.equals("2131296435")) {
 
                                 while(!line.equals("Layout end")) {
                                     Log.e("lay", line);
                                     line = reader.readLine();
-                                    if (line.split(" ")[0].equals("2131296454")) {
-                                        String noteBookName = line.replace("2131296454 ", "");
+                                    if (line.split(" ")[0].equals("2131296455")) {
+                                        String noteBookName = line.replace("2131296455 ", "");
 
                                         //insert the noteBook
                                         addNoteBook(noteBookName);
@@ -779,7 +761,64 @@ public class NoteActivity extends AppCompatActivity {
     }
 
 
+    //Deletes current notebook and sub notebooks
+    public void deleteNoteBook(){
+        Log.e("delete", NOTEBOOK_DIRECTORY + "/" + currentFolder);
+        //Delete sub notebooks
+        File dir = new File(NOTEBOOK_DIRECTORY + "/" + currentFolder);
+        if(dir.exists() && dir.isDirectory()){
+            deleteFilesInDir(dir);
+        }
+        //Delete current notebook file
+        File currentNoteBook = new File(NOTEBOOK_DIRECTORY + "/" + currentFolder + ".txt");
+        currentNoteBook.delete();
 
+        //Call back button to return to the layout above this
+        goBacktoPreviousLayout();
+
+    }
+
+    //Recursively deletes files in dirctory/sub directorys
+    public void deleteFilesInDir(File dir){
+        String[] children = dir.list();
+        for(String child: children){
+            File f = new File(dir, child);
+            if(f.isDirectory()){
+                deleteFilesInDir(f);
+            }
+            //TODO delete images that are used in these notebooks?
+//            if(child.endsWith(".txt")){
+//                Log.e("notebook", child);
+//            }
+
+            new File(dir, child).delete();
+        }
+        dir.delete();
+
+    }
+
+    public void goBacktoPreviousLayout(){
+        if(currentFolder.contains("/")){
+            saveItems(layoutAllNotes);
+            //Split out the last notebook in the chain
+            String previousFolder = currentFolder.substring(0, currentFolder.lastIndexOf("/"));
+            //pass the new working notebook folder into memory
+            SharedPreferences mPrefs = getSharedPreferences("NotebookNameValue", 0);
+            SharedPreferences.Editor editor = mPrefs.edit();
+            editor.putString(getString(R.string.curWorkingFolder), (String) previousFolder);
+            editor.commit();
+
+            Intent intent = new Intent(new Intent(NoteActivity.this, NoteActivity.class));
+            //Store animation direction so it can be set in the next activity
+            intent.putExtra("activity","right");
+            startActivity(intent);
+
+
+            return;
+        }
+        startActivity(new Intent(NoteActivity.this, MainActivity.class));
+
+    }
 
 
     ////####################################################################################################################################
