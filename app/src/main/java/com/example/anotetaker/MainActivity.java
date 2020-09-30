@@ -67,10 +67,7 @@ public class MainActivity extends AppCompatActivity {
 
                 builder.setTitle("New notebook");
 
-                // Set up the input
-
                 //TODO: update the layout
-
                 //Check this https://stackoverflow.com/questions/10903754/input-text-dialog-android
 
                 final EditText input = new EditText(MainActivity.this);
@@ -85,16 +82,10 @@ public class MainActivity extends AppCompatActivity {
                 input.setInputType(InputType.TYPE_CLASS_TEXT);
                 builder.setView(input);
 
-                //builder.set
-
-
-
                 builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
 
-                        createNoteBookEntry(input.getText().toString());
-
-
+                        createNoteBookEntry(input.getText().toString().replace("/","-"));
 
                     }
                 });
@@ -104,8 +95,6 @@ public class MainActivity extends AppCompatActivity {
                         // User cancelled the dialog
                     }
                 });
-
-
                 builder.show();
             }
         });

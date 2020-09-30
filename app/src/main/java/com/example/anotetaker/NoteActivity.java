@@ -1,3 +1,14 @@
+/*
+todo
+1. fix the border setting, cannot create a default black border when color is -1,
+work around at the moment is just not setting a border programatically and using the layout border
+makes code spagehtti for adding an image
+2. make the notes into classes?
+
+
+ */
+
+
 package com.example.anotetaker;
 
 import android.annotation.SuppressLint;
@@ -9,7 +20,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.ColorFilter;
 import android.graphics.Matrix;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.shapes.Shape;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
@@ -52,10 +69,12 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.solver.widgets.Rectangle;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.FileProvider;
 
@@ -64,6 +83,9 @@ public class NoteActivity extends AppCompatActivity {
     ImageButton buttonAdd;
     ScrollView scrollView;
     LinearLayout layout, layoutAllNotes;
+
+    //border used in all layouts
+    GradientDrawable border;
     String currentFolder = "";
 
     Uri imageUri = null;
@@ -75,6 +97,8 @@ public class NoteActivity extends AppCompatActivity {
     private ImageView displayImage;  // imageview
     private int GALLERY = 1, CAMERA = 2;
 
+    public int notesColour = -1;
+
 
     public String lastImageAddedLocation = "null";
 
@@ -85,6 +109,7 @@ public class NoteActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_note_page);
 
+
         //get if the animation direction has been stored
         Intent intent = getIntent();
         String direction = intent.getStringExtra("activity");
@@ -92,6 +117,10 @@ public class NoteActivity extends AppCompatActivity {
         //Set the animation direction if right has been stored, else left
         if(direction != null && direction.equals("right")){
             this.overridePendingTransition(R.anim.anim_slide_in_right, R.anim.anim_slide_out_right);
+        }
+        //Turn off animation if we are reloading a new color
+        else if(direction != null && direction.equals("reload")){
+            this.overridePendingTransition(R.anim.anim_none, R.anim.anim_none);
         }
         else {
             //Set the animation for opening this intent
@@ -183,7 +212,7 @@ public class NoteActivity extends AppCompatActivity {
                                 builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
 
-                                        addNoteBook(currentFolder + "/" + input.getText().toString());
+                                        addNoteBook(currentFolder + "/" + input.getText().toString().replace("/","-"));
 
                                     }
                                 });
@@ -205,6 +234,16 @@ public class NoteActivity extends AppCompatActivity {
         pictureDialog.show();
     }
 
+    @SuppressLint("ResourceAsColor")
+    private void createBorder(){
+        border = new GradientDrawable();
+        border.setColor(0xFFFFFFFF);
+        if(notesColour != -1) {
+
+            border.setStroke(10, notesColour);
+        }
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void addNoteCell(String title, String date, String contents){
         final View layoutNoteBeingAdded = LayoutInflater.from(NoteActivity.this).inflate(R.layout.layout_note_cell, layoutAllNotes, false);
@@ -223,11 +262,25 @@ public class NoteActivity extends AppCompatActivity {
             dateTimeCreated.setText(LocalDateTime.now().toLocalDate() + " " + LocalDateTime.now().toLocalTime().toString().split(":")[0] + ":" + LocalDateTime.now().toLocalTime().toString().split(":")[1]);
         }
 
+
+        EditText contentsOnNote = layoutNoteBeingAdded.findViewById(R.id.editTextTextMultiLine);
+
         if(contents != null){
-            EditText contentsOnNote = layoutNoteBeingAdded.findViewById(R.id.editTextTextMultiLine);
             contentsOnNote.append(contents);
         }
+        //TODO fix this work around
+        //work around because of of weird bug where it was over lapping?
+        else{
+            contentsOnNote.append("\n");
+        }
 
+        if(border != null){
+            //set border of whole layout
+            ConstraintLayout note = layoutNoteBeingAdded.findViewById(R.id.layoutTextCell);
+            note.setBackground(border);
+            //set border of multiline
+            contentsOnNote.setBackground(border);
+        }
 
 
         Button removeButton = layoutNoteBeingAdded.findViewById(R.id.buttonRemove);
@@ -251,9 +304,20 @@ public class NoteActivity extends AppCompatActivity {
 
         if(noTitle){
             layoutNoteBeingAdded = LayoutInflater.from(NoteActivity.this).inflate(R.layout.layout_image_cell_no_title, layoutAllNotes, false);
+            //set large border
+            if(border != null){
+                ConstraintLayout outsideArea = layoutNoteBeingAdded.findViewById(R.id.layoutImageCellNoTitle);
+                outsideArea.setBackground(border);
+            }
+
         }
         else{
             layoutNoteBeingAdded = LayoutInflater.from(NoteActivity.this).inflate(R.layout.layout_image_cell, layoutAllNotes, false);
+            //set large border
+            if(border != null) {
+                ConstraintLayout outsideArea = layoutNoteBeingAdded.findViewById(R.id.layoutImageCell);
+                outsideArea.setBackground(border);
+            };
         }
 
 
@@ -264,6 +328,10 @@ public class NoteActivity extends AppCompatActivity {
         final Button addImageFromCamera = layoutNoteBeingAdded.findViewById(R.id.buttonImageFromCamera);
 
         displayImage = layoutNoteBeingAdded.findViewById(R.id.imageView);
+        //set the images border
+        if(border != null) {
+            displayImage.setBackground(border);
+        }
         final TextView fileLocationSave = layoutNoteBeingAdded.findViewById(R.id.fileLocation);
         if(fileLocation != null){
             fileLocationSave.setText(fileLocation);
@@ -357,8 +425,6 @@ public class NoteActivity extends AppCompatActivity {
         saveItems(layoutAllNotes);
     }
 
-
-
     private void addNoteBook(String noteBookFile){
 
         final View noteBookBeingAdded = LayoutInflater.from(NoteActivity.this).inflate(R.layout.activity_open_note_cell, layoutAllNotes, false);
@@ -366,6 +432,15 @@ public class NoteActivity extends AppCompatActivity {
         noteBookName.setText(noteBookFile);
 
         ImageButton openButton = noteBookBeingAdded.findViewById(R.id.openNoteImageButton);
+
+        //if the border is not null set the border and change the color
+        if(border != null){
+            ConstraintLayout noteLayout = noteBookBeingAdded.findViewById(R.id.layoutOpenNoteCell);
+            noteLayout.setBackground(border);
+            openButton.setColorFilter(notesColour);
+            openButton.setBackgroundColor(0x00000000);
+        }
+
 
 
         //Listener to open activity
@@ -414,6 +489,7 @@ public class NoteActivity extends AppCompatActivity {
     }
 
     //Control the menu
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
 
@@ -475,11 +551,31 @@ public class NoteActivity extends AppCompatActivity {
                 int randomAndroidColor = androidColors[new Random().nextInt(androidColors.length)];
                 getTheme().applyStyle(randomAndroidColor, true);
 
-                layout.setBackgroundColor(randomAndroidColor);
-                layoutAllNotes.setBackgroundColor(randomAndroidColor);
+                //set the color of the note
+                notesColour = randomAndroidColor;
+                //save note with the new color
+                saveItems(layoutAllNotes);
+                //load the items to redraw
+                Intent intent = getIntent();
+                this.overridePendingTransition(R.anim.anim_none, R.anim.anim_none);
+                //set extra value so the animation will be disabled of a new intent
+                intent.putExtra("activity","reload");
+                finish();
+                startActivity(intent);
+
+                //loadFolder(currentFolder);
+
+                return true;
+
+                //getSupportActionBar().setBackgroundDrawable(new ColorDrawable(randomAndroidColor));
+
+
+
+//                layout.setBackgroundColor(randomAndroidColor);
+//                layoutAllNotes.setBackgroundColor(randomAndroidColor);
 
                 ///startActivity(new Intent(this, EmailIntent.class));
-                return true;
+                //return true;
             case R.id.delete:
 
                 builder = new AlertDialog.Builder(this);
@@ -534,6 +630,15 @@ public class NoteActivity extends AppCompatActivity {
                 reader = new BufferedReader(new InputStreamReader(is));
                 String line = reader.readLine();
                 while (line != null) {
+
+                    //Get the color of the notebook
+                    if(line.split(" ")[0].equals("color") && !line.split(" ")[1].equals("-1")){
+                        notesColour = Integer.parseInt(line.split(" ")[1]);
+                        //set the toolbar to the correct color
+                        getSupportActionBar().setBackgroundDrawable(new ColorDrawable(notesColour));
+                        createBorder();
+                    }
+
 
                     Log.d("StackOverflow", line);
 
@@ -675,6 +780,8 @@ public class NoteActivity extends AppCompatActivity {
 
     }
 
+
+
     public void saveItems(LinearLayout layoutItems){
         //todo: make folders and save files as the folder name
         String fileName = currentFolder + ".txt";
@@ -711,9 +818,10 @@ public class NoteActivity extends AppCompatActivity {
             //make or edit existing file
             File noteBookFile = new File(noteBookDirectory, fileName);
 
-           Log.e("hmm",NOTEBOOK_DIRECTORY +"/" + fileName);
 
             BufferedWriter bw = new BufferedWriter(new FileWriter(noteBookFile));
+
+            bw.write("color " + Integer.toString(notesColour) +"\n");
 
             //OutputStreamWriter outputStreamWriter = new OutputStreamWriter(NoteActivity.this.openFileOutput(NOTEBOOK_DIRECTORY +"/" + fileName, NoteActivity.this.MODE_PRIVATE));
 
