@@ -115,20 +115,19 @@ public class NoteActivity extends AppCompatActivity {
         String direction = intent.getStringExtra("activity");
 
         //Set the animation direction if right has been stored, else left
-        if(direction != null && direction.equals("right")){
+        if (direction != null && direction.equals("right")) {
             this.overridePendingTransition(R.anim.anim_slide_in_right, R.anim.anim_slide_out_right);
         }
         //Turn off animation if we are reloading a new color
-        else if(direction != null && direction.equals("reload")){
+        else if (direction != null && direction.equals("reload")) {
             this.overridePendingTransition(R.anim.anim_none, R.anim.anim_none);
-        }
-        else {
+        } else {
             //Set the animation for opening this intent
             this.overridePendingTransition(R.anim.anim_slide_in_left, R.anim.anim_slide_out_left);
         }
 
         //Get the folder/file we are currently working on
-        SharedPreferences mPrefs = getSharedPreferences("NotebookNameValue",0);
+        SharedPreferences mPrefs = getSharedPreferences("NotebookNameValue", 0);
         String defaultValue = getResources().getString(R.string.workingFolder_default);
         currentFolder = mPrefs.getString(getString(R.string.curWorkingFolder), defaultValue);
 
@@ -141,7 +140,6 @@ public class NoteActivity extends AppCompatActivity {
 
 
         layout = (LinearLayout) findViewById(R.id.layout);
-
 
 
         layoutAllNotes = (LinearLayout) findViewById(R.id.layoutItems);
@@ -168,8 +166,6 @@ public class NoteActivity extends AppCompatActivity {
 //                saveItems(layoutAllNotes);
 //            }
 //        }, 0, 500);
-
-
 
 
         buttonAdd.setOnClickListener(listener);
@@ -212,7 +208,7 @@ public class NoteActivity extends AppCompatActivity {
                                 builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
 
-                                        addNoteBook(currentFolder + "/" + input.getText().toString().replace("/","-"));
+                                        addNoteBook(currentFolder + "/" + input.getText().toString().replace("/", "-"));
 
                                     }
                                 });
@@ -225,9 +221,9 @@ public class NoteActivity extends AppCompatActivity {
 
 
                                 builder.show();
-                        }
+                            }
 
-                                break;
+                            break;
                         }
                     }
                 });
@@ -235,46 +231,47 @@ public class NoteActivity extends AppCompatActivity {
     }
 
     @SuppressLint("ResourceAsColor")
-    private void createBorder(){
+    private void createBorder() {
         border = new GradientDrawable();
         border.setColor(0xFFFFFFFF);
-        if(notesColour != -1) {
+        if (notesColour != -1) {
 
             border.setStroke(10, notesColour);
+            buttonAdd.setColorFilter(notesColour);
         }
     }
 
+    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     @RequiresApi(api = Build.VERSION_CODES.O)
-    private void addNoteCell(String title, String date, String contents){
+    private void addNoteCell(String title, String date, String contents) {
         final View layoutNoteBeingAdded = LayoutInflater.from(NoteActivity.this).inflate(R.layout.layout_note_cell, layoutAllNotes, false);
 
-        if(title != null) {
+        if (title != null) {
             TextView titleOnNote = layoutNoteBeingAdded.findViewById(R.id.editTextTitle);
             titleOnNote.setText(title);
         }
 
 
         TextView dateTimeCreated = layoutNoteBeingAdded.findViewById(R.id.DateTimeCreated);
-        if(date != null){
+        if (date != null) {
             dateTimeCreated.setText(date);
-        }
-        else {
+        } else {
             dateTimeCreated.setText(LocalDateTime.now().toLocalDate() + " " + LocalDateTime.now().toLocalTime().toString().split(":")[0] + ":" + LocalDateTime.now().toLocalTime().toString().split(":")[1]);
         }
 
 
         EditText contentsOnNote = layoutNoteBeingAdded.findViewById(R.id.editTextTextMultiLine);
 
-        if(contents != null){
+        if (contents != null) {
             contentsOnNote.append(contents);
         }
         //TODO fix this work around
         //work around because of of weird bug where it was over lapping?
-        else{
+        else {
             contentsOnNote.append("\n");
         }
 
-        if(border != null){
+        if (border != null) {
             //set border of whole layout
             ConstraintLayout note = layoutNoteBeingAdded.findViewById(R.id.layoutTextCell);
             note.setBackground(border);
@@ -292,34 +289,33 @@ public class NoteActivity extends AppCompatActivity {
             }
         });
 
-        layoutAllNotes.addView(layoutNoteBeingAdded );
+        layoutAllNotes.addView(layoutNoteBeingAdded);
         saveItems(layoutAllNotes);
 
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    private void addImageCell(Boolean noTitle, String fileLocation, String title, String date){
+    private void addImageCell(Boolean noTitle, String fileLocation, String title, String date) {
 
         View layoutNoteBeingAdded = null;
 
-        if(noTitle){
+        if (noTitle) {
             layoutNoteBeingAdded = LayoutInflater.from(NoteActivity.this).inflate(R.layout.layout_image_cell_no_title, layoutAllNotes, false);
             //set large border
-            if(border != null){
+            if (border != null) {
                 ConstraintLayout outsideArea = layoutNoteBeingAdded.findViewById(R.id.layoutImageCellNoTitle);
                 outsideArea.setBackground(border);
             }
 
-        }
-        else{
+        } else {
             layoutNoteBeingAdded = LayoutInflater.from(NoteActivity.this).inflate(R.layout.layout_image_cell, layoutAllNotes, false);
             //set large border
-            if(border != null) {
+            if (border != null) {
                 ConstraintLayout outsideArea = layoutNoteBeingAdded.findViewById(R.id.layoutImageCell);
                 outsideArea.setBackground(border);
-            };
+            }
+            ;
         }
-
 
 
         Button removeButton = layoutNoteBeingAdded.findViewById(R.id.buttonRemove);
@@ -329,18 +325,18 @@ public class NoteActivity extends AppCompatActivity {
 
         displayImage = layoutNoteBeingAdded.findViewById(R.id.imageView);
         //set the images border
-        if(border != null) {
+        if (border != null) {
             displayImage.setBackground(border);
         }
         final TextView fileLocationSave = layoutNoteBeingAdded.findViewById(R.id.fileLocation);
-        if(fileLocation != null){
+        if (fileLocation != null) {
             fileLocationSave.setText(fileLocation);
-            File imgFile = new  File(fileLocation);
+            File imgFile = new File(fileLocation);
 
             //Important - sets the file location of the image so that this layout can be saved and reloaded!
             fileLocationSave.setText(imgFile.toString());
 
-            if(imgFile.exists()){
+            if (imgFile.exists()) {
                 displayImage = layoutNoteBeingAdded.findViewById(R.id.imageView);
                 Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
                 displayImage.setImageBitmap(myBitmap);
@@ -359,10 +355,10 @@ public class NoteActivity extends AppCompatActivity {
             public void onGlobalLayout() {
                 int height = myImageView.getHeight();
                 //Set buttons to invisible if the image displayed is not the empty image
-                if(myImageView.getDrawable().getConstantState() != getResources().getDrawable(R.drawable.emptyimage).getConstantState()) {
+                if (myImageView.getDrawable().getConstantState() != getResources().getDrawable(R.drawable.emptyimage).getConstantState()) {
                     addImageFromFile.setVisibility(View.GONE);
                     addImageFromCamera.setVisibility(View.GONE);
-                    if(fileLocationSave.getText().equals("null") && !lastImageAddedLocation.equals("null")){
+                    if (fileLocationSave.getText().equals("null") && !lastImageAddedLocation.equals("null")) {
                         fileLocationSave.setText(lastImageAddedLocation);
                         lastImageAddedLocation = "null";
                     }
@@ -393,26 +389,26 @@ public class NoteActivity extends AppCompatActivity {
         });
 
         //Creating with title
-        if(!noTitle) {
+        if (!noTitle) {
             TextView dateTimeCreated = layoutNoteBeingAdded.findViewById(R.id.DateTimeCreated);
             TextView titleOfNote = layoutNoteBeingAdded.findViewById(R.id.editTextTitle);
             //First time creating so get current date time
-            if(date == null){
+            if (date == null) {
                 dateTimeCreated.setText(LocalDateTime.now().toLocalDate() + " " + LocalDateTime.now().toLocalTime().toString().split(":")[0] + ":" + LocalDateTime.now().toLocalTime().toString().split(":")[1]);
             }
             //Loading already created cell so put in saved date
-            else{
+            else {
                 dateTimeCreated.setText(date);
             }
             //If loading file already has a title
-            if(title != null){
+            if (title != null) {
                 titleOfNote.setText(title);
             }
 
 
         }
 
-        layoutAllNotes.addView(layoutNoteBeingAdded );
+        layoutAllNotes.addView(layoutNoteBeingAdded);
         final View finalLayoutNoteBeingAdded2 = layoutNoteBeingAdded;
         removeButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -425,7 +421,7 @@ public class NoteActivity extends AppCompatActivity {
         saveItems(layoutAllNotes);
     }
 
-    private void addNoteBook(String noteBookFile){
+    private void addNoteBook(String noteBookFile) {
 
         final View noteBookBeingAdded = LayoutInflater.from(NoteActivity.this).inflate(R.layout.activity_open_note_cell, layoutAllNotes, false);
         final TextView noteBookName = noteBookBeingAdded.findViewById(R.id.noteNametextView);
@@ -433,13 +429,38 @@ public class NoteActivity extends AppCompatActivity {
 
         ImageButton openButton = noteBookBeingAdded.findViewById(R.id.openNoteImageButton);
 
-        //if the border is not null set the border and change the color
-        if(border != null){
-            ConstraintLayout noteLayout = noteBookBeingAdded.findViewById(R.id.layoutOpenNoteCell);
-            noteLayout.setBackground(border);
-            openButton.setColorFilter(notesColour);
-            openButton.setBackgroundColor(0x00000000);
+        int noteBookColor = -1;
+        //get the color of the notebook
+        try {
+            BufferedReader reader;
+            File file = new File(NOTEBOOK_DIRECTORY + "/" + noteBookFile +".txt");
+            if (file.exists()) {
+                reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+                String line = reader.readLine();
+                while (line != null) {
+                    if (line.split(" ")[0].equals("color")) {
+                        noteBookColor = Integer.parseInt(line.split(" ")[1]);
+                        break;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.e("io exception", e.toString());
+
         }
+
+
+        if (noteBookColor != -1) {
+            openButton.setColorFilter(noteBookColor);
+            openButton.setBackgroundColor(0x000000);
+            //Create border
+            GradientDrawable border = new GradientDrawable();
+            border.setColor(0xFFFFFFFF);
+            border.setStroke(10, noteBookColor);
+            ConstraintLayout layoutNote = noteBookBeingAdded.findViewById(R.id.layoutOpenNoteCell);
+            layoutNote.setBackground(border);
+        }
+
 
 
 
@@ -465,19 +486,15 @@ public class NoteActivity extends AppCompatActivity {
         saveItems(layoutAllNotes);
 
 
-
-
     }
 
-
+    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     @Override
     protected void onDestroy() {
         //saveItems(layoutItems);
         super.onDestroy();
 
     }
-
-
 
 
     //Create the menu
@@ -527,7 +544,6 @@ public class NoteActivity extends AppCompatActivity {
                 //builder.set
 
 
-
                 builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         // User clicked OK button
@@ -545,7 +561,7 @@ public class NoteActivity extends AppCompatActivity {
 
 
                 return true;
-                //TODO: make this change the primary dark colour, so the whole theme can change, also make the colour save/loadable
+            //TODO: make this change the primary dark colour, so the whole theme can change, also make the colour save/loadable
             case R.id.setColour:
                 int[] androidColors = getResources().getIntArray(R.array.androidcolors);
                 int randomAndroidColor = androidColors[new Random().nextInt(androidColors.length)];
@@ -559,7 +575,7 @@ public class NoteActivity extends AppCompatActivity {
                 Intent intent = getIntent();
                 this.overridePendingTransition(R.anim.anim_none, R.anim.anim_none);
                 //set extra value so the animation will be disabled of a new intent
-                intent.putExtra("activity","reload");
+                intent.putExtra("activity", "reload");
                 finish();
                 startActivity(intent);
 
@@ -567,15 +583,14 @@ public class NoteActivity extends AppCompatActivity {
 
                 return true;
 
-                //getSupportActionBar().setBackgroundDrawable(new ColorDrawable(randomAndroidColor));
-
+            //getSupportActionBar().setBackgroundDrawable(new ColorDrawable(randomAndroidColor));
 
 
 //                layout.setBackgroundColor(randomAndroidColor);
 //                layoutAllNotes.setBackgroundColor(randomAndroidColor);
 
-                ///startActivity(new Intent(this, EmailIntent.class));
-                //return true;
+            ///startActivity(new Intent(this, EmailIntent.class));
+            //return true;
             case R.id.delete:
 
                 builder = new AlertDialog.Builder(this);
@@ -601,12 +616,10 @@ public class NoteActivity extends AppCompatActivity {
 
                 dialog.show();
 
-                Log.e("dsad","hello");
+                Log.e("dsad", "hello");
 
                 //DeleteFileDialogFragment delete = new DeleteFileDialogFragment().onCreateDialog();
                 return true;
-
-
 
 
             default:
@@ -622,7 +635,7 @@ public class NoteActivity extends AppCompatActivity {
         try {
             FileInputStream is;
             BufferedReader reader;
-            final File file = new File(NOTEBOOK_DIRECTORY +"/" + folderName);
+            final File file = new File(NOTEBOOK_DIRECTORY + "/" + folderName);
 
             if (file.exists()) {
                 Log.e("loading", "loading");
@@ -632,7 +645,7 @@ public class NoteActivity extends AppCompatActivity {
                 while (line != null) {
 
                     //Get the color of the notebook
-                    if(line.split(" ")[0].equals("color") && !line.split(" ")[1].equals("-1")){
+                    if (line.split(" ")[0].equals("color") && !line.split(" ")[1].equals("-1")) {
                         notesColour = Integer.parseInt(line.split(" ")[1]);
                         //set the toolbar to the correct color
                         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(notesColour));
@@ -643,10 +656,10 @@ public class NoteActivity extends AppCompatActivity {
                     Log.d("StackOverflow", line);
 
 
-                    if(line.equals("Layout start")){
+                    if (line.equals("Layout start")) {
 
                         //Set up the note that is being inserted
-                        while(!line.equals("Layout end")) {
+                        while (!line.equals("Layout end")) {
                             line = reader.readLine();
 
                             //Bool to no use the layoutnotes.addview
@@ -654,53 +667,53 @@ public class NoteActivity extends AppCompatActivity {
 
                             //Todo: make this work with more layouts
                             //Title and text note
-                            if(line.equals("2131296436")) {
+                            if (line.equals("2131296436")) {
 
                                 String title = null;
                                 String date = null;
                                 String contents = null;
 
                                 Boolean keepFillingData = false;
-                                while(!line.equals("Layout end")) {
+                                while (!line.equals("Layout end")) {
                                     line = reader.readLine();
 
                                     //put in the date
-                                    if(line.split(" ")[0].equals("2131296258")){
+                                    if (line.split(" ")[0].equals("2131296258")) {
                                         keepFillingData = false;
                                         date = (line.split(" ")[1] + " " + line.split(" ")[2]);
 
 
                                     }
                                     //put in the saved title to the note
-                                    if(line.split(" ")[0].equals("2131296391")){
+                                    if (line.split(" ")[0].equals("2131296391")) {
                                         keepFillingData = false;
                                         title = line.replace("2131296391 ", "");
 
                                     }
                                     //Fill out the text box
-                                    if(line.split(" ")[0].equals("2131296390")){
+                                    if (line.split(" ")[0].equals("2131296390")) {
                                         keepFillingData = true;
-                                        line = line.replace("2131296390 ", "" );
+                                        line = line.replace("2131296390 ", "");
                                         contents = line + "\n";
                                     }
                                     //keep filling multiline text if no id
-                                    else if(keepFillingData){
+                                    else if (keepFillingData) {
                                         contents += line + "\n";
                                     }
                                 }
                                 //Remove the last new line character from contents
-                                contents = contents.substring(0, contents.length()-1);
+                                contents = contents.substring(0, contents.length() - 1);
                                 addNoteCell(title, date, contents);
                             }
 
                             //Title and image note
-                            if(line.equals("2131296432")){
+                            if (line.equals("2131296432")) {
 
                                 String fileLocation = null;
                                 String title = null;
                                 String date = null;
 
-                                while(!line.equals("Layout end")) {
+                                while (!line.equals("Layout end")) {
                                     line = reader.readLine();
 
                                     //Get the title
@@ -722,16 +735,16 @@ public class NoteActivity extends AppCompatActivity {
 
                             }
                             //Image note with no title
-                            if(line.equals("2131296433")){
+                            if (line.equals("2131296433")) {
 
                                 String fileLocation = null;
 
-                                while(!line.equals("Layout end")) {
+                                while (!line.equals("Layout end")) {
                                     line = reader.readLine();
                                     //insert the image and set up the buttons
                                     if (line.split(" ")[0].equals("2131296399")) {
                                         String linesData = line.split(" ")[1];
-                                        if (!linesData.equals("null")){
+                                        if (!linesData.equals("null")) {
                                             fileLocation = linesData;
                                             break;
                                         }
@@ -744,9 +757,9 @@ public class NoteActivity extends AppCompatActivity {
 
 
                             //Extra noteBook note
-                            if(line.equals("2131296435")) {
+                            if (line.equals("2131296435")) {
 
-                                while(!line.equals("Layout end")) {
+                                while (!line.equals("Layout end")) {
                                     Log.e("lay", line);
                                     line = reader.readLine();
                                     if (line.split(" ")[0].equals("2131296455")) {
@@ -767,42 +780,38 @@ public class NoteActivity extends AppCompatActivity {
                     }
 
 
-
                     line = reader.readLine();
 
                 }
                 reader.close();
             }
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             Log.e("Exception", "File load failed: " + e.toString());
         }
 
     }
 
 
-
-    public void saveItems(LinearLayout layoutItems){
+    public void saveItems(LinearLayout layoutItems) {
         //todo: make folders and save files as the folder name
         String fileName = currentFolder + ".txt";
-      //  Log.e("filename", fileName);
+        //  Log.e("filename", fileName);
         int itemCount = layoutItems.getChildCount();
         try {
 
             //Check directory exists
-            if(fileName.contains("/")){
+            if (fileName.contains("/")) {
                 Log.e("dir", fileName);
-                Log.e("dir",NOTEBOOK_DIRECTORY + "/" + fileName.split("/")[0] );
+                Log.e("dir", NOTEBOOK_DIRECTORY + "/" + fileName.split("/")[0]);
 
                 //Get path to file ( splits off the last element, the file name)
                 //TODO: is there a simpler way to do this
                 String filePath = "";
                 String[] filePathSplit = fileName.split("/");
-                for(int i =0; i < filePathSplit.length - 1; i++){
+                for (int i = 0; i < filePathSplit.length - 1; i++) {
                     filePath += "/" + filePathSplit[i];
                 }
                 Log.e("dir", filePath);
-
 
 
                 File noteBookDirectory = new File(NOTEBOOK_DIRECTORY + filePath);
@@ -821,17 +830,17 @@ public class NoteActivity extends AppCompatActivity {
 
             BufferedWriter bw = new BufferedWriter(new FileWriter(noteBookFile));
 
-            bw.write("color " + Integer.toString(notesColour) +"\n");
+            bw.write("color " + Integer.toString(notesColour) + "\n");
 
             //OutputStreamWriter outputStreamWriter = new OutputStreamWriter(NoteActivity.this.openFileOutput(NOTEBOOK_DIRECTORY +"/" + fileName, NoteActivity.this.MODE_PRIVATE));
 
             for (int i = 0; i < itemCount; i++) {
                 bw.write("Layout start" + "\n");
 
-          //      Log.e("save", "Layout start");
+                //      Log.e("save", "Layout start");
                 if (layoutItems.getChildAt(i) instanceof ConstraintLayout) {
                     ConstraintLayout cell = (ConstraintLayout) layoutItems.getChildAt(i);
-            //        Log.e("save", Integer.toString(cell.getId()));
+                    //        Log.e("save", Integer.toString(cell.getId()));
                     int count = cell.getChildCount();
                     for (int j = 0; j < count; j++) {
 
@@ -853,28 +862,24 @@ public class NoteActivity extends AppCompatActivity {
                 }
                 bw.write("Layout end" + "\n");
 
-            //    Log.e("save", "Layout wnd");
+                //    Log.e("save", "Layout wnd");
 
             }
             bw.close();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             Log.e("Exception", "File write failed: " + e.toString());
         }
-
-
-
 
 
     }
 
 
     //Deletes current notebook and sub notebooks
-    public void deleteNoteBook(){
+    public void deleteNoteBook() {
         Log.e("delete", NOTEBOOK_DIRECTORY + "/" + currentFolder);
         //Delete sub notebooks
         File dir = new File(NOTEBOOK_DIRECTORY + "/" + currentFolder);
-        if(dir.exists() && dir.isDirectory()){
+        if (dir.exists() && dir.isDirectory()) {
             deleteFilesInDir(dir);
         }
         //Delete current notebook file
@@ -887,11 +892,11 @@ public class NoteActivity extends AppCompatActivity {
     }
 
     //Recursively deletes files in dirctory/sub directorys
-    public void deleteFilesInDir(File dir){
+    public void deleteFilesInDir(File dir) {
         String[] children = dir.list();
-        for(String child: children){
+        for (String child : children) {
             File f = new File(dir, child);
-            if(f.isDirectory()){
+            if (f.isDirectory()) {
                 deleteFilesInDir(f);
             }
             //TODO delete images that are used in these notebooks?
@@ -905,8 +910,8 @@ public class NoteActivity extends AppCompatActivity {
 
     }
 
-    public void goBacktoPreviousLayout(){
-        if(currentFolder.contains("/")){
+    public void goBacktoPreviousLayout() {
+        if (currentFolder.contains("/")) {
             saveItems(layoutAllNotes);
             //Split out the last notebook in the chain
             String previousFolder = currentFolder.substring(0, currentFolder.lastIndexOf("/"));
@@ -918,7 +923,7 @@ public class NoteActivity extends AppCompatActivity {
 
             Intent intent = new Intent(new Intent(NoteActivity.this, NoteActivity.class));
             //Store animation direction so it can be set in the next activity
-            intent.putExtra("activity","right");
+            intent.putExtra("activity", "right");
             startActivity(intent);
 
 
@@ -996,13 +1001,13 @@ public class NoteActivity extends AppCompatActivity {
             //TODO: make this faster
             //Try here
             //https://stackoverflow.com/questions/32043222/how-to-get-full-size-picture-and-thumbnail-from-camera-in-the-same-intent
-           // Bitmap thumbnailSmall = (Bitmap) data.getExtras().get("data");
+            // Bitmap thumbnailSmall = (Bitmap) data.getExtras().get("data");
             Log.e("processing", "processing");
             //loading
 //            ProgressDialog dialog = ProgressDialog.show(this, "",
 //                    "Loading. Please wait...", true);
             //
-                Bitmap thumbnail = null;
+            Bitmap thumbnail = null;
             try {
                 thumbnail = MediaStore.Images.Media.getBitmap(
                         getContentResolver(), imageUri);
@@ -1010,23 +1015,22 @@ public class NoteActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-            Log.e("thumbnail", Integer.toString(thumbnail.getWidth()) );
+            Log.e("thumbnail", Integer.toString(thumbnail.getWidth()));
 
             Bitmap rotatedBitmap = null;
 
             //Check if width > height
-            if(thumbnail.getWidth() > thumbnail.getHeight()){
+            if (thumbnail.getWidth() > thumbnail.getHeight()) {
                 //Rotate the image 90
                 Matrix matrix = new Matrix();
                 matrix.postRotate(90);
                 //rotated bitmap
-                rotatedBitmap = Bitmap.createBitmap(thumbnail, 0, 0, thumbnail.getWidth(),thumbnail.getHeight(),matrix, true);
+                rotatedBitmap = Bitmap.createBitmap(thumbnail, 0, 0, thumbnail.getWidth(), thumbnail.getHeight(), matrix, true);
             }
             //Else dont rotate
-            else{
+            else {
                 rotatedBitmap = thumbnail;
             }
-
 
 
             displayImage.setImageBitmap(rotatedBitmap);
@@ -1049,7 +1053,7 @@ public class NoteActivity extends AppCompatActivity {
         }
 
         try {
-            File f = new File(IMAGE_DIRECTORY + "/"+ Calendar.getInstance().getTimeInMillis() + ".jpg");
+            File f = new File(IMAGE_DIRECTORY + "/" + Calendar.getInstance().getTimeInMillis() + ".jpg");
             f.createNewFile();
 
             FileOutputStream fo = new FileOutputStream(f);
@@ -1069,7 +1073,6 @@ public class NoteActivity extends AppCompatActivity {
         }
         return "";
     }
-
 
 
     ////####################################################################################################################################

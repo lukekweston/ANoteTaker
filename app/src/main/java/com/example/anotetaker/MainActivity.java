@@ -2,11 +2,13 @@ package com.example.anotetaker;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
@@ -27,7 +29,10 @@ import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.PermissionRequestErrorListener;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -140,9 +145,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void loadNoteBooks(){
 
-        File wallpaperDirectory = new File(NOTEBOOK_DIRECTORY);
-        if (!wallpaperDirectory.exists()) {  // have the object build the directory structure, if needed.
-            wallpaperDirectory.mkdirs();
+        File notebookDirectory = new File(NOTEBOOK_DIRECTORY);
+        if (!notebookDirectory.exists()) {  // have the object build the directory structure, if needed.
+            notebookDirectory.mkdirs();
         }
         final ArrayList<String> notebooks = new ArrayList<String>();
 
@@ -174,14 +179,49 @@ public class MainActivity extends AppCompatActivity {
 
             final View noteBookBeingAdded = LayoutInflater.from(MainActivity.this).inflate(R.layout.activity_open_note_cell, layoutItems, false);
             final TextView noteBookName = noteBookBeingAdded.findViewById(R.id.noteNametextView);
-            //Display the file without .txt extension
-            if(noteBookFile.contains(".txt")) {
-                noteBookFile = noteBookFile.substring(0, noteBookFile.length() - 4);
+
+            int noteBookColor = -1;
+            //get the color of the notebook
+            try {
+                BufferedReader reader;
+                File file = new File(NOTEBOOK_DIRECTORY +"/" + noteBookFile);
+                if (file.exists()) {
+                    reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+                    String line = reader.readLine();
+                    while (line != null) {
+                        if (line.split(" ")[0].equals("color")){
+                            noteBookColor = Integer.parseInt(line.split(" ")[1]);
+                            break;
+                        }
+                    }
+                }
+                    }catch (Exception e){
+                Log.e("io exception",e.toString());
 
             }
+
+        //Display the file without .txt extension
+        if(noteBookFile.contains(".txt")) {
+            noteBookFile = noteBookFile.substring(0, noteBookFile.length() - 4);
+
+        }
+
+
+
+
             noteBookName.setText(noteBookFile);
 
             ImageButton openButton = noteBookBeingAdded.findViewById(R.id.openNoteImageButton);
+            if(noteBookColor != -1){
+                openButton.setColorFilter(noteBookColor);
+                openButton.setBackgroundColor(0x000000);
+                //Create border
+                GradientDrawable border = new GradientDrawable();
+                border.setColor(0xFFFFFFFF);
+                border.setStroke(10, noteBookColor);
+                ConstraintLayout layoutNote = noteBookBeingAdded.findViewById(R.id.layoutOpenNoteCell);
+                layoutNote.setBackground(border);
+            }
 
 
             //Listener to open activity
