@@ -12,7 +12,6 @@ makes code spagehtti for adding an image
 package com.example.anotetaker;
 
 import android.annotation.SuppressLint;
-import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -20,18 +19,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.ColorFilter;
 import android.graphics.Matrix;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.shapes.Shape;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.text.InputType;
 import android.util.Log;
@@ -39,7 +33,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
@@ -60,23 +53,18 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.solver.widgets.Rectangle;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.content.FileProvider;
 
 public class NoteActivity extends AppCompatActivity {
 
@@ -160,12 +148,12 @@ public class NoteActivity extends AppCompatActivity {
 
 
 //        Todo make this listener work better
-//        new Timer().scheduleAtFixedRate(new TimerTask() {
-//            @Override
-//            public void run() {
-//                saveItems(layoutAllNotes);
-//            }
-//        }, 0, 500);
+        new Timer().scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                saveItems(layoutAllNotes);
+            }
+        }, 0, 2000);
 
 
         buttonAdd.setOnClickListener(listener);
@@ -176,7 +164,7 @@ public class NoteActivity extends AppCompatActivity {
     private void selectNoteTypeDialog() {
         AlertDialog.Builder pictureDialog = new AlertDialog.Builder(this);
         pictureDialog.setTitle("Select Note to add");
-        String[] pictureDialogItems = {"Add text note and title", "Add image", "Add image with title", "Add exta notebook"};
+        String[] pictureDialogItems = {"Add text note", "Add text note and title", "Add image", "Add image with title", "Add exta notebook"};
         pictureDialog.setItems(pictureDialogItems,
                 new DialogInterface.OnClickListener() {
                     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -184,15 +172,21 @@ public class NoteActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         switch (which) {
                             case 0:
-                                addNoteCell(null, null, null);
+                                NoteCell nC = new NoteCell(null, null, null, true, notesColour);
+                                nC.createNoteCell(NoteActivity.this, layoutAllNotes);
                                 break;
                             case 1:
-                                addImageCell(true, null, null, null);
+                                nC = new NoteCell(null, null, null, false, notesColour);
+                                nC.createNoteCell(NoteActivity.this, layoutAllNotes);
+                                //addNoteCell(null, null, null);
                                 break;
                             case 2:
-                                addImageCell(false, null, null, null);
+                                addImageCell(true, null, null, null);
                                 break;
                             case 3:
+                                addImageCell(false, null, null, null);
+                                break;
+                            case 4:
                                 //TODO: make this pop up better
                             {
                                 AlertDialog.Builder builder = new AlertDialog.Builder(NoteActivity.this);
@@ -233,61 +227,7 @@ public class NoteActivity extends AppCompatActivity {
 
 
     //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    private void addNoteCell(String title, String date, String contents) {
-        final View layoutNoteBeingAdded = LayoutInflater.from(NoteActivity.this).inflate(R.layout.layout_note_cell, layoutAllNotes, false);
 
-        if (title != null) {
-            TextView titleOnNote = layoutNoteBeingAdded.findViewById(R.id.editTextTitle);
-            titleOnNote.setText(title);
-        }
-
-
-        TextView dateTimeCreated = layoutNoteBeingAdded.findViewById(R.id.DateTimeCreated);
-        if (date != null) {
-            dateTimeCreated.setText(date);
-        } else {
-            dateTimeCreated.setText(LocalDateTime.now().toLocalDate() + " " + LocalDateTime.now().toLocalTime().toString().split(":")[0] + ":" + LocalDateTime.now().toLocalTime().toString().split(":")[1]);
-        }
-
-
-        EditText contentsOnNote = layoutNoteBeingAdded.findViewById(R.id.editTextTextMultiLine);
-
-        if (contents != null) {
-            contentsOnNote.append(contents);
-        }
-        //TODO fix this work around
-        //work around because of of weird bug where it was over lapping?
-        else {
-            contentsOnNote.append("\n");
-        }
-
-        //Create a new border and use it for this layout (border can not be shared)
-        if (notesColour != -1) {
-            GradientDrawable border = new GradientDrawable();
-            border.setColor(0xFFFFFFFF);
-            border.setStroke(10, notesColour);
-            //set border of whole layout
-            ConstraintLayout note = layoutNoteBeingAdded.findViewById(R.id.layoutTextCell);
-            note.setBackground(border);
-            //set border of multiline
-            contentsOnNote.setBackground(border);
-        }
-
-
-        Button removeButton = layoutNoteBeingAdded.findViewById(R.id.buttonRemove);
-        removeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                layoutAllNotes.removeView(layoutNoteBeingAdded);
-                saveItems(layoutAllNotes);
-            }
-        });
-
-        layoutAllNotes.addView(layoutNoteBeingAdded);
-        saveItems(layoutAllNotes);
-
-    }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void addImageCell(Boolean noTitle, String fileLocation, String title, String date) {
@@ -304,7 +244,7 @@ public class NoteActivity extends AppCompatActivity {
         }
 
         if (noTitle) {
-            layoutNoteBeingAdded = LayoutInflater.from(NoteActivity.this).inflate(R.layout.layout_image_cell_no_title, layoutAllNotes, false);
+            layoutNoteBeingAdded = LayoutInflater.from(NoteActivity.this).inflate(R.layout.layout_image_cell, layoutAllNotes, false);
             //set large border
             if (border != null) {
                 ConstraintLayout outsideArea = layoutNoteBeingAdded.findViewById(R.id.layoutImageCellNoTitle);
@@ -312,7 +252,7 @@ public class NoteActivity extends AppCompatActivity {
             }
 
         } else {
-            layoutNoteBeingAdded = LayoutInflater.from(NoteActivity.this).inflate(R.layout.layout_image_cell, layoutAllNotes, false);
+            layoutNoteBeingAdded = LayoutInflater.from(NoteActivity.this).inflate(R.layout.layout_image_cell_title, layoutAllNotes, false);
             //set large border
             if (border != null) {
                 ConstraintLayout outsideArea = layoutNoteBeingAdded.findViewById(R.id.layoutImageCell);
@@ -322,7 +262,7 @@ public class NoteActivity extends AppCompatActivity {
         }
 
 
-        Button removeButton = layoutNoteBeingAdded.findViewById(R.id.buttonRemove);
+        Button removeButton = layoutNoteBeingAdded.findViewById(R.id.buttonMenu);
 
         final Button addImageFromFile = layoutNoteBeingAdded.findViewById(R.id.buttonImageFromFile);
         final Button addImageFromCamera = layoutNoteBeingAdded.findViewById(R.id.buttonImageFromCamera);
@@ -708,7 +648,9 @@ public class NoteActivity extends AppCompatActivity {
                                 }
                                 //Remove the last new line character from contents
                                 contents = contents.substring(0, contents.length() - 1);
-                                addNoteCell(title, date, contents);
+                                NoteCell nC = new NoteCell(title, date, contents, false, notesColour);
+                                nC.createNoteCell(NoteActivity.this, layoutAllNotes);
+                                //addNoteCell(title, date, contents);
                             }
 
                             //Title and image note

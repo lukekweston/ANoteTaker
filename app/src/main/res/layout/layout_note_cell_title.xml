@@ -17,19 +17,6 @@
         tools:layout_editor_absoluteY="dp">
 
 
-        <!--        <EditText-->
-<!--            android:id="@+id/editTextTitle"-->
-<!--            android:layout_width="200dp"-->
-<!--            android:layout_height="40dp"-->
-<!--            android:layout_marginStart="16dp"-->
-<!--            android:layout_marginTop="8dp"-->
-
-<!--            android:ems="10"-->
-
-<!--            android:text=""-->
-<!--            android:hint="Title"-->
-<!--            app:layout_constraintStart_toStartOf="parent"-->
-<!--            app:layout_constraintTop_toTopOf="parent" />-->
 
         <Button
             android:id="@+id/buttonMenu"
@@ -42,15 +29,29 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <EditText
+            android:id="@+id/editTextTitle"
+            android:layout_width="200dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+
+            android:ems="10"
+
+            android:text=""
+            android:hint="Title"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
             android:id="@+id/editTextTextMultiLine"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="64dp"
             android:background="@drawable/border"
             android:ems="10"
             android:gravity="start|top"
             android:inputType="textMultiLine"
             android:padding="10dp"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:layout_editor_absoluteX="0dp" />
 
@@ -61,7 +62,6 @@
             android:layout_marginStart="28dp"
             android:layout_marginTop="16dp"
             android:text="TextView"
-            android:visibility="invisible"
             app:layout_constraintStart_toEndOf="@+id/editTextTitle"
             app:layout_constraintTop_toTopOf="parent" />
 
