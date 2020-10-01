@@ -230,16 +230,7 @@ public class NoteActivity extends AppCompatActivity {
         pictureDialog.show();
     }
 
-    @SuppressLint("ResourceAsColor")
-    private void createBorder() {
-        border = new GradientDrawable();
-        border.setColor(0xFFFFFFFF);
-        if (notesColour != -1) {
 
-            border.setStroke(10, notesColour);
-            buttonAdd.setColorFilter(notesColour);
-        }
-    }
 
     //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -271,7 +262,11 @@ public class NoteActivity extends AppCompatActivity {
             contentsOnNote.append("\n");
         }
 
-        if (border != null) {
+        //Create a new border and use it for this layout (border can not be shared)
+        if (notesColour != -1) {
+            GradientDrawable border = new GradientDrawable();
+            border.setColor(0xFFFFFFFF);
+            border.setStroke(10, notesColour);
             //set border of whole layout
             ConstraintLayout note = layoutNoteBeingAdded.findViewById(R.id.layoutTextCell);
             note.setBackground(border);
@@ -298,6 +293,15 @@ public class NoteActivity extends AppCompatActivity {
     private void addImageCell(Boolean noTitle, String fileLocation, String title, String date) {
 
         View layoutNoteBeingAdded = null;
+        GradientDrawable border = null;
+
+        //create a new border to be used for this object (borders cannot be shared)
+        if (notesColour != -1) {
+            Log.e("dasd", "creating border");
+            border = new GradientDrawable();
+            border.setColor(0xFFFFFFFF);
+            border.setStroke(10, notesColour);
+        }
 
         if (noTitle) {
             layoutNoteBeingAdded = LayoutInflater.from(NoteActivity.this).inflate(R.layout.layout_image_cell_no_title, layoutAllNotes, false);
@@ -649,7 +653,8 @@ public class NoteActivity extends AppCompatActivity {
                         notesColour = Integer.parseInt(line.split(" ")[1]);
                         //set the toolbar to the correct color
                         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(notesColour));
-                        createBorder();
+                        buttonAdd.setColorFilter(notesColour);
+
                     }
 
 
