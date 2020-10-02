@@ -54,6 +54,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Random;
 import java.util.Timer;
@@ -76,16 +77,21 @@ public class NoteActivity extends AppCompatActivity {
     GradientDrawable border;
     String currentFolder = "";
 
-    Uri imageUri = null;
+    static Uri imageUri = null;
 
 
     private static final String IMAGE_DIRECTORY = "/data/data/com.example.anotetaker/files/images";
     private static final String NOTEBOOK_DIRECTORY = "/data/data/com.example.anotetaker/files/notebooks";
     private Context mContext;
     private ImageView displayImage;  // imageview
-    private int GALLERY = 1, CAMERA = 2;
+    private int GALLERY = 1;
+    private static int CAMERA = 2;
 
     public int notesColour = -1;
+
+    public ArrayList<Note> notesDisplayed = new ArrayList<Note>();
+
+    Timer timer;
 
 
     public String lastImageAddedLocation = "null";
@@ -148,7 +154,8 @@ public class NoteActivity extends AppCompatActivity {
 
 
 //        Todo make this listener work better
-        new Timer().scheduleAtFixedRate(new TimerTask() {
+        timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 saveItems(layoutAllNotes);
@@ -172,12 +179,14 @@ public class NoteActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         switch (which) {
                             case 0:
-                                NoteCell nC = new NoteCell(null, null, null, true, notesColour);
-                                nC.createNoteCell(NoteActivity.this, layoutAllNotes);
+                                NoteCell nC = new NoteCell(null, null, null, true, notesColour, false, NoteActivity.this, layoutAllNotes);
+                                notesDisplayed.add(nC);
+                                nC.createNote();
                                 break;
                             case 1:
-                                nC = new NoteCell(null, null, null, false, notesColour);
-                                nC.createNoteCell(NoteActivity.this, layoutAllNotes);
+                                nC = new NoteCell(null, null, null, false, notesColour, false,NoteActivity.this, layoutAllNotes);
+                                notesDisplayed.add(nC);
+                                nC.createNote();
                                 //addNoteCell(null, null, null);
                                 break;
                             case 2:
@@ -229,141 +238,141 @@ public class NoteActivity extends AppCompatActivity {
     //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    private void addImageCell(Boolean noTitle, String fileLocation, String title, String date) {
-
-        View layoutNoteBeingAdded = null;
-        GradientDrawable border = null;
-
-        //create a new border to be used for this object (borders cannot be shared)
-        if (notesColour != -1) {
-            Log.e("dasd", "creating border");
-            border = new GradientDrawable();
-            border.setColor(0xFFFFFFFF);
-            border.setStroke(10, notesColour);
-        }
-
-        if (noTitle) {
-            layoutNoteBeingAdded = LayoutInflater.from(NoteActivity.this).inflate(R.layout.layout_image_cell, layoutAllNotes, false);
-            //set large border
-            if (border != null) {
-                ConstraintLayout outsideArea = layoutNoteBeingAdded.findViewById(R.id.layoutImageCellNoTitle);
-                outsideArea.setBackground(border);
-            }
-
-        } else {
-            layoutNoteBeingAdded = LayoutInflater.from(NoteActivity.this).inflate(R.layout.layout_image_cell_title, layoutAllNotes, false);
-            //set large border
-            if (border != null) {
-                ConstraintLayout outsideArea = layoutNoteBeingAdded.findViewById(R.id.layoutImageCell);
-                outsideArea.setBackground(border);
-            }
-            ;
-        }
-
-
-        Button removeButton = layoutNoteBeingAdded.findViewById(R.id.buttonMenu);
-
-        final Button addImageFromFile = layoutNoteBeingAdded.findViewById(R.id.buttonImageFromFile);
-        final Button addImageFromCamera = layoutNoteBeingAdded.findViewById(R.id.buttonImageFromCamera);
-
-        displayImage = layoutNoteBeingAdded.findViewById(R.id.imageView);
-        //set the images border
-        if (border != null) {
-            displayImage.setBackground(border);
-        }
-        final TextView fileLocationSave = layoutNoteBeingAdded.findViewById(R.id.fileLocation);
-        if (fileLocation != null) {
-            fileLocationSave.setText(fileLocation);
-            File imgFile = new File(fileLocation);
-
-            //Important - sets the file location of the image so that this layout can be saved and reloaded!
-            fileLocationSave.setText(imgFile.toString());
-
-            if (imgFile.exists()) {
-                displayImage = layoutNoteBeingAdded.findViewById(R.id.imageView);
-                Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-                displayImage.setImageBitmap(myBitmap);
-                addImageFromFile.setVisibility(View.INVISIBLE);
-                addImageFromCamera.setVisibility(View.INVISIBLE);
-
-            }
-
-        }
-
-        //Listener that updates when the image size updates
-        final ImageView myImageView = (ImageView) layoutNoteBeingAdded.findViewById(R.id.imageView);
-        final ViewTreeObserver observer = myImageView.getViewTreeObserver();
-        observer.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                int height = myImageView.getHeight();
-                //Set buttons to invisible if the image displayed is not the empty image
-                if (myImageView.getDrawable().getConstantState() != getResources().getDrawable(R.drawable.emptyimage).getConstantState()) {
-                    addImageFromFile.setVisibility(View.GONE);
-                    addImageFromCamera.setVisibility(View.GONE);
-                    if (fileLocationSave.getText().equals("null") && !lastImageAddedLocation.equals("null")) {
-                        fileLocationSave.setText(lastImageAddedLocation);
-                        lastImageAddedLocation = "null";
-                    }
-
-                    // Remove the layout listener so we don't waste time on future passes
-                    myImageView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                    //observer.removeOnGlobalLayoutListener(this);
-                }
-
-            }
-        });
-
-
-        final View finalLayoutNoteBeingAdded = layoutNoteBeingAdded;
-        addImageFromFile.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                displayImage = finalLayoutNoteBeingAdded.findViewById(R.id.imageView);
-                choosePhotoFromGallery();
-            }
-        });
-
-        final View finalLayoutNoteBeingAdded1 = layoutNoteBeingAdded;
-        addImageFromCamera.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                displayImage = finalLayoutNoteBeingAdded1.findViewById(R.id.imageView);
-                takePhotoFromCamera();
-            }
-        });
-
-        //Creating with title
-        if (!noTitle) {
-            TextView dateTimeCreated = layoutNoteBeingAdded.findViewById(R.id.DateTimeCreated);
-            TextView titleOfNote = layoutNoteBeingAdded.findViewById(R.id.editTextTitle);
-            //First time creating so get current date time
-            if (date == null) {
-                dateTimeCreated.setText(LocalDateTime.now().toLocalDate() + " " + LocalDateTime.now().toLocalTime().toString().split(":")[0] + ":" + LocalDateTime.now().toLocalTime().toString().split(":")[1]);
-            }
-            //Loading already created cell so put in saved date
-            else {
-                dateTimeCreated.setText(date);
-            }
-            //If loading file already has a title
-            if (title != null) {
-                titleOfNote.setText(title);
-            }
-
-
-        }
-
-        layoutAllNotes.addView(layoutNoteBeingAdded);
-        final View finalLayoutNoteBeingAdded2 = layoutNoteBeingAdded;
-        removeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                layoutAllNotes.removeView(finalLayoutNoteBeingAdded2);
-                saveItems(layoutAllNotes);
-            }
-        });
-
-        saveItems(layoutAllNotes);
-    }
+//    @RequiresApi(api = Build.VERSION_CODES.O)
+//    private void addImageCell(Boolean noTitle, String fileLocation, String title, String date) {
+//
+//        View layoutNoteBeingAdded = null;
+//        GradientDrawable border = null;
+//
+//        //create a new border to be used for this object (borders cannot be shared)
+//        if (notesColour != -1) {
+//            Log.e("dasd", "creating border");
+//            border = new GradientDrawable();
+//            border.setColor(0xFFFFFFFF);
+//            border.setStroke(10, notesColour);
+//        }
+//
+//        if (noTitle) {
+//            layoutNoteBeingAdded = LayoutInflater.from(NoteActivity.this).inflate(R.layout.layout_image_cell, layoutAllNotes, false);
+//            //set large border
+//            if (border != null) {
+//                ConstraintLayout outsideArea = layoutNoteBeingAdded.findViewById(R.id.layoutImageCellNoTitle);
+//                outsideArea.setBackground(border);
+//            }
+//
+//        } else {
+//            layoutNoteBeingAdded = LayoutInflater.from(NoteActivity.this).inflate(R.layout.layout_image_cell_title, layoutAllNotes, false);
+//            //set large border
+//            if (border != null) {
+//                ConstraintLayout outsideArea = layoutNoteBeingAdded.findViewById(R.id.layoutImageCell);
+//                outsideArea.setBackground(border);
+//            }
+//            ;
+//        }
+//
+//
+//        Button removeButton = layoutNoteBeingAdded.findViewById(R.id.buttonMenu);
+//
+//        final Button addImageFromFile = layoutNoteBeingAdded.findViewById(R.id.buttonImageFromFile);
+//        final Button addImageFromCamera = layoutNoteBeingAdded.findViewById(R.id.buttonImageFromCamera);
+//
+//        displayImage = layoutNoteBeingAdded.findViewById(R.id.imageView);
+//        //set the images border
+//        if (border != null) {
+//            displayImage.setBackground(border);
+//        }
+//        final TextView fileLocationSave = layoutNoteBeingAdded.findViewById(R.id.fileLocation);
+//        if (fileLocation != null) {
+//            fileLocationSave.setText(fileLocation);
+//            File imgFile = new File(fileLocation);
+//
+//            //Important - sets the file location of the image so that this layout can be saved and reloaded!
+//            fileLocationSave.setText(imgFile.toString());
+//
+//            if (imgFile.exists()) {
+//                displayImage = layoutNoteBeingAdded.findViewById(R.id.imageView);
+//                Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+//                displayImage.setImageBitmap(myBitmap);
+//                addImageFromFile.setVisibility(View.INVISIBLE);
+//                addImageFromCamera.setVisibility(View.INVISIBLE);
+//
+//            }
+//
+//        }
+//
+//        //Listener that updates when the image size updates
+//        final ImageView myImageView = (ImageView) layoutNoteBeingAdded.findViewById(R.id.imageView);
+//        final ViewTreeObserver observer = myImageView.getViewTreeObserver();
+//        observer.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+//            @Override
+//            public void onGlobalLayout() {
+//                int height = myImageView.getHeight();
+//                //Set buttons to invisible if the image displayed is not the empty image
+//                if (myImageView.getDrawable().getConstantState() != getResources().getDrawable(R.drawable.emptyimage).getConstantState()) {
+//                    addImageFromFile.setVisibility(View.GONE);
+//                    addImageFromCamera.setVisibility(View.GONE);
+//                    if (fileLocationSave.getText().equals("null") && !lastImageAddedLocation.equals("null")) {
+//                        fileLocationSave.setText(lastImageAddedLocation);
+//                        lastImageAddedLocation = "null";
+//                    }
+//
+//                    // Remove the layout listener so we don't waste time on future passes
+//                    myImageView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+//                    //observer.removeOnGlobalLayoutListener(this);
+//                }
+//
+//            }
+//        });
+//
+//
+//        final View finalLayoutNoteBeingAdded = layoutNoteBeingAdded;
+//        addImageFromFile.setOnClickListener(new View.OnClickListener() {
+//            public void onClick(View v) {
+//                displayImage = finalLayoutNoteBeingAdded.findViewById(R.id.imageView);
+//                choosePhotoFromGallery();
+//            }
+//        });
+//
+//        final View finalLayoutNoteBeingAdded1 = layoutNoteBeingAdded;
+//        addImageFromCamera.setOnClickListener(new View.OnClickListener() {
+//            public void onClick(View v) {
+//                displayImage = finalLayoutNoteBeingAdded1.findViewById(R.id.imageView);
+//                takePhotoFromCamera();
+//            }
+//        });
+//
+//        //Creating with title
+//        if (!noTitle) {
+//            TextView dateTimeCreated = layoutNoteBeingAdded.findViewById(R.id.DateTimeCreated);
+//            TextView titleOfNote = layoutNoteBeingAdded.findViewById(R.id.editTextTitle);
+//            //First time creating so get current date time
+//            if (date == null) {
+//                dateTimeCreated.setText(LocalDateTime.now().toLocalDate() + " " + LocalDateTime.now().toLocalTime().toString().split(":")[0] + ":" + LocalDateTime.now().toLocalTime().toString().split(":")[1]);
+//            }
+//            //Loading already created cell so put in saved date
+//            else {
+//                dateTimeCreated.setText(date);
+//            }
+//            //If loading file already has a title
+//            if (title != null) {
+//                titleOfNote.setText(title);
+//            }
+//
+//
+//        }
+//
+//        layoutAllNotes.addView(layoutNoteBeingAdded);
+//        final View finalLayoutNoteBeingAdded2 = layoutNoteBeingAdded;
+//        removeButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                layoutAllNotes.removeView(finalLayoutNoteBeingAdded2);
+//                saveItems(layoutAllNotes);
+//            }
+//        });
+//
+//        saveItems(layoutAllNotes);
+//    }
 
     private void addNoteBook(String noteBookFile) {
 
@@ -520,10 +529,22 @@ public class NoteActivity extends AppCompatActivity {
                 this.overridePendingTransition(R.anim.anim_none, R.anim.anim_none);
                 //set extra value so the animation will be disabled of a new intent
                 intent.putExtra("activity", "reload");
+                timer.cancel();
+                //Was not shutting intent while a task was operating, was causing errors, this fixes it
+                while(true){
+                    try{
+                        NoteActivity.this.finishAndRemoveTask();
+                        break;
+                    }
+                    catch (Exception e){
+                        Log.e("hmm", "onOptionsItemSelected: ", e);
+                    }
+
+                }
+
                 finish();
                 startActivity(intent);
 
-                //loadFolder(currentFolder);
 
                 return true;
 
@@ -612,44 +633,74 @@ public class NoteActivity extends AppCompatActivity {
 
                             //Todo: make this work with more layouts
                             //Title and text note
-                            if (line.equals("2131296436")) {
+                            if (line.equals("LayoutNoteCell")) {
 
+                                Log.e("line", line);
+
+
+                                boolean highlighted = false;
                                 String title = null;
                                 String date = null;
                                 String contents = null;
+                                boolean noTitle = false;
+
 
                                 Boolean keepFillingData = false;
                                 while (!line.equals("Layout end")) {
                                     line = reader.readLine();
 
+
+                                    if(line.split(" ")[0].equals("highlighted#%^$")){
+                                        keepFillingData = false;
+                                        highlighted = Boolean.parseBoolean(line.split(" ")[1]);
+                                        continue;
+                                    }
+
+                                    //put in the saved title to the note
+                                    if (line.split(" ")[0].equals("title#%^$")) {
+                                        keepFillingData = false;
+                                        title = line.substring(10, line.length());
+                                        continue;
+                                    }
+
+
+
                                     //put in the date
-                                    if (line.split(" ")[0].equals("2131296258")) {
+                                    if (line.split(" ")[0].equals("date#%^$")) {
                                         keepFillingData = false;
                                         date = (line.split(" ")[1] + " " + line.split(" ")[2]);
-
-
+                                        continue;
                                     }
-                                    //put in the saved title to the note
-                                    if (line.split(" ")[0].equals("2131296391")) {
+
+                                    //get if the note has or hasnt got a title
+                                    if (line.split(" ")[0].equals("noTitle#%^$")) {
                                         keepFillingData = false;
-                                        title = line.replace("2131296391 ", "");
-
+                                        noTitle = Boolean.parseBoolean(line.split(" ")[1]);
+                                        continue;
                                     }
+
                                     //Fill out the text box
-                                    if (line.split(" ")[0].equals("2131296390")) {
+                                    if (line.split(" ")[0].equals("contents#%^$")) {
                                         keepFillingData = true;
-                                        line = line.replace("2131296390 ", "");
+                                        line = line.replace("contents#%^$ ", "");
                                         contents = line + "\n";
                                     }
                                     //keep filling multiline text if no id
                                     else if (keepFillingData) {
                                         contents += line + "\n";
                                     }
+
+
+
+
+
+
                                 }
                                 //Remove the last new line character from contents
                                 contents = contents.substring(0, contents.length() - 1);
-                                NoteCell nC = new NoteCell(title, date, contents, false, notesColour);
-                                nC.createNoteCell(NoteActivity.this, layoutAllNotes);
+                                NoteCell nC = new NoteCell(title, date, contents, noTitle, notesColour, highlighted, NoteActivity.this, layoutAllNotes);
+                                notesDisplayed.add(nC);
+                                nC.createNote();
                                 //addNoteCell(title, date, contents);
                             }
 
@@ -778,41 +829,52 @@ public class NoteActivity extends AppCompatActivity {
             BufferedWriter bw = new BufferedWriter(new FileWriter(noteBookFile));
 
             bw.write("color " + Integer.toString(notesColour) + "\n");
+            Log.e("what", Integer.toString(notesColour));
 
             //OutputStreamWriter outputStreamWriter = new OutputStreamWriter(NoteActivity.this.openFileOutput(NOTEBOOK_DIRECTORY +"/" + fileName, NoteActivity.this.MODE_PRIVATE));
 
-            for (int i = 0; i < itemCount; i++) {
+            for(Note n : notesDisplayed){
                 bw.write("Layout start" + "\n");
+                bw.write(n.saveNote());
+                //Log.e("yo", n.saveNote());
 
-                //      Log.e("save", "Layout start");
-                if (layoutItems.getChildAt(i) instanceof ConstraintLayout) {
-                    ConstraintLayout cell = (ConstraintLayout) layoutItems.getChildAt(i);
-                    //        Log.e("save", Integer.toString(cell.getId()));
-                    int count = cell.getChildCount();
-                    for (int j = 0; j < count; j++) {
-
-                        ConstraintLayout cellLayout = (ConstraintLayout) cell.getChildAt(j);
-                        bw.write(Integer.toString(cellLayout.getId()) + "\n");
-                        Log.e("save", Integer.toString(cellLayout.getId()));
-                        int count2 = cellLayout.getChildCount();
-                        View v = null;
-                        for (int m = 0; m < count2; m++) {
-                            v = cellLayout.getChildAt(m);
-                            if (v instanceof TextView || v instanceof EditText) {
-                                bw.write(Integer.toString(v.getId()) + " " + ((TextView) v).getText() + "\n");
-                                Log.e("save", Integer.toString(v.getId()) + " " + ((TextView) v).getText());
-
-                            }
-
-                        }
-                    }
-                }
+//            for (int i = 0; i < itemCount; i++) {
+//                bw.write("Layout start" + "\n");
+//
+//
+//                //      Log.e("save", "Layout start");
+//                if (layoutItems.getChildAt(i) instanceof ConstraintLayout) {
+//                    ConstraintLayout cell = (ConstraintLayout) layoutItems.getChildAt(i);
+//                    //        Log.e("save", Integer.toString(cell.getId()));
+//                    int count = cell.getChildCount();
+//                    for (int j = 0; j < count; j++) {
+//
+//                        ConstraintLayout cellLayout = (ConstraintLayout) cell.getChildAt(j);
+//                        bw.write(Integer.toString(cellLayout.getId()) + "\n");
+//                        Log.e("save", Integer.toString(cellLayout.getId()));
+//                        int count2 = cellLayout.getChildCount();
+//                        View v = null;
+//                        for (int m = 0; m < count2; m++) {
+//                            v = cellLayout.getChildAt(m);
+//                            if (v instanceof TextView || v instanceof EditText) {
+//                                bw.write(Integer.toString(v.getId()) + " " + ((TextView) v).getText() + "\n");
+//                                Log.e("save", Integer.toString(v.getId()) + " " + ((TextView) v).getText());
+//
+//                            }
+//
+//                        }
+//                    }
+//                }
                 bw.write("Layout end" + "\n");
 
                 //    Log.e("save", "Layout wnd");
 
             }
             bw.close();
+
+
+
+
         } catch (Exception e) {
             Log.e("Exception", "File write failed: " + e.toString());
         }
@@ -909,7 +971,7 @@ public class NoteActivity extends AppCompatActivity {
         startActivityForResult(galleryIntent, GALLERY);
     }
 
-    private void takePhotoFromCamera() {
+    void takePhotoFromCamera() {
 //https://www.semicolonworld.com/question/45696/low-picture-image-quality-when-capture-from-camera
         ContentValues values = new ContentValues();
         values.put(MediaStore.Images.Media.TITLE, "New Picture");
@@ -919,6 +981,7 @@ public class NoteActivity extends AppCompatActivity {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
         startActivityForResult(intent, CAMERA);
+
     }
 
     @Override

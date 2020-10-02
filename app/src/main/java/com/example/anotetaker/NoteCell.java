@@ -18,32 +18,34 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
-public class NoteCell {
+public class NoteCell extends Note{
+
 
     public String _title;
     public String _date;
     public String _contents;
     public boolean _noTitle;
-    public int _borderColor;
-    public GradientDrawable border;
-    public boolean _highlighted = false;
 
 
-    public NoteCell(String title, String date, String contents, boolean noTitle, int borderColor) {
+
+    public NoteCell(String title, String date, String contents, boolean noTitle, int borderColor, boolean highlighted, Context c, LinearLayout layoutAllNotes) {
         _title = title;
         _date = date;
         _contents = contents;
         _noTitle = noTitle;
         _borderColor = borderColor;
+        _highlighted = highlighted;
+        _c = c;
+        _layoutAllNotes = layoutAllNotes;
     }
 
-    public View createNoteCellNoTitle(Context c, LinearLayout layoutAllNotes){
+    public View createNoteCellNoTitle(){
 
-        return LayoutInflater.from(c).inflate(R.layout.layout_note_cell, layoutAllNotes, false);
+        return LayoutInflater.from(_c).inflate(R.layout.layout_note_cell, _layoutAllNotes, false);
     }
 
-    public View createNoteCellTitle(Context c, LinearLayout layoutAllNotes){
-        final View layoutNoteBeingAdded = LayoutInflater.from(c).inflate(R.layout.layout_note_cell_title, layoutAllNotes, false);
+    public View createNoteCellTitle(){
+        final View layoutNoteBeingAdded = LayoutInflater.from(_c).inflate(R.layout.layout_note_cell_title, _layoutAllNotes, false);
 
         //Check if title has been set
         if (_title != null) {
@@ -56,29 +58,27 @@ public class NoteCell {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public void createNoteCell(final Context c, final LinearLayout layoutAllNotes) {
-
-
-        final View layoutNoteBeingAdded;
+    public void createNote() {
 
         if(_noTitle){
-            layoutNoteBeingAdded = createNoteCellNoTitle(c, layoutAllNotes);
+            _layoutNoteBeingAdded = createNoteCellNoTitle();
         }
         else{
-            layoutNoteBeingAdded = createNoteCellTitle(c, layoutAllNotes);
+            _layoutNoteBeingAdded = createNoteCellTitle();
         }
 
 
         //Add date
-        TextView dateTimeCreated = layoutNoteBeingAdded.findViewById(R.id.DateTimeCreated);
+        TextView dateTimeCreated = _layoutNoteBeingAdded.findViewById(R.id.DateTimeCreated);
         if (_date != null) {
             dateTimeCreated.setText(_date);
         } else {
-            dateTimeCreated.setText(LocalDateTime.now().toLocalDate() + " " + LocalDateTime.now().toLocalTime().toString().split(":")[0] + ":" + LocalDateTime.now().toLocalTime().toString().split(":")[1]);
+            _date = LocalDateTime.now().toLocalDate() + " " + LocalDateTime.now().toLocalTime().toString().split(":")[0] + ":" + LocalDateTime.now().toLocalTime().toString().split(":")[1];
+            dateTimeCreated.setText(_date);
         }
 
         //Fill out contents
-        final EditText contentsOnNote = layoutNoteBeingAdded.findViewById(R.id.editTextTextMultiLine);
+        final EditText contentsOnNote = _layoutNoteBeingAdded.findViewById(R.id.editTextTextMultiLine);
 
         if (_contents != null) {
             contentsOnNote.append(_contents);
@@ -89,236 +89,40 @@ public class NoteCell {
             contentsOnNote.append("\n");
         }
 
-        final ConstraintLayout note = layoutNoteBeingAdded.findViewById(R.id.layoutTextCell);
+        final ConstraintLayout note = _layoutNoteBeingAdded.findViewById(R.id.layoutTextCell);
 
+        //setup views for border
+        _borderViews = new View[]{note, contentsOnNote};
 
         //Set up the border
-        setBorder(note, contentsOnNote);
+        setBorder();
 
 
-        Button menuButton = layoutNoteBeingAdded.findViewById(R.id.buttonMenu);
-        menuButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-//                layoutAllNotes.removeView(layoutNoteBeingAdded);
-//                saveItems(layoutAllNotes);
-                AlertDialog.Builder pictureDialog = new AlertDialog.Builder(c);
-                pictureDialog.setTitle("Select Note to add");
-                //"Move note up", "Move note down"
-                String[] pictureDialogItems = {"Set reminder", "Highlight note", "Duplicate note", "Delete note"};
-                if(_highlighted){
-                    pictureDialogItems[1] = "Unhighlight Note";
-                }
-                pictureDialog.setItems(pictureDialogItems,
-                        new DialogInterface.OnClickListener() {
-                            @RequiresApi(api = Build.VERSION_CODES.O)
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                switch (which) {
-                                    //Reminder
-                                    case 0:
-                                        break;
-                                    //Highlight note
-                                    case 1:
-                                        _highlighted = !_highlighted;
-                                        setBorder(note, contentsOnNote);
+        Button menuButton = _layoutNoteBeingAdded.findViewById(R.id.buttonMenu);
+        menuButton.setOnClickListener(menuListener);
 
 
-                                        break;
-//                                    //Move note up
-//                                    case 2:
-//
-//
-//                                        break;
-//                                    //move note down
-//                                    case 3:
-//                                        //TODO: make this pop up better
-//                                    {
-////                                        AlertDialog.Builder builder = new AlertDialog.Builder(NoteActivity.this);
-////
-////                                        builder.setTitle("New notebook");
-////                                        final EditText input = new EditText(NoteActivity.this);
-////                                        input.setHint("Notebook name");
-////
-////                                        input.setInputType(InputType.TYPE_CLASS_TEXT);
-////                                        builder.setView(input);
-////
-////
-////                                        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-////                                            public void onClick(DialogInterface dialog, int id) {
-////
-////                                                addNoteBook(currentFolder + "/" + input.getText().toString().replace("/", "-"));
-////
-////                                            }
-////                                        });
-////
-////                                        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-////                                            public void onClick(DialogInterface dialog, int id) {
-////                                                // User cancelled the dialog
-////                                            }
-////                                        });
-////
-////
-////                                        builder.show();
-//                                    }
-//
-//                                    break;
-                                    //duplicate note
-                                    case 2:
-                                        break;
 
-                                    //Delete note
-                                    case 3:
-                                        layoutAllNotes.removeView(layoutNoteBeingAdded);
-                                        break;
-
-                                }
-                            }
-                        });
-                pictureDialog.show();
-
-
-            }
-        });
-
-        layoutAllNotes.addView(layoutNoteBeingAdded);
+        _layoutAllNotes.addView(_layoutNoteBeingAdded);
 
     }
 
-
-    //Creates and sets a border around the note
-    public void setBorder(ConstraintLayout wholeNoteBorder, EditText textBorder){
-        if (_borderColor != -1 || _highlighted) {
-            border = new GradientDrawable();
-            border.setColor(0xFFFFFFFF);
-            if(_highlighted){
-                border.setStroke(10, Color.parseColor("#FFFF00"));
-            }
-            else {
-                border.setStroke(10, _borderColor);
-            }
-            //set border of whole layout
-            wholeNoteBorder.setBackground(border);
-            //set border of multiline
-            textBorder.setBackground(border);
+    //#%^$ added to the end of string so user will unlikely put in a string == to this and mess up the loading
+    public String saveNote(){
+        String file = "LayoutNoteCell\n";
+        file += "borderColor#%^$ " + Integer.toString(_borderColor) + "\n";
+        file += "highlighted#%^$ " + _highlighted + "\n";
+        if(!_noTitle){
+            file += "title#%^$ " + ((EditText) _layoutNoteBeingAdded.findViewById(R.id.editTextTitle)).getText() + "\n";
         }
+        file += "date#%^$ " + _date + "\n";
+        file += "contents#%^$ " + ((TextView)_layoutNoteBeingAdded.findViewById(R.id.editTextTextMultiLine)).getText() +"\n";
+        file += "noTitle#%^$ " + _noTitle + "\n";
 
+        return file;
     }
+
 
 }
 
 
-
-
-//    private void addNoteCell(String title, String date, String contents) {
-//        final View layoutNoteBeingAdded = LayoutInflater.from(NoteActivity.this).inflate(R.layout.layout_note_cell, layoutAllNotes, false);
-//
-//        if (title != null) {
-//            TextView titleOnNote = layoutNoteBeingAdded.findViewById(R.id.editTextTitle);
-//            titleOnNote.setText(title);
-//        }
-//
-//
-//        TextView dateTimeCreated = layoutNoteBeingAdded.findViewById(R.id.DateTimeCreated);
-//        if (date != null) {
-//            dateTimeCreated.setText(date);
-//        } else {
-//            dateTimeCreated.setText(LocalDateTime.now().toLocalDate() + " " + LocalDateTime.now().toLocalTime().toString().split(":")[0] + ":" + LocalDateTime.now().toLocalTime().toString().split(":")[1]);
-//        }
-//
-//
-//        EditText contentsOnNote = layoutNoteBeingAdded.findViewById(R.id.editTextTextMultiLine);
-//
-//        if (contents != null) {
-//            contentsOnNote.append(contents);
-//        }
-//        //TODO fix this work around
-//        //work around because of of weird bug where it was over lapping?
-//        else {
-//            contentsOnNote.append("\n");
-//        }
-//
-//        //Create a new border and use it for this layout (border can not be shared)
-//        if (notesColour != -1) {
-//            GradientDrawable border = new GradientDrawable();
-//            border.setColor(0xFFFFFFFF);
-//            border.setStroke(10, notesColour);
-//            //set border of whole layout
-//            ConstraintLayout note = layoutNoteBeingAdded.findViewById(R.id.layoutTextCell);
-//            note.setBackground(border);
-//            //set border of multiline
-//            contentsOnNote.setBackground(border);
-//        }
-//
-//
-//        Button removeButton = layoutNoteBeingAdded.findViewById(R.id.buttonRemove);
-//        removeButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-////                layoutAllNotes.removeView(layoutNoteBeingAdded);
-////                saveItems(layoutAllNotes);
-//                AlertDialog.Builder pictureDialog = new AlertDialog.Builder(NoteActivity.this);
-//                pictureDialog.setTitle("Select Note to add");
-//                String[] pictureDialogItems = {"Add text note and title", "Add image", "Add image with title", "Add exta notebook"};
-//                pictureDialog.setItems(pictureDialogItems,
-//                        new DialogInterface.OnClickListener() {
-//                            @RequiresApi(api = Build.VERSION_CODES.O)
-//                            @Override
-//                            public void onClick(DialogInterface dialog, int which) {
-//                                switch (which) {
-//                                    case 0:
-//                                        addNoteCell(null, null, null);
-//                                        break;
-//                                    case 1:
-//                                        addImageCell(true, null, null, null);
-//                                        break;
-//                                    case 2:
-//                                        addImageCell(false, null, null, null);
-//                                        break;
-//                                    case 3:
-//                                        //TODO: make this pop up better
-//                                    {
-//                                        AlertDialog.Builder builder = new AlertDialog.Builder(NoteActivity.this);
-//
-//                                        builder.setTitle("New notebook");
-//                                        final EditText input = new EditText(NoteActivity.this);
-//                                        input.setHint("Notebook name");
-//
-//                                        input.setInputType(InputType.TYPE_CLASS_TEXT);
-//                                        builder.setView(input);
-//
-//
-//                                        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-//                                            public void onClick(DialogInterface dialog, int id) {
-//
-//                                                addNoteBook(currentFolder + "/" + input.getText().toString().replace("/", "-"));
-//
-//                                            }
-//                                        });
-//
-//                                        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-//                                            public void onClick(DialogInterface dialog, int id) {
-//                                                // User cancelled the dialog
-//                                            }
-//                                        });
-//
-//
-//                                        builder.show();
-//                                    }
-//
-//                                    break;
-//                                }
-//                            }
-//                        });
-//                pictureDialog.show();
-//
-//
-//            }
-//        });
-//
-//        layoutAllNotes.addView(layoutNoteBeingAdded);
-//        saveItems(layoutAllNotes);
-//
-//    }
-//
-//}
