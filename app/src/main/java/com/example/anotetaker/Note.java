@@ -1,5 +1,6 @@
 package com.example.anotetaker;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -18,6 +19,8 @@ public abstract class Note {
     public GradientDrawable border;
     public boolean _highlighted = false;
     public View[] _borderViews = null;
+    //Boolean variable to check if the note has been deleted
+    public boolean _deleted = false;
 
     Context _c;
     LinearLayout _layoutAllNotes;
@@ -124,6 +127,7 @@ public abstract class Note {
                                 //Delete note
                                 case 3:
                                     _layoutAllNotes.removeView(_layoutNoteBeingAdded);
+                                    _deleted = true;
                                     break;
 
                             }

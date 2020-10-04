@@ -22,11 +22,13 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
+import android.media.Image;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -77,7 +79,7 @@ public class NoteActivity extends AppCompatActivity {
     GradientDrawable border;
     String currentFolder = "";
 
-    static Uri imageUri = null;
+    public static Uri imageUri = null;
 
 
     private static final String IMAGE_DIRECTORY = "/data/data/com.example.anotetaker/files/images";
@@ -125,10 +127,7 @@ public class NoteActivity extends AppCompatActivity {
         String defaultValue = getResources().getString(R.string.workingFolder_default);
         currentFolder = mPrefs.getString(getString(R.string.curWorkingFolder), defaultValue);
 
-//        if(currentFolder.split("/").length > 1){
-//            //Set the animation for opening this intent
-//            this.overridePendingTransition(R.anim.anim_slide_in_left, R.anim.anim_slide_out_right);
-//        }
+
 
         getSupportActionBar().setTitle(currentFolder);
 
@@ -184,16 +183,21 @@ public class NoteActivity extends AppCompatActivity {
                                 nC.createNote();
                                 break;
                             case 1:
-                                nC = new NoteCell(null, null, null, false, notesColour, false,NoteActivity.this, layoutAllNotes);
+                                nC = new NoteCell(null, null, null, false, notesColour, false, NoteActivity.this, layoutAllNotes);
                                 notesDisplayed.add(nC);
                                 nC.createNote();
                                 //addNoteCell(null, null, null);
                                 break;
                             case 2:
-                                addImageCell(true, null, null, null);
+                                ImageCell iC = new ImageCell(null, null, null, true, notesColour, false, NoteActivity.this, layoutAllNotes);
+                                notesDisplayed.add(iC);
+                                iC.createNote();
+
                                 break;
                             case 3:
-                                addImageCell(false, null, null, null);
+                                iC = new ImageCell(null, null, null, false, notesColour, false, NoteActivity.this, layoutAllNotes);
+                                notesDisplayed.add(iC);
+                                iC.createNote();
                                 break;
                             case 4:
                                 //TODO: make this pop up better
@@ -234,145 +238,8 @@ public class NoteActivity extends AppCompatActivity {
     }
 
 
-
     //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-
-//    @RequiresApi(api = Build.VERSION_CODES.O)
-//    private void addImageCell(Boolean noTitle, String fileLocation, String title, String date) {
-//
-//        View layoutNoteBeingAdded = null;
-//        GradientDrawable border = null;
-//
-//        //create a new border to be used for this object (borders cannot be shared)
-//        if (notesColour != -1) {
-//            Log.e("dasd", "creating border");
-//            border = new GradientDrawable();
-//            border.setColor(0xFFFFFFFF);
-//            border.setStroke(10, notesColour);
-//        }
-//
-//        if (noTitle) {
-//            layoutNoteBeingAdded = LayoutInflater.from(NoteActivity.this).inflate(R.layout.layout_image_cell, layoutAllNotes, false);
-//            //set large border
-//            if (border != null) {
-//                ConstraintLayout outsideArea = layoutNoteBeingAdded.findViewById(R.id.layoutImageCellNoTitle);
-//                outsideArea.setBackground(border);
-//            }
-//
-//        } else {
-//            layoutNoteBeingAdded = LayoutInflater.from(NoteActivity.this).inflate(R.layout.layout_image_cell_title, layoutAllNotes, false);
-//            //set large border
-//            if (border != null) {
-//                ConstraintLayout outsideArea = layoutNoteBeingAdded.findViewById(R.id.layoutImageCell);
-//                outsideArea.setBackground(border);
-//            }
-//            ;
-//        }
-//
-//
-//        Button removeButton = layoutNoteBeingAdded.findViewById(R.id.buttonMenu);
-//
-//        final Button addImageFromFile = layoutNoteBeingAdded.findViewById(R.id.buttonImageFromFile);
-//        final Button addImageFromCamera = layoutNoteBeingAdded.findViewById(R.id.buttonImageFromCamera);
-//
-//        displayImage = layoutNoteBeingAdded.findViewById(R.id.imageView);
-//        //set the images border
-//        if (border != null) {
-//            displayImage.setBackground(border);
-//        }
-//        final TextView fileLocationSave = layoutNoteBeingAdded.findViewById(R.id.fileLocation);
-//        if (fileLocation != null) {
-//            fileLocationSave.setText(fileLocation);
-//            File imgFile = new File(fileLocation);
-//
-//            //Important - sets the file location of the image so that this layout can be saved and reloaded!
-//            fileLocationSave.setText(imgFile.toString());
-//
-//            if (imgFile.exists()) {
-//                displayImage = layoutNoteBeingAdded.findViewById(R.id.imageView);
-//                Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-//                displayImage.setImageBitmap(myBitmap);
-//                addImageFromFile.setVisibility(View.INVISIBLE);
-//                addImageFromCamera.setVisibility(View.INVISIBLE);
-//
-//            }
-//
-//        }
-//
-//        //Listener that updates when the image size updates
-//        final ImageView myImageView = (ImageView) layoutNoteBeingAdded.findViewById(R.id.imageView);
-//        final ViewTreeObserver observer = myImageView.getViewTreeObserver();
-//        observer.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-//            @Override
-//            public void onGlobalLayout() {
-//                int height = myImageView.getHeight();
-//                //Set buttons to invisible if the image displayed is not the empty image
-//                if (myImageView.getDrawable().getConstantState() != getResources().getDrawable(R.drawable.emptyimage).getConstantState()) {
-//                    addImageFromFile.setVisibility(View.GONE);
-//                    addImageFromCamera.setVisibility(View.GONE);
-//                    if (fileLocationSave.getText().equals("null") && !lastImageAddedLocation.equals("null")) {
-//                        fileLocationSave.setText(lastImageAddedLocation);
-//                        lastImageAddedLocation = "null";
-//                    }
-//
-//                    // Remove the layout listener so we don't waste time on future passes
-//                    myImageView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-//                    //observer.removeOnGlobalLayoutListener(this);
-//                }
-//
-//            }
-//        });
-//
-//
-//        final View finalLayoutNoteBeingAdded = layoutNoteBeingAdded;
-//        addImageFromFile.setOnClickListener(new View.OnClickListener() {
-//            public void onClick(View v) {
-//                displayImage = finalLayoutNoteBeingAdded.findViewById(R.id.imageView);
-//                choosePhotoFromGallery();
-//            }
-//        });
-//
-//        final View finalLayoutNoteBeingAdded1 = layoutNoteBeingAdded;
-//        addImageFromCamera.setOnClickListener(new View.OnClickListener() {
-//            public void onClick(View v) {
-//                displayImage = finalLayoutNoteBeingAdded1.findViewById(R.id.imageView);
-//                takePhotoFromCamera();
-//            }
-//        });
-//
-//        //Creating with title
-//        if (!noTitle) {
-//            TextView dateTimeCreated = layoutNoteBeingAdded.findViewById(R.id.DateTimeCreated);
-//            TextView titleOfNote = layoutNoteBeingAdded.findViewById(R.id.editTextTitle);
-//            //First time creating so get current date time
-//            if (date == null) {
-//                dateTimeCreated.setText(LocalDateTime.now().toLocalDate() + " " + LocalDateTime.now().toLocalTime().toString().split(":")[0] + ":" + LocalDateTime.now().toLocalTime().toString().split(":")[1]);
-//            }
-//            //Loading already created cell so put in saved date
-//            else {
-//                dateTimeCreated.setText(date);
-//            }
-//            //If loading file already has a title
-//            if (title != null) {
-//                titleOfNote.setText(title);
-//            }
-//
-//
-//        }
-//
-//        layoutAllNotes.addView(layoutNoteBeingAdded);
-//        final View finalLayoutNoteBeingAdded2 = layoutNoteBeingAdded;
-//        removeButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                layoutAllNotes.removeView(finalLayoutNoteBeingAdded2);
-//                saveItems(layoutAllNotes);
-//            }
-//        });
-//
-//        saveItems(layoutAllNotes);
-//    }
 
     private void addNoteBook(String noteBookFile) {
 
@@ -386,7 +253,7 @@ public class NoteActivity extends AppCompatActivity {
         //get the color of the notebook
         try {
             BufferedReader reader;
-            File file = new File(NOTEBOOK_DIRECTORY + "/" + noteBookFile +".txt");
+            File file = new File(NOTEBOOK_DIRECTORY + "/" + noteBookFile + ".txt");
             if (file.exists()) {
                 reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
                 String line = reader.readLine();
@@ -413,8 +280,6 @@ public class NoteActivity extends AppCompatActivity {
             ConstraintLayout layoutNote = noteBookBeingAdded.findViewById(R.id.layoutOpenNoteCell);
             layoutNote.setBackground(border);
         }
-
-
 
 
         //Listener to open activity
@@ -531,12 +396,11 @@ public class NoteActivity extends AppCompatActivity {
                 intent.putExtra("activity", "reload");
                 timer.cancel();
                 //Was not shutting intent while a task was operating, was causing errors, this fixes it
-                while(true){
-                    try{
+                while (true) {
+                    try {
                         NoteActivity.this.finishAndRemoveTask();
                         break;
-                    }
-                    catch (Exception e){
+                    } catch (Exception e) {
                         Log.e("hmm", "onOptionsItemSelected: ", e);
                     }
 
@@ -650,7 +514,7 @@ public class NoteActivity extends AppCompatActivity {
                                     line = reader.readLine();
 
 
-                                    if(line.split(" ")[0].equals("highlighted#%^$")){
+                                    if (line.split(" ")[0].equals("highlighted#%^$")) {
                                         keepFillingData = false;
                                         highlighted = Boolean.parseBoolean(line.split(" ")[1]);
                                         continue;
@@ -662,7 +526,6 @@ public class NoteActivity extends AppCompatActivity {
                                         title = line.substring(10, line.length());
                                         continue;
                                     }
-
 
 
                                     //put in the date
@@ -691,87 +554,83 @@ public class NoteActivity extends AppCompatActivity {
                                     }
 
 
-
-
-
-
                                 }
                                 //Remove the last new line character from contents
                                 contents = contents.substring(0, contents.length() - 1);
                                 NoteCell nC = new NoteCell(title, date, contents, noTitle, notesColour, highlighted, NoteActivity.this, layoutAllNotes);
                                 notesDisplayed.add(nC);
                                 nC.createNote();
-                                //addNoteCell(title, date, contents);
+
                             }
 
-                            //Title and image note
-                            if (line.equals("2131296432")) {
+                            //Add image note
+                            if (line.equals("LayoutImageCell")) {
 
-                                String fileLocation = null;
+                                Boolean highlighted = false;
                                 String title = null;
                                 String date = null;
+                                String fileLocation = null;
+                                Boolean noTitle = false;
 
                                 while (!line.equals("Layout end")) {
                                     line = reader.readLine();
+
 
                                     //Get the title
-                                    if (line.split(" ")[0].equals("2131296391")) {
-                                        title = line.replace("2131296391 ", "");
+                                    if (line.split(" ")[0].equals("title#%^$")) {
+                                        title = line.replace("title#%^$ ", "");
+                                        continue;
                                     }
+
 
                                     //Get the date
-                                    if (line.split(" ")[0].equals("2131296258")) {
+                                    if (line.split(" ")[0].equals("date#%^$")) {
                                         date = (line.split(" ")[1] + " " + line.split(" ")[2]);
+                                        continue;
                                     }
+
 
                                     //Get the fileLocation
-                                    if (line.split(" ")[0].equals("2131296399")) {
+                                    if (line.split(" ")[0].equals("filelocation#%^$")) {
                                         fileLocation = line.split(" ")[1];
+                                        continue;
                                     }
-                                }
-                                addImageCell(false, fileLocation, title, date);
-
-                            }
-                            //Image note with no title
-                            if (line.equals("2131296433")) {
-
-                                String fileLocation = null;
-
-                                while (!line.equals("Layout end")) {
-                                    line = reader.readLine();
-                                    //insert the image and set up the buttons
-                                    if (line.split(" ")[0].equals("2131296399")) {
-                                        String linesData = line.split(" ")[1];
-                                        if (!linesData.equals("null")) {
-                                            fileLocation = linesData;
-                                            break;
-                                        }
-
-                                    }
-                                }
-                                addImageCell(true, fileLocation, null, null);
-
-                            }
 
 
-                            //Extra noteBook note
-                            if (line.equals("2131296435")) {
-
-                                while (!line.equals("Layout end")) {
-                                    Log.e("lay", line);
-                                    line = reader.readLine();
-                                    if (line.split(" ")[0].equals("2131296455")) {
-                                        String noteBookName = line.replace("2131296455 ", "");
-
-                                        //insert the noteBook
-                                        addNoteBook(noteBookName);
-
+                                    //get if the note has or hasnt got a title
+                                    if (line.split(" ")[0].equals("noTitle#%^$")) {
+                                        noTitle = Boolean.parseBoolean(line.split(" ")[1]);
+                                        continue;
                                     }
 
 
                                 }
+                                ImageCell iC = new ImageCell(title, date, fileLocation, noTitle, notesColour, highlighted, NoteActivity.this, layoutAllNotes);
+                                notesDisplayed.add(iC);
+                                iC.createNote();
+
 
                             }
+
+
+//                            //Extra noteBook note
+//                            if (line.equals("2131296435")) {
+//
+//                                while (!line.equals("Layout end")) {
+//                                    Log.e("lay", line);
+//                                    line = reader.readLine();
+//                                    if (line.split(" ")[0].equals("2131296455")) {
+//                                        String noteBookName = line.replace("2131296455 ", "");
+//
+//                                        //insert the noteBook
+//                                        addNoteBook(noteBookName);
+//
+//                                    }
+//
+//
+//                                }
+
+//                            }
 
                         }
 
@@ -833,46 +692,18 @@ public class NoteActivity extends AppCompatActivity {
 
             //OutputStreamWriter outputStreamWriter = new OutputStreamWriter(NoteActivity.this.openFileOutput(NOTEBOOK_DIRECTORY +"/" + fileName, NoteActivity.this.MODE_PRIVATE));
 
-            for(Note n : notesDisplayed){
-                bw.write("Layout start" + "\n");
-                bw.write(n.saveNote());
-                //Log.e("yo", n.saveNote());
+            for (Note n : notesDisplayed) {
+                if(!n._deleted) {
+                    bw.write("Layout start" + "\n");
+                    bw.write(n.saveNote());
+                }
 
-//            for (int i = 0; i < itemCount; i++) {
-//                bw.write("Layout start" + "\n");
-//
-//
-//                //      Log.e("save", "Layout start");
-//                if (layoutItems.getChildAt(i) instanceof ConstraintLayout) {
-//                    ConstraintLayout cell = (ConstraintLayout) layoutItems.getChildAt(i);
-//                    //        Log.e("save", Integer.toString(cell.getId()));
-//                    int count = cell.getChildCount();
-//                    for (int j = 0; j < count; j++) {
-//
-//                        ConstraintLayout cellLayout = (ConstraintLayout) cell.getChildAt(j);
-//                        bw.write(Integer.toString(cellLayout.getId()) + "\n");
-//                        Log.e("save", Integer.toString(cellLayout.getId()));
-//                        int count2 = cellLayout.getChildCount();
-//                        View v = null;
-//                        for (int m = 0; m < count2; m++) {
-//                            v = cellLayout.getChildAt(m);
-//                            if (v instanceof TextView || v instanceof EditText) {
-//                                bw.write(Integer.toString(v.getId()) + " " + ((TextView) v).getText() + "\n");
-//                                Log.e("save", Integer.toString(v.getId()) + " " + ((TextView) v).getText());
-//
-//                            }
-//
-//                        }
-//                    }
-//                }
                 bw.write("Layout end" + "\n");
 
-                //    Log.e("save", "Layout wnd");
+
 
             }
             bw.close();
-
-
 
 
         } catch (Exception e) {
@@ -945,50 +776,14 @@ public class NoteActivity extends AppCompatActivity {
 
     ////####################################################################################################################################
     //Copied from https://stackoverflow.com/questions/5991319/capture-image-from-camera-and-display-in-activity
-    private void showPictureDialog() {
-        AlertDialog.Builder pictureDialog = new AlertDialog.Builder(this);
-        pictureDialog.setTitle("Select Action");
-        String[] pictureDialogItems = {"Select photo from gallery", "Capture photo from camera"};
-        pictureDialog.setItems(pictureDialogItems,
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        switch (which) {
-                            case 0:
-                                choosePhotoFromGallery();
-                                break;
-                            case 1:
-                                takePhotoFromCamera();
-                                break;
-                        }
-                    }
-                });
-        pictureDialog.show();
-    }
 
-    public void choosePhotoFromGallery() {
-        Intent galleryIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(galleryIntent, GALLERY);
-    }
-
-    void takePhotoFromCamera() {
-//https://www.semicolonworld.com/question/45696/low-picture-image-quality-when-capture-from-camera
-        ContentValues values = new ContentValues();
-        values.put(MediaStore.Images.Media.TITLE, "New Picture");
-        values.put(MediaStore.Images.Media.DESCRIPTION, "From your Camera");
-        imageUri = getContentResolver().insert(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
-        startActivityForResult(intent, CAMERA);
-
-    }
-
+    //Activity result from the camera called from an image cell object
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == this.RESULT_CANCELED) {
+            cancelAddingImage();
             return;
         }
         if (requestCode == GALLERY) {
@@ -998,7 +793,7 @@ public class NoteActivity extends AppCompatActivity {
                     Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), contentURI);
                     String path = saveImage(bitmap);
                     Toast.makeText(getApplicationContext(), "Image Saved!", Toast.LENGTH_SHORT).show();
-                    displayImage.setImageBitmap(bitmap);
+                    setDisplayImage(path, bitmap);
 
 
                 } catch (IOException e) {
@@ -1008,10 +803,12 @@ public class NoteActivity extends AppCompatActivity {
             }
 
         } else if (requestCode == CAMERA) {
+
             //TODO: make this faster
             //Try here
             //https://stackoverflow.com/questions/32043222/how-to-get-full-size-picture-and-thumbnail-from-camera-in-the-same-intent
-            // Bitmap thumbnailSmall = (Bitmap) data.getExtras().get("data");
+            //Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
+
             Log.e("processing", "processing");
             //loading
 //            ProgressDialog dialog = ProgressDialog.show(this, "",
@@ -1022,10 +819,12 @@ public class NoteActivity extends AppCompatActivity {
                 thumbnail = MediaStore.Images.Media.getBitmap(
                         getContentResolver(), imageUri);
             } catch (IOException e) {
+
                 e.printStackTrace();
             }
 
             Log.e("thumbnail", Integer.toString(thumbnail.getWidth()));
+
 
             Bitmap rotatedBitmap = null;
 
@@ -1043,10 +842,36 @@ public class NoteActivity extends AppCompatActivity {
             }
 
 
-            displayImage.setImageBitmap(rotatedBitmap);
-            saveImage(rotatedBitmap);
+            //displayImage.setImageBitmap(rotatedBitmap);
+            String fileLocation = saveImage(rotatedBitmap);
+            setDisplayImage(fileLocation, rotatedBitmap);
+
+
             Toast.makeText(getApplicationContext(), "Image Saved!", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    //Sets the image in the correct cell
+    public void setDisplayImage(String path, Bitmap image) {
+        for (Note n : notesDisplayed) {
+            if (n instanceof ImageCell) {
+                if (((ImageCell) n).ADDINGIMAGE) {
+                    ((ImageCell) n).setDisplayImage(path, image);
+                }
+            }
+        }
+    }
+
+    //Sets the adding image to false if we are canceling adding an image
+    public void cancelAddingImage() {
+        for (Note n : notesDisplayed) {
+            if (n instanceof ImageCell) {
+                if (((ImageCell) n).ADDINGIMAGE) {
+                    ((ImageCell) n).ADDINGIMAGE = false;
+                }
+            }
+        }
+
     }
 
     public String saveImage(Bitmap myBitmap) {

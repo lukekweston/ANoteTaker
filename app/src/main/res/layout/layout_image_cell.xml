@@ -65,12 +65,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
 
-        <TextView
-            android:id="@+id/fileLocation"
-            android:visibility="invisible"
-            android:text="null"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content" />
+
 
 
 
