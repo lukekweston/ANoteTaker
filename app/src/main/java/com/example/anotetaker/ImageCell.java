@@ -48,6 +48,7 @@ public class ImageCell extends Note {
         _noTitle = noTitle;
         _borderColor = borderColor;
         _highlighted = highlighted;
+        Log.e("highlighted", _highlighted + "");
         _c = c;
         _layoutAllNotes = layoutAllNotes;
 
@@ -86,6 +87,8 @@ public class ImageCell extends Note {
 
         _layoutNoteBeingAdded = _noTitle ? ImageCellNoTitle() : imageTitle();
 
+
+        setBorder();
 
         Button menuButton = _layoutNoteBeingAdded.findViewById(R.id.buttonMenu);
 

@@ -12,23 +12,19 @@ makes code spagehtti for adding an image
 package com.example.anotetaker;
 
 import android.annotation.SuppressLint;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
-import android.media.Image;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.provider.Settings;
 import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -36,8 +32,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewTreeObserver;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -55,7 +49,6 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Random;
@@ -73,7 +66,7 @@ public class NoteActivity extends AppCompatActivity {
 
     ImageButton buttonAdd;
     ScrollView scrollView;
-    LinearLayout layout, layoutAllNotes;
+    public LinearLayout layout, layoutAllNotes;
 
     //border used in all layouts
     GradientDrawable border;
@@ -94,6 +87,7 @@ public class NoteActivity extends AppCompatActivity {
     public ArrayList<Note> notesDisplayed = new ArrayList<Note>();
 
     Timer timer;
+    TimerTask autoSaveEvent;
 
 
     public String lastImageAddedLocation = "null";
@@ -154,18 +148,30 @@ public class NoteActivity extends AppCompatActivity {
 
 //        Todo make this listener work better
         timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() {
+        int delay = 0;
+        int period = 2000;
+        autoSaveEvent = new TimerTask() {
             @Override
             public void run() {
                 saveItems(layoutAllNotes);
             }
-        }, 0, 2000);
-
+        };
+        timer.scheduleAtFixedRate(autoSaveEvent, delay, period);
 
         buttonAdd.setOnClickListener(listener);
 
 
     }
+
+    public void removeAutoSave(){
+        timer.cancel();
+    }
+
+    public void onPause(){
+        removeAutoSave();
+        super.onPause();
+    }
+
 
     private void selectNoteTypeDialog() {
         AlertDialog.Builder pictureDialog = new AlertDialog.Builder(this);
@@ -215,7 +221,14 @@ public class NoteActivity extends AppCompatActivity {
                                 builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
 
-                                        addNoteBook(currentFolder + "/" + input.getText().toString().replace("/", "-"));
+
+                                        //addNoteBook(currentFolder + "/" + input.getText().toString().replace("/", "-"));
+                                        NewNoteBookCell nNNB = new NewNoteBookCell(currentFolder + "/" + input.getText().toString().replace("/", "-"), NoteActivity.this, layoutAllNotes);
+                                        notesDisplayed.add(nNNB);
+                                        nNNB.createNote();
+
+
+
 
                                     }
                                 });
@@ -238,75 +251,6 @@ public class NoteActivity extends AppCompatActivity {
     }
 
 
-    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-
-    private void addNoteBook(String noteBookFile) {
-
-        final View noteBookBeingAdded = LayoutInflater.from(NoteActivity.this).inflate(R.layout.activity_open_note_cell, layoutAllNotes, false);
-        final TextView noteBookName = noteBookBeingAdded.findViewById(R.id.noteNametextView);
-        noteBookName.setText(noteBookFile);
-
-        ImageButton openButton = noteBookBeingAdded.findViewById(R.id.openNoteImageButton);
-
-        int noteBookColor = -1;
-        //get the color of the notebook
-        try {
-            BufferedReader reader;
-            File file = new File(NOTEBOOK_DIRECTORY + "/" + noteBookFile + ".txt");
-            if (file.exists()) {
-                reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
-                String line = reader.readLine();
-                while (line != null) {
-                    if (line.split(" ")[0].equals("color")) {
-                        noteBookColor = Integer.parseInt(line.split(" ")[1]);
-                        break;
-                    }
-                }
-            }
-        } catch (Exception e) {
-            Log.e("io exception", e.toString());
-
-        }
-
-
-        if (noteBookColor != -1) {
-            openButton.setColorFilter(noteBookColor);
-            openButton.setBackgroundColor(0x000000);
-            //Create border
-            GradientDrawable border = new GradientDrawable();
-            border.setColor(0xFFFFFFFF);
-            border.setStroke(10, noteBookColor);
-            ConstraintLayout layoutNote = noteBookBeingAdded.findViewById(R.id.layoutOpenNoteCell);
-            layoutNote.setBackground(border);
-        }
-
-
-        //Listener to open activity
-        View.OnClickListener openNotebook = new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                saveItems(layoutAllNotes);
-                SharedPreferences mPrefs = getSharedPreferences("NotebookNameValue", 0);
-                SharedPreferences.Editor editor = mPrefs.edit();
-                editor.putString(getString(R.string.curWorkingFolder), (String) noteBookName.getText());
-                editor.commit();
-                startActivity(new Intent(NoteActivity.this, NoteActivity.class));
-
-            }
-
-        };
-
-        openButton.setOnClickListener(openNotebook);
-        noteBookName.setOnClickListener(openNotebook);
-
-        layoutAllNotes.addView(noteBookBeingAdded);
-        saveItems(layoutAllNotes);
-
-
-    }
-
-    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     @Override
     protected void onDestroy() {
         //saveItems(layoutItems);
@@ -330,7 +274,7 @@ public class NoteActivity extends AppCompatActivity {
 
             //Check if the back button has been pressed
             case android.R.id.home:
-                goBacktoPreviousLayout();
+                goBacktoPreviousLayout(false);
                 return true;
 
 
@@ -589,6 +533,12 @@ public class NoteActivity extends AppCompatActivity {
                                         continue;
                                     }
 
+                                    //get if its highlighted
+                                    if (line.split(" ")[0].equals("highlighted#%^$")) {
+                                        highlighted = Boolean.parseBoolean(line.split(" ")[1]);
+                                        continue;
+                                    }
+
 
                                     //Get the fileLocation
                                     if (line.split(" ")[0].equals("filelocation#%^$")) {
@@ -613,24 +563,29 @@ public class NoteActivity extends AppCompatActivity {
                             }
 
 
-//                            //Extra noteBook note
-//                            if (line.equals("2131296435")) {
-//
-//                                while (!line.equals("Layout end")) {
-//                                    Log.e("lay", line);
-//                                    line = reader.readLine();
-//                                    if (line.split(" ")[0].equals("2131296455")) {
-//                                        String noteBookName = line.replace("2131296455 ", "");
-//
-//                                        //insert the noteBook
-//                                        addNoteBook(noteBookName);
-//
-//                                    }
-//
-//
-//                                }
+                            //Extra noteBook note
+                            if (line.equals("LayoutNewNoteBookCell")) {
 
-//                            }
+
+                                String noteBookName = null;
+
+                                while (!line.equals("Layout end")) {
+                                    line = reader.readLine();
+
+                                    if (line.split(" ")[0].equals("filename#%^$")) {
+                                        noteBookName = line.replace("filename#%^$ ", "");
+                                    }
+
+
+                                }
+                                //insert the noteBook if it has not been deleted
+                                if(!noteBookName.equals("!@#$deleted$#@!")) {
+                                    NewNoteBookCell nNBC = new NewNoteBookCell(noteBookName, NoteActivity.this, layoutAllNotes);
+                                    notesDisplayed.add(nNBC);
+                                    nNBC.createNote();
+                                }
+
+                            }
 
                         }
 
@@ -716,18 +671,83 @@ public class NoteActivity extends AppCompatActivity {
 
     //Deletes current notebook and sub notebooks
     public void deleteNoteBook() {
-        Log.e("delete", NOTEBOOK_DIRECTORY + "/" + currentFolder);
-        //Delete sub notebooks
-        File dir = new File(NOTEBOOK_DIRECTORY + "/" + currentFolder);
-        if (dir.exists() && dir.isDirectory()) {
-            deleteFilesInDir(dir);
-        }
-        //Delete current notebook file
-        File currentNoteBook = new File(NOTEBOOK_DIRECTORY + "/" + currentFolder + ".txt");
-        currentNoteBook.delete();
+        try {
+            Log.e("delete", NOTEBOOK_DIRECTORY + "/" + currentFolder);
+            //Delete sub notebooks
+            File dir = new File(NOTEBOOK_DIRECTORY + "/" + currentFolder);
+            if (dir.exists() && dir.isDirectory()) {
+                deleteFilesInDir(dir);
+            }
+            //Delete current notebook file
+            File currentNoteBook = new File(NOTEBOOK_DIRECTORY + "/" + currentFolder + ".txt");
+            Log.e("gi", currentNoteBook.toString());
 
-        //Call back button to return to the layout above this
-        goBacktoPreviousLayout();
+            currentNoteBook.delete();
+            if (currentFolder.contains("/")) {
+                removeLinkToSelfFromPreviousLayout();
+            }
+
+            //Call back button to return to the layout above this
+            goBacktoPreviousLayout(true);
+        }
+        catch (Exception e){
+
+        }
+
+
+    }
+
+    //Removes the link from the previous layout by renaming the filnename in the newnotebookcell to !@#$deleted$#@!
+    public void removeLinkToSelfFromPreviousLayout(){
+        Log.e("previous", currentFolder);
+        String previousFolder = NOTEBOOK_DIRECTORY + "/" + currentFolder.substring(0, currentFolder.lastIndexOf("/")) + ".txt";
+        String newFile = "";
+        //Load and change the file
+        try {
+            FileInputStream is;
+            BufferedReader reader;
+            final File file = new File(previousFolder);
+            if (file.exists()) {
+                is = new FileInputStream(file);
+                reader = new BufferedReader(new InputStreamReader(is));
+                String line = reader.readLine();
+                while (line != null) {
+                    Log.e("line", line);
+                    newFile += line + "\n";
+                    if(line.equals("LayoutNewNoteBookCell")){
+                        while(!line.equals("Layout end")){
+                            line = reader.readLine();
+                            Log.e("hmm", line);
+                            if(line.split(" ")[0].equals("filename#%^$") && line.split(" ")[1].equals(currentFolder)){
+
+                                Log.e(currentFolder, line.split(" ")[1]);
+                                newFile += "filename#%^$" + " !@#$deleted$#@!" +"\n";
+
+                            }
+                            else {
+                                newFile += line + "\n";
+                            }
+                        }
+                        newFile += line + "\n";
+                    }
+                    line = reader.readLine();
+                }
+                is.close();
+            }
+
+        }catch (Exception e){
+
+        }
+        //Save the file
+        try{
+            BufferedWriter bw = new BufferedWriter(new FileWriter(previousFolder));
+            bw.write(newFile);
+            bw.close();
+
+        }catch (Exception e){
+
+        }
+
 
     }
 
@@ -750,9 +770,17 @@ public class NoteActivity extends AppCompatActivity {
 
     }
 
-    public void goBacktoPreviousLayout() {
-        if (currentFolder.contains("/")) {
+    public void goBacktoPreviousLayout(Boolean deleting) {
+
+        //Remove the auto save and save the layout
+        removeAutoSave();
+        //If not deleting save the layout
+        if(!deleting) {
             saveItems(layoutAllNotes);
+        }
+
+        if (currentFolder.contains("/")) {
+
             //Split out the last notebook in the chain
             String previousFolder = currentFolder.substring(0, currentFolder.lastIndexOf("/"));
             //pass the new working notebook folder into memory
@@ -765,6 +793,8 @@ public class NoteActivity extends AppCompatActivity {
             //Store animation direction so it can be set in the next activity
             intent.putExtra("activity", "right");
             startActivity(intent);
+            this.finishAndRemoveTask();
+
 
 
             return;

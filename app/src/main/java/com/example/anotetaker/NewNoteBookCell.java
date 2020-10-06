@@ -1,0 +1,108 @@
+package com.example.anotetaker;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.drawable.GradientDrawable;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+
+
+
+public class NewNoteBookCell extends Note {
+
+
+    private static final String NOTEBOOK_DIRECTORY = "/data/data/com.example.anotetaker/files/notebooks";
+    String _noteBookFile = null;
+
+    public NewNoteBookCell(String noteBookFile, Context c, LinearLayout layoutAllNotes){
+        _noteBookFile = noteBookFile;
+        //Initially creating, border set to -1 (black)
+        _borderColor = -1;
+        _c = c;
+        _layoutAllNotes = layoutAllNotes;
+    }
+
+
+    @Override
+    public void createNote() {
+        _layoutNoteBeingAdded = LayoutInflater.from(_c).inflate(R.layout.activity_open_note_cell, _layoutAllNotes, false);
+        final TextView noteBookName = _layoutNoteBeingAdded.findViewById(R.id.noteNametextView);
+        noteBookName.setText(_noteBookFile);
+
+        ImageButton openButton = _layoutNoteBeingAdded.findViewById(R.id.openNoteImageButton);
+
+
+        //get the color of the notebook if it already exists
+        try {
+            BufferedReader reader;
+            File file = new File(NOTEBOOK_DIRECTORY + "/" + _noteBookFile + ".txt");
+            if (file.exists()) {
+                reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+                String line = reader.readLine();
+                while (line != null) {
+                    if (line.split(" ")[0].equals("color")) {
+                        _borderColor = Integer.parseInt(line.split(" ")[1]);
+                        break;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.e("io exception", e.toString());
+
+        }
+
+        //setup views for border
+        _borderViews = new View[]{_layoutNoteBeingAdded.findViewById(R.id.layoutOpenNoteCell), openButton};
+
+        //Set up the border
+        setBorder();
+
+
+
+        //Listener to open activity
+        View.OnClickListener openNotebook = new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ((NoteActivity)_c).saveItems(((NoteActivity)_c).layoutAllNotes);
+                SharedPreferences mPrefs = _c.getSharedPreferences("NotebookNameValue", 0);
+                SharedPreferences.Editor editor = mPrefs.edit();
+                editor.putString(_c.getString(R.string.curWorkingFolder), (String) noteBookName.getText());
+                editor.commit();
+                ((NoteActivity) _c).finishAndRemoveTask();
+                ((NoteActivity) _c).removeAutoSave();
+                _c.startActivity(new Intent(_c, NoteActivity.class));
+
+            }
+
+        };
+
+        openButton.setOnClickListener(openNotebook);
+        noteBookName.setOnClickListener(openNotebook);
+
+        _layoutAllNotes.addView(_layoutNoteBeingAdded);
+
+
+
+    }
+
+    //#%^$ added to the end of string so user will unlikely put in a string == to this and mess up the loading
+    @Override
+    public String saveNote() {
+        String file = "LayoutNewNoteBookCell\n";
+        file += "borderColor#%^$ " + Integer.toString(_borderColor) + "\n";
+        file += "filename#%^$ " + _noteBookFile +"\n";
+        return file;
+    }
+
+}

@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
 import androidx.annotation.RequiresApi;
@@ -26,10 +27,12 @@ public abstract class Note {
     LinearLayout _layoutAllNotes;
     View _layoutNoteBeingAdded;
 
-    //Creates a string containing all of the notes data
-    public abstract String saveNote();
+
     //Creates the cell
     public abstract void createNote();
+    //Creates a string containing all of the notes data
+    public abstract String saveNote();
+
 
 
     //Creates and sets a border around the note
@@ -44,7 +47,12 @@ public abstract class Note {
                 border.setStroke(10, _borderColor);
             }
             for(View v: _borderViews){
-                v.setBackground(border);
+                if(v instanceof ImageButton){
+                    ((ImageButton)v).setColorFilter(_borderColor);
+                }
+                else {
+                    v.setBackground(border);
+                }
             }
 
         }
