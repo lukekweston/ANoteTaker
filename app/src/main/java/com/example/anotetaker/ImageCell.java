@@ -27,7 +27,6 @@ import androidx.annotation.RequiresApi;
 public class ImageCell extends Note {
 
     String _fileLocation = null;
-    String _title = null;
     String _date = null;
     boolean _noTitle = true;
 
@@ -195,8 +194,14 @@ public class ImageCell extends Note {
         return file;
     }
 
-
-
-
-
+    @Override
+    public String getReminderTitle() {
+        _title = ((EditText) _layoutNoteBeingAdded.findViewById(R.id.editTextTitle)).getText().toString();
+        if(!_title.equals("Title") && !_title.equals(null)){
+            return _title;
+        }
+        else{
+            return "Reminder for image";
+        }
+    }
 }

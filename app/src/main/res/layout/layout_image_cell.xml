@@ -18,7 +18,7 @@
 
 
 
-        <Button
+        <ImageButton
             android:id="@+id/buttonMenu"
             android:layout_width="31dp"
             android:layout_height="52dp"

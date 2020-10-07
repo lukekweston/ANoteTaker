@@ -11,6 +11,8 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
+import java.util.Calendar;
+
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 
@@ -22,6 +24,7 @@ public abstract class Note {
     public View[] _borderViews = null;
     //Boolean variable to check if the note has been deleted
     public boolean _deleted = false;
+    public String _title = null;
 
     Context _c;
     LinearLayout _layoutAllNotes;
@@ -32,6 +35,8 @@ public abstract class Note {
     public abstract void createNote();
     //Creates a string containing all of the notes data
     public abstract String saveNote();
+    //Gets the title that should be used for a reminder for a specific note
+    public abstract String getReminderTitle();
 
 
 
@@ -82,6 +87,21 @@ public abstract class Note {
                             switch (which) {
                                 //Reminder
                                 case 0:
+                                    Calendar cal = Calendar.getInstance();
+                                    Intent intent = new Intent(Intent.ACTION_EDIT);
+                                    intent.setType("vnd.android.cursor.item/event");
+                                    intent.putExtra("beginTime", cal.getTimeInMillis());
+                                    intent.putExtra("allDay", false);
+                                    intent.putExtra("rrule", "FREQ=DAILY");
+                                    intent.putExtra("endTime", cal.getTimeInMillis()+60*60*1000);
+                                    if(_title != null){
+                                        intent.putExtra("title", getReminderTitle());
+                                    }
+                                    else{
+                                        intent.putExtra("title", "Reminder for note");
+                                    }
+
+                                    ((Activity)_c).startActivity(intent);
                                     break;
                                 //Highlight note
                                 case 1:

@@ -105,4 +105,9 @@ public class NewNoteBookCell extends Note {
         return file;
     }
 
+    //Won't ever be used
+    @Override
+    public String getReminderTitle() {
+        return null;
+    }
 }

@@ -21,7 +21,6 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 public class NoteCell extends Note{
 
 
-    public String _title;
     public String _date;
     public String _contents;
     public boolean _noTitle;
@@ -121,6 +120,23 @@ public class NoteCell extends Note{
 
         return file;
     }
+
+    public String getReminderTitle(){
+        _title = ((EditText) _layoutNoteBeingAdded.findViewById(R.id.editTextTitle)).getText().toString();
+        _contents = ((TextView)_layoutNoteBeingAdded.findViewById(R.id.editTextTextMultiLine)).getText().toString();
+        if(!_title.equals("Title")){
+            return _title;
+        }
+        if(!_contents.equals("") && !_contents.equals(null)){
+            //Just get the first line
+            return _contents.split("\n")[0];
+        }
+        else {
+            return "Reminder for note";
+        }
+
+    }
+
 
 
 }
