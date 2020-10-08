@@ -24,7 +24,6 @@ public class NoteCell extends Note{
 
     public String _date;
     public String _contents;
-    public boolean _noTitle;
 
 
 
@@ -58,7 +57,7 @@ public class NoteCell extends Note{
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public void createNote() {
+    public void createNote(Integer index) {
 
         if(_noTitle){
             _layoutNoteBeingAdded = createNoteCellNoTitle();
@@ -101,7 +100,12 @@ public class NoteCell extends Note{
         setBorder();
 
 
-        _layoutAllNotes.addView(_layoutNoteBeingAdded);
+        if(index == null) {
+            _layoutAllNotes.addView(_layoutNoteBeingAdded);
+        }
+        else {
+            _layoutAllNotes.addView(_layoutNoteBeingAdded, index);
+        }
 
     }
 
@@ -136,8 +140,10 @@ public class NoteCell extends Note{
 
     }
 
-
-
+    @Override
+    public String getTitle() {
+        return ((EditText) _layoutNoteBeingAdded.findViewById(R.id.editTextTitle)).getText().toString();
+    }
 }
 
 

@@ -29,7 +29,6 @@ public class ImageCell extends Note {
 
     String _fileLocation = null;
     String _date = null;
-    boolean _noTitle = true;
 
 
     public boolean ADDINGIMAGE = false;
@@ -81,7 +80,8 @@ public class ImageCell extends Note {
 
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public void createNote() {
+    public void createNote(Integer index) {
+        Log.e("dd",_noTitle + "");
 
         _layoutNoteBeingAdded = _noTitle ? ImageCellNoTitle() : imageTitle();
 
@@ -99,7 +99,6 @@ public class ImageCell extends Note {
 
         if (_fileLocation != null) {
             File imgFile = new File(_fileLocation);
-
 
 
             if (imgFile.exists()) {
@@ -133,12 +132,11 @@ public class ImageCell extends Note {
         //First time creating so get current date time
         if (_date == null) {
             _date = LocalDateTime.now().toLocalDate() + " " + LocalDateTime.now().toLocalTime().toString().split(":")[0] + ":" + LocalDateTime.now().toLocalTime().toString().split(":")[1];
-
         }
 
 
         //Creating with title
-        if (!_noTitle && _title != null) {
+        if (! _noTitle) {
 
             TextView dateTimeCreated = _layoutNoteBeingAdded.findViewById(R.id.DateTimeCreated);
             dateTimeCreated.setText(_date);
@@ -153,7 +151,12 @@ public class ImageCell extends Note {
         menuButton.setOnClickListener(menuListener);
 
 
-        _layoutAllNotes.addView(_layoutNoteBeingAdded);
+        if(index == null) {
+            _layoutAllNotes.addView(_layoutNoteBeingAdded);
+        }
+        else {
+            _layoutAllNotes.addView(_layoutNoteBeingAdded, index);
+        }
 
 
     }
@@ -204,5 +207,10 @@ public class ImageCell extends Note {
         else{
             return "Reminder for image";
         }
+    }
+
+    @Override
+    public String getTitle() {
+        return ((EditText)_layoutNoteBeingAdded.findViewById(R.id.editTextTitle)).getText().toString();
     }
 }

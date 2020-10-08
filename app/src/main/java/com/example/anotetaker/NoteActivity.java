@@ -186,24 +186,24 @@ public class NoteActivity extends AppCompatActivity {
                             case 0:
                                 NoteCell nC = new NoteCell(null, null, null, true, notesColour, false, NoteActivity.this, layoutAllNotes);
                                 notesDisplayed.add(nC);
-                                nC.createNote();
+                                nC.createNote(null);
                                 break;
                             case 1:
                                 nC = new NoteCell(null, null, null, false, notesColour, false, NoteActivity.this, layoutAllNotes);
                                 notesDisplayed.add(nC);
-                                nC.createNote();
+                                nC.createNote(null);
                                 //addNoteCell(null, null, null);
                                 break;
                             case 2:
                                 ImageCell iC = new ImageCell(null, null, null, true, notesColour, false, NoteActivity.this, layoutAllNotes);
                                 notesDisplayed.add(iC);
-                                iC.createNote();
+                                iC.createNote(null);
 
                                 break;
                             case 3:
                                 iC = new ImageCell(null, null, null, false, notesColour, false, NoteActivity.this, layoutAllNotes);
                                 notesDisplayed.add(iC);
-                                iC.createNote();
+                                iC.createNote(null);
                                 break;
                             case 4:
                                 //TODO: make this pop up better
@@ -225,7 +225,7 @@ public class NoteActivity extends AppCompatActivity {
                                         //addNoteBook(currentFolder + "/" + input.getText().toString().replace("/", "-"));
                                         NewNoteBookCell nNNB = new NewNoteBookCell(currentFolder + "/" + input.getText().toString().replace("/", "-"), NoteActivity.this, layoutAllNotes);
                                         notesDisplayed.add(nNNB);
-                                        nNNB.createNote();
+                                        nNNB.createNote(null);
 
 
 
@@ -503,7 +503,7 @@ public class NoteActivity extends AppCompatActivity {
                                 contents = contents.substring(0, contents.length() - 1);
                                 NoteCell nC = new NoteCell(title, date, contents, noTitle, notesColour, highlighted, NoteActivity.this, layoutAllNotes);
                                 notesDisplayed.add(nC);
-                                nC.createNote();
+                                nC.createNote(null);
 
                             }
 
@@ -557,7 +557,7 @@ public class NoteActivity extends AppCompatActivity {
                                 }
                                 ImageCell iC = new ImageCell(title, date, fileLocation, noTitle, notesColour, highlighted, NoteActivity.this, layoutAllNotes);
                                 notesDisplayed.add(iC);
-                                iC.createNote();
+                                iC.createNote(null);
 
 
                             }
@@ -582,7 +582,7 @@ public class NoteActivity extends AppCompatActivity {
                                 if(!noteBookName.equals("!@#$deleted$#@!")) {
                                     NewNoteBookCell nNBC = new NewNoteBookCell(noteBookName, NoteActivity.this, layoutAllNotes);
                                     notesDisplayed.add(nNBC);
-                                    nNBC.createNote();
+                                    nNBC.createNote(null);
                                 }
 
                             }

@@ -35,7 +35,7 @@ public class NewNoteBookCell extends Note {
 
 
     @Override
-    public void createNote() {
+    public void createNote(Integer index) {
         _layoutNoteBeingAdded = LayoutInflater.from(_c).inflate(R.layout.activity_open_note_cell, _layoutAllNotes, false);
         final TextView noteBookName = _layoutNoteBeingAdded.findViewById(R.id.noteNametextView);
         noteBookName.setText(_noteBookFile);
@@ -97,8 +97,12 @@ public class NewNoteBookCell extends Note {
         openButton.setOnClickListener(openNotebook);
         noteBookName.setOnClickListener(openNotebook);
 
-        _layoutAllNotes.addView(_layoutNoteBeingAdded);
-
+        if(index == null) {
+            _layoutAllNotes.addView(_layoutNoteBeingAdded);
+        }
+        else {
+            _layoutAllNotes.addView(_layoutNoteBeingAdded, index);
+        }
 
 
     }
@@ -115,6 +119,10 @@ public class NewNoteBookCell extends Note {
     //Won't ever be used
     @Override
     public String getReminderTitle() {
+        return null;
+    }
+
+    public String getTitle(){
         return null;
     }
 }

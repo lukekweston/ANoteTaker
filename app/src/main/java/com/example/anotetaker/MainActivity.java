@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int id) {
 
 
-                        new NewNoteBookCell(input.getText().toString().replace("/","-"), MainActivity.this, layoutItems).createNote();
+                        new NewNoteBookCell(input.getText().toString().replace("/","-"), MainActivity.this, layoutItems).createNote(null);
 
                     }
                 });
@@ -167,8 +167,8 @@ public class MainActivity extends AppCompatActivity {
 
 
         for (String nb : notebooks) {
-            
-            new NewNoteBookCell(nb, MainActivity.this, layoutItems).createNote();
+
+            new NewNoteBookCell(nb, MainActivity.this, layoutItems).createNote(null);
         }
 
 

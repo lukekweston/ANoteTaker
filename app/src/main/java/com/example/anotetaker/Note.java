@@ -7,7 +7,9 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
+import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
@@ -25,6 +27,7 @@ public abstract class Note {
     //Boolean variable to check if the note has been deleted
     public boolean _deleted = false;
     public String _title = null;
+    public boolean _noTitle = false;
 
     Context _c;
     LinearLayout _layoutAllNotes;
@@ -32,11 +35,15 @@ public abstract class Note {
 
 
     //Creates the cell
-    public abstract void createNote();
+    //Index for if the note is being inserted
+    public abstract void createNote(Integer index);
     //Creates a string containing all of the notes data
     public abstract String saveNote();
     //Gets the title that should be used for a reminder for a specific note
     public abstract String getReminderTitle();
+
+    //Gets the current title
+    public abstract String getTitle();
 
 
 
@@ -81,9 +88,12 @@ public abstract class Note {
             AlertDialog.Builder pictureDialog = new AlertDialog.Builder(_c);
             pictureDialog.setTitle("Select Note to add");
             //"Move note up", "Move note down"
-            String[] pictureDialogItems = {"Set reminder", "Highlight note", "Duplicate note", "Delete note"};
+            String[] pictureDialogItems = {"Set reminder", "Highlight note", "Add title", "Delete note"};
             if(_highlighted){
-                pictureDialogItems[1] = "Unhighlight Note";
+                pictureDialogItems[1] = "Unhighlight note";
+            }
+            if(!_noTitle){
+                pictureDialogItems[2] = "Remove title";
             }
             pictureDialog.setItems(pictureDialogItems,
                     new DialogInterface.OnClickListener() {
@@ -156,6 +166,21 @@ public abstract class Note {
 //                                    break;
                                 //duplicate note
                                 case 2:
+                                    //Get and save the previous title if there was one
+                                    if(!_noTitle){
+                                        _title = getTitle();
+                                    }
+                                    //Change title status
+                                    _noTitle = !_noTitle;
+                                    int i;
+                                    for(i =0; i < _layoutAllNotes.getChildCount(); i++){
+                                        if(_layoutAllNotes.getChildAt(i) == _layoutNoteBeingAdded){
+                                            Log.e("int i = ", Integer.toString(i));
+                                            break;
+                                        }
+                                    }
+                                    _layoutAllNotes.removeView(_layoutNoteBeingAdded);
+                                    createNote(i);
                                     break;
 
                                 //Delete note
