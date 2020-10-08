@@ -91,7 +91,8 @@ public class MainActivity extends AppCompatActivity {
                 builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
 
-                        createNoteBookEntry(input.getText().toString().replace("/","-"));
+
+                        new NewNoteBookCell(input.getText().toString().replace("/","-"), MainActivity.this, layoutItems).createNote();
 
                     }
                 });
@@ -160,18 +161,16 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i < files.length; i++)
         {
             if(files[i].getName().endsWith(".txt")) {
-                notebooks.add(files[i].getName());
+                notebooks.add(files[i].getName().split(".txt")[0]);
             }
         }
 
-       // simpleList = (ListView)findViewById(R.id.list);
 
         for (String nb : notebooks) {
-
-            new NewNoteBookCell(nb.split(".txt")[0], MainActivity.this, layoutItems).createNote();
-
+            
+            new NewNoteBookCell(nb, MainActivity.this, layoutItems).createNote();
         }
-        
+
 
     }
 
