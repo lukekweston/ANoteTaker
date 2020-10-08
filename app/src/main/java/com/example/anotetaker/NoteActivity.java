@@ -824,6 +824,7 @@ public class NoteActivity extends AppCompatActivity {
                     String path = saveImage(bitmap);
                     Toast.makeText(getApplicationContext(), "Image Saved!", Toast.LENGTH_SHORT).show();
                     setDisplayImage(path, bitmap);
+                    saveItems(layoutAllNotes);
 
 
                 } catch (IOException e) {
@@ -875,7 +876,7 @@ public class NoteActivity extends AppCompatActivity {
             //displayImage.setImageBitmap(rotatedBitmap);
             String fileLocation = saveImage(rotatedBitmap);
             setDisplayImage(fileLocation, rotatedBitmap);
-
+            saveItems(layoutAllNotes);
 
             Toast.makeText(getApplicationContext(), "Image Saved!", Toast.LENGTH_SHORT).show();
         }
@@ -906,9 +907,7 @@ public class NoteActivity extends AppCompatActivity {
 
     public String saveImage(Bitmap myBitmap) {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        Log.e("ds", Integer.toString(myBitmap.getWidth()));
         myBitmap.compress(Bitmap.CompressFormat.PNG, 100, bytes);
-        Log.e("ds", Integer.toString(myBitmap.getWidth()));
 
 
         //File wallpaperDirectory = new File(Environment.getExternalStorageDirectory() + IMAGE_DIRECTORY);

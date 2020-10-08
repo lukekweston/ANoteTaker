@@ -53,10 +53,16 @@ public abstract class Note {
             }
             for(View v: _borderViews){
                 if(v instanceof ImageButton){
-                    ((ImageButton)v).setColorFilter(_borderColor);
+                    if(_highlighted){
+                        ((ImageButton)v).setColorFilter(Color.parseColor("#FFFF00"));
+                    }
+                    else {
+                        ((ImageButton) v).setColorFilter(_borderColor);
+                    }
                 }
+
                 else {
-                    v.setBackground(border);
+                   v.setBackground(border);
                 }
             }
 

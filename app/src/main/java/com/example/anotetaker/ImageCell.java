@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -57,13 +58,13 @@ public class ImageCell extends Note {
 
     public View ImageCellNoTitle() {
         View layoutBeingAdded = LayoutInflater.from(_c).inflate(R.layout.layout_image_cell, _layoutAllNotes, false);
-        _borderViews = new View[]{layoutBeingAdded.findViewById(R.id.layoutImageCellNoTitle), layoutBeingAdded.findViewById(R.id.imageView)};
+        _borderViews = new View[]{layoutBeingAdded.findViewById(R.id.layoutImageCellNoTitle), layoutBeingAdded.findViewById(R.id.imageView), layoutBeingAdded.findViewById(R.id.menuButton)};
         return layoutBeingAdded;
     }
 
     public View imageTitle() {
         View layoutBeingAdded = LayoutInflater.from(_c).inflate(R.layout.layout_image_cell_title, _layoutAllNotes, false);
-        _borderViews = new View[]{layoutBeingAdded.findViewById(R.id.layoutImageCell), layoutBeingAdded.findViewById(R.id.imageView)};
+        _borderViews = new View[]{layoutBeingAdded.findViewById(R.id.layoutImageCell), layoutBeingAdded.findViewById(R.id.imageView), layoutBeingAdded.findViewById(R.id.menuButton)};
         return layoutBeingAdded;
     }
 
@@ -71,10 +72,8 @@ public class ImageCell extends Note {
     public void setDisplayImage(String filelocation, Bitmap image) {
         displayImage.setImageBitmap(image);
         _fileLocation = filelocation;
-
         addImageFromCamera.setVisibility(View.INVISIBLE);
         addImageFromFile.setVisibility(View.INVISIBLE);
-
         ADDINGIMAGE = false;
 
 
@@ -89,7 +88,8 @@ public class ImageCell extends Note {
 
         setBorder();
 
-        Button menuButton = _layoutNoteBeingAdded.findViewById(R.id.buttonMenu);
+        ImageButton menuButton = _layoutNoteBeingAdded.findViewById(R.id.menuButton);
+        menuButton.setClickable(true);
 
         addImageFromFile = _layoutNoteBeingAdded.findViewById(R.id.buttonImageFromFile);
         addImageFromCamera = _layoutNoteBeingAdded.findViewById(R.id.buttonImageFromCamera);
@@ -151,6 +151,7 @@ public class ImageCell extends Note {
 
 
         menuButton.setOnClickListener(menuListener);
+
 
         _layoutAllNotes.addView(_layoutNoteBeingAdded);
 

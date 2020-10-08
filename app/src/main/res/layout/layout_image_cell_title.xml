@@ -18,15 +18,18 @@
 
 
 
-        <Button
-            android:id="@+id/buttonMenu"
+        <ImageButton
+            android:id="@+id/menuButton"
             android:layout_width="31dp"
             android:layout_height="52dp"
             android:layout_marginStart="372dp"
             android:layout_marginTop="4dp"
-            android:text="X"
+            android:background="@android:color/transparent"
+            android:elevation="2dp"
+            android:src="@drawable/optionsmenu"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            style="?android:attr/borderlessButtonStyle"/>
 
         <EditText
             android:id="@+id/editTextTitle"

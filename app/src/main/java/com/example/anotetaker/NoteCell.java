@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -90,16 +91,14 @@ public class NoteCell extends Note{
 
         final ConstraintLayout note = _layoutNoteBeingAdded.findViewById(R.id.layoutTextCell);
 
+        ImageButton menuButton = _layoutNoteBeingAdded.findViewById(R.id.menuButton);
+        menuButton.setOnClickListener(menuListener);
+
         //setup views for border
-        _borderViews = new View[]{note, contentsOnNote};
+        _borderViews = new View[]{note, contentsOnNote, menuButton};
 
         //Set up the border
         setBorder();
-
-
-        Button menuButton = _layoutNoteBeingAdded.findViewById(R.id.buttonMenu);
-        menuButton.setOnClickListener(menuListener);
-
 
 
         _layoutAllNotes.addView(_layoutNoteBeingAdded);
