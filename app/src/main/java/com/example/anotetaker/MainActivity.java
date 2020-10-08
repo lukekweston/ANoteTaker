@@ -168,84 +168,12 @@ public class MainActivity extends AppCompatActivity {
 
         for (String nb : notebooks) {
 
-            createNoteBookEntry(nb);
+            new NewNoteBookCell(nb.split(".txt")[0], MainActivity.this, layoutItems).createNote();
+
         }
-
-
-
+        
 
     }
-
-    public void createNoteBookEntry(String noteBookFile){
-
-            final View noteBookBeingAdded = LayoutInflater.from(MainActivity.this).inflate(R.layout.activity_open_note_cell, layoutItems, false);
-            final TextView noteBookName = noteBookBeingAdded.findViewById(R.id.noteNametextView);
-
-            int noteBookColor = -1;
-            //get the color of the notebook
-            try {
-                BufferedReader reader;
-                File file = new File(NOTEBOOK_DIRECTORY +"/" + noteBookFile);
-                if (file.exists()) {
-                    reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
-                    String line = reader.readLine();
-                    while (line != null) {
-                        if (line.split(" ")[0].equals("color")){
-                            noteBookColor = Integer.parseInt(line.split(" ")[1]);
-                            break;
-                        }
-                    }
-                }
-                    }catch (Exception e){
-                Log.e("io exception",e.toString());
-
-            }
-
-        //Display the file without .txt extension
-        if(noteBookFile.contains(".txt")) {
-            noteBookFile = noteBookFile.substring(0, noteBookFile.length() - 4);
-
-        }
-
-
-
-
-            noteBookName.setText(noteBookFile);
-
-            ImageButton openButton = noteBookBeingAdded.findViewById(R.id.openNoteImageButton);
-            if(noteBookColor != -1){
-                openButton.setColorFilter(noteBookColor);
-                openButton.setBackgroundColor(0x000000);
-                //Create border
-                GradientDrawable border = new GradientDrawable();
-                border.setColor(0xFFFFFFFF);
-                border.setStroke(10, noteBookColor);
-                ConstraintLayout layoutNote = noteBookBeingAdded.findViewById(R.id.layoutOpenNoteCell);
-                layoutNote.setBackground(border);
-            }
-
-
-            //Listener to open activity
-            View.OnClickListener openNotebook = new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    SharedPreferences mPrefs = getSharedPreferences("NotebookNameValue", 0);
-                    SharedPreferences.Editor editor = mPrefs.edit();
-                    editor.putString(getString(R.string.curWorkingFolder), (String) noteBookName.getText());
-                    editor.commit();
-                    startActivity(new Intent(MainActivity.this, NoteActivity.class));
-
-                }
-
-            };
-
-            openButton.setOnClickListener(openNotebook);
-            noteBookName.setOnClickListener(openNotebook);
-
-            layoutItems.addView(noteBookBeingAdded);
-
-        }
-
 
 
 

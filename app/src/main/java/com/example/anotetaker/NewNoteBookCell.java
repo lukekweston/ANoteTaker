@@ -74,14 +74,21 @@ public class NewNoteBookCell extends Note {
         View.OnClickListener openNotebook = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ((NoteActivity)_c).saveItems(((NoteActivity)_c).layoutAllNotes);
-                SharedPreferences mPrefs = _c.getSharedPreferences("NotebookNameValue", 0);
-                SharedPreferences.Editor editor = mPrefs.edit();
-                editor.putString(_c.getString(R.string.curWorkingFolder), (String) noteBookName.getText());
-                editor.commit();
-                ((NoteActivity) _c).finishAndRemoveTask();
-                ((NoteActivity) _c).removeAutoSave();
-                _c.startActivity(new Intent(_c, NoteActivity.class));
+                try {
+                    ((NoteActivity) _c).saveItems(((NoteActivity) _c).layoutAllNotes);
+                    ((NoteActivity) _c).finishAndRemoveTask();
+                    ((NoteActivity) _c).removeAutoSave();
+                }
+                catch (Exception e){
+                    Log.e("Main Actvity note","Do not need to save");
+                }
+                    SharedPreferences mPrefs = _c.getSharedPreferences("NotebookNameValue", 0);
+                    SharedPreferences.Editor editor = mPrefs.edit();
+                    editor.putString(_c.getString(R.string.curWorkingFolder), (String) noteBookName.getText());
+                    editor.commit();
+
+                    _c.startActivity(new Intent(_c, NoteActivity.class));
+
 
             }
 
