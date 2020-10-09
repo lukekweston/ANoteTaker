@@ -176,7 +176,7 @@ public class NoteActivity extends AppCompatActivity {
     private void selectNoteTypeDialog() {
         AlertDialog.Builder pictureDialog = new AlertDialog.Builder(this);
         pictureDialog.setTitle("Select Note to add");
-        String[] pictureDialogItems = {"Text note", "Image", "Add Checklist", "Exta notebook"};
+        String[] pictureDialogItems = {"Text note", "Text note - bullet point", "Image", "Add Checklist", "Exta notebook"};
         pictureDialog.setItems(pictureDialogItems,
                 new DialogInterface.OnClickListener() {
                     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -184,22 +184,27 @@ public class NoteActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         switch (which) {
                             case 0:
-                                NoteCell nC = new NoteCell(null, null, null, NoteCell.Type.bulletpoint,true, notesColour, false, NoteActivity.this, layoutAllNotes);
+                                NoteCell nC = new NoteCell(null, null, null, NoteCell.Type.text,true, notesColour, false, NoteActivity.this, layoutAllNotes);
                                 notesDisplayed.add(nC);
                                 nC.createNote(null);
                                 break;
                             case 1:
+                                nC = new NoteCell(null, null, null, NoteCell.Type.bulletpoint,true, notesColour, false, NoteActivity.this, layoutAllNotes);
+                                notesDisplayed.add(nC);
+                                nC.createNote(null);
+                                break;
+                            case 2:
                                 ImageCell iC = new ImageCell(null, null, null, true, notesColour, false, NoteActivity.this, layoutAllNotes);
                                 notesDisplayed.add(iC);
                                 iC.createNote(null);
                                 break;
                                 //Check list
-                            case 2:
+                            case 3:
                                 CheckListCell cLC = new CheckListCell(null, null, false, notesColour, false, NoteActivity.this, layoutAllNotes);
                                 notesDisplayed.add(cLC);
                                 cLC.createNote(null);
                                 break;
-                            case 3:
+                            case 4:
                                 //TODO: make this pop up better
                             {
                                 AlertDialog.Builder builder = new AlertDialog.Builder(NoteActivity.this);
@@ -444,12 +449,14 @@ public class NoteActivity extends AppCompatActivity {
                                 String title = null;
                                 String date = null;
                                 String contents = null;
+                                NoteCell.Type type = null;
                                 boolean noTitle = false;
 
 
                                 Boolean keepFillingData = false;
                                 while (!line.equals("Layout end")) {
                                     line = reader.readLine();
+                                    Log.e("line", line);
 
 
                                     if (line.split(" ")[0].equals("highlighted#%^$")) {
@@ -480,6 +487,23 @@ public class NoteActivity extends AppCompatActivity {
                                         continue;
                                     }
 
+                                    //get the type of the note
+                                    if(line.split(" ")[0].equals("type#%^$")){
+                                        keepFillingData = false;
+                                        Log.e("split", line.split(" ")[1]);
+                                        if(line.split(" ")[1].equals("text")){
+                                            type = NoteCell.Type.text;
+                                        }
+                                        else if(line.split( " ")[1].equals("bulletpoint")){
+                                            type = NoteCell.Type.bulletpoint;
+                                        }
+                                        else if(line.split(" ")[1].equals("list")){
+                                            type = NoteCell.Type.list;
+                                        }
+                                        continue;
+                                    }
+
+
                                     //Fill out the text box
                                     if (line.split(" ")[0].equals("contents#%^$")) {
                                         keepFillingData = true;
@@ -495,7 +519,7 @@ public class NoteActivity extends AppCompatActivity {
                                 }
                                 //Remove the last new line character from contents
                                 contents = contents.substring(0, contents.length() - 1);
-                                NoteCell nC = new NoteCell(title, date, contents, NoteCell.Type.bulletpoint, noTitle,  notesColour, highlighted, NoteActivity.this, layoutAllNotes);
+                                NoteCell nC = new NoteCell(title, date, contents, type, noTitle,  notesColour, highlighted, NoteActivity.this, layoutAllNotes);
                                 notesDisplayed.add(nC);
                                 nC.createNote(null);
 

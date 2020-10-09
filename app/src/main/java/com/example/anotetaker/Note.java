@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
+import java.util.Arrays;
 import java.util.Calendar;
 
 import androidx.annotation.RequiresApi;
@@ -29,6 +30,10 @@ public abstract class Note {
     public String _title = null;
     public boolean _noTitle = false;
     public String _date;
+
+    enum Type {text, bulletpoint, list}
+
+    Type _type = null;
 
     Context _c;
     LinearLayout _layoutAllNotes;
@@ -87,7 +92,7 @@ public abstract class Note {
 
             //                layoutAllNotes.removeView(layoutNoteBeingAdded);
 //                saveItems(layoutAllNotes);
-            AlertDialog.Builder pictureDialog = new AlertDialog.Builder(_c);
+            final AlertDialog.Builder pictureDialog = new AlertDialog.Builder(_c);
             pictureDialog.setTitle("Select Note to add");
             //"Move note up", "Move note down"
             String[] pictureDialogItems = {"Set reminder", "Highlight note", "Add title", "Delete note"};
@@ -97,6 +102,17 @@ public abstract class Note {
             if(!_noTitle){
                 pictureDialogItems[2] = "Remove title";
             }
+            //Set up final item in picture Dialog if we are using a note item
+            if(_type != null) {
+                pictureDialogItems = Arrays.copyOf(pictureDialogItems, pictureDialogItems.length + 1);
+                if (_type == Type.text) {
+                    pictureDialogItems[pictureDialogItems.length - 1] = "Convert to bullet points";
+                }
+                if (_type == Type.bulletpoint) {
+                    pictureDialogItems[pictureDialogItems.length - 1] = "Convert to plain text";
+                }
+            }
+            final String[] finalPictureDialogItems = pictureDialogItems;
             pictureDialog.setItems(pictureDialogItems,
                     new DialogInterface.OnClickListener() {
                         @RequiresApi(api = Build.VERSION_CODES.O)
@@ -127,44 +143,6 @@ public abstract class Note {
                                     setBorder();
 
                                     break;
-//                                    //Move note up
-//                                    case 2:
-//
-//
-//                                        break;
-//                                    //move note down
-//                                    case 3:
-//                                        //TODO: make this pop up better
-//                                    {
-////                                        AlertDialog.Builder builder = new AlertDialog.Builder(NoteActivity.this);
-////
-////                                        builder.setTitle("New notebook");
-////                                        final EditText input = new EditText(NoteActivity.this);
-////                                        input.setHint("Notebook name");
-////
-////                                        input.setInputType(InputType.TYPE_CLASS_TEXT);
-////                                        builder.setView(input);
-////
-////
-////                                        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-////                                            public void onClick(DialogInterface dialog, int id) {
-////
-////                                                addNoteBook(currentFolder + "/" + input.getText().toString().replace("/", "-"));
-////
-////                                            }
-////                                        });
-////
-////                                        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-////                                            public void onClick(DialogInterface dialog, int id) {
-////                                                // User cancelled the dialog
-////                                            }
-////                                        });
-////
-////
-////                                        builder.show();
-//                                    }
-//
-//                                    break;
                                 //duplicate note
                                 case 2:
                                     //Get and save the previous title if there was one
@@ -189,6 +167,23 @@ public abstract class Note {
                                     _layoutAllNotes.removeView(_layoutNoteBeingAdded);
                                     _deleted = true;
                                     break;
+                                case 4:
+                                    if(finalPictureDialogItems[4].equals("Convert to bullet points")){
+                                        _type = Type.bulletpoint;
+                                    }
+                                    if(finalPictureDialogItems[4].equals("Convert to plain text")){
+                                        _type = Type.text;
+                                    }
+                                    //Redraw using set border
+
+                                    for(i =0; i < _layoutAllNotes.getChildCount(); i++){
+                                        if(_layoutAllNotes.getChildAt(i) == _layoutNoteBeingAdded){
+                                            Log.e("int i = ", Integer.toString(i));
+                                            break;
+                                        }
+                                    }
+                                    _layoutAllNotes.removeView(_layoutNoteBeingAdded);
+                                    createNote(i);
 
                             }
                         }
