@@ -176,7 +176,7 @@ public class NoteActivity extends AppCompatActivity {
     private void selectNoteTypeDialog() {
         AlertDialog.Builder pictureDialog = new AlertDialog.Builder(this);
         pictureDialog.setTitle("Select Note to add");
-        String[] pictureDialogItems = {"Add text note", "Add text note and title", "Add image", "Add image with title", "Add exta notebook"};
+        String[] pictureDialogItems = {"Text note", "Image", "Add Checklist", "Exta notebook"};
         pictureDialog.setItems(pictureDialogItems,
                 new DialogInterface.OnClickListener() {
                     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -184,28 +184,22 @@ public class NoteActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         switch (which) {
                             case 0:
-                                NoteCell nC = new NoteCell(null, null, null, true, notesColour, false, NoteActivity.this, layoutAllNotes);
+                                NoteCell nC = new NoteCell(null, null, null, NoteCell.Type.bulletpoint,true, notesColour, false, NoteActivity.this, layoutAllNotes);
                                 notesDisplayed.add(nC);
                                 nC.createNote(null);
                                 break;
                             case 1:
-                                nC = new NoteCell(null, null, null, false, notesColour, false, NoteActivity.this, layoutAllNotes);
-                                notesDisplayed.add(nC);
-                                nC.createNote(null);
-                                //addNoteCell(null, null, null);
-                                break;
-                            case 2:
                                 ImageCell iC = new ImageCell(null, null, null, true, notesColour, false, NoteActivity.this, layoutAllNotes);
                                 notesDisplayed.add(iC);
                                 iC.createNote(null);
-
+                                break;
+                                //Check list
+                            case 2:
+                                CheckListCell cLC = new CheckListCell(null, null, false, notesColour, false, NoteActivity.this, layoutAllNotes);
+                                notesDisplayed.add(cLC);
+                                cLC.createNote(null);
                                 break;
                             case 3:
-                                iC = new ImageCell(null, null, null, false, notesColour, false, NoteActivity.this, layoutAllNotes);
-                                notesDisplayed.add(iC);
-                                iC.createNote(null);
-                                break;
-                            case 4:
                                 //TODO: make this pop up better
                             {
                                 AlertDialog.Builder builder = new AlertDialog.Builder(NoteActivity.this);
@@ -501,7 +495,7 @@ public class NoteActivity extends AppCompatActivity {
                                 }
                                 //Remove the last new line character from contents
                                 contents = contents.substring(0, contents.length() - 1);
-                                NoteCell nC = new NoteCell(title, date, contents, noTitle, notesColour, highlighted, NoteActivity.this, layoutAllNotes);
+                                NoteCell nC = new NoteCell(title, date, contents, NoteCell.Type.bulletpoint, noTitle,  notesColour, highlighted, NoteActivity.this, layoutAllNotes);
                                 notesDisplayed.add(nC);
                                 nC.createNote(null);
 
@@ -584,6 +578,73 @@ public class NoteActivity extends AppCompatActivity {
                                     notesDisplayed.add(nNBC);
                                     nNBC.createNote(null);
                                 }
+
+                            }
+
+                            if(line.equals("CheckListCell")){
+
+                                Boolean highlighted = false;
+                                String title = null;
+                                String date = null;
+                                Boolean noTitle = false;
+
+                                while (!line.equals("Layout end")) {
+                                    line = reader.readLine();
+
+
+                                    //Get the title
+                                    if (line.split(" ")[0].equals("title#%^$")) {
+                                        title = line.replace("title#%^$ ", "");
+                                        continue;
+                                    }
+
+
+                                    //Get the date
+                                    if (line.split(" ")[0].equals("date#%^$")) {
+                                        date = (line.split(" ")[1] + " " + line.split(" ")[2]);
+                                        continue;
+                                    }
+
+                                    //get if its highlighted
+                                    if (line.split(" ")[0].equals("highlighted#%^$")) {
+                                        highlighted = Boolean.parseBoolean(line.split(" ")[1]);
+                                        continue;
+                                    }
+
+
+
+
+                                    //get if the note has or hasnt got a title
+                                    if (line.split(" ")[0].equals("noTitle#%^$")) {
+                                        noTitle = Boolean.parseBoolean(line.split(" ")[1]);
+                                        continue;
+                                    }
+
+
+                                    //get the check list items
+                                    if(line.equals("CheckListItem")){
+                                        CheckListCell cLC = new CheckListCell(title, date, noTitle, notesColour, highlighted, NoteActivity.this, layoutAllNotes);
+                                        notesDisplayed.add(cLC);
+                                        cLC.createNote(null);
+
+                                        Boolean checked = false;
+                                        String contents = "";
+                                        while(!line.equals("Layout end")){
+                                            line = reader.readLine();
+                                            if (line.split(" ")[0].equals("checked#%^$")) {
+                                                checked = Boolean.parseBoolean(line.split(" ")[1]);
+                                                continue;
+                                            }
+
+                                            if (line.split(" ")[0].equals("contents#%^$")) {
+                                                contents = line.replace("contents#%^$ ", "");
+                                                cLC.addItem(checked, contents, cLC._layoutItems);
+                                                continue;
+                                            }
+                                        }
+                                    }
+                                }
+
 
                             }
 

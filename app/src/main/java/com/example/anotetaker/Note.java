@@ -28,10 +28,12 @@ public abstract class Note {
     public boolean _deleted = false;
     public String _title = null;
     public boolean _noTitle = false;
+    public String _date;
 
     Context _c;
     LinearLayout _layoutAllNotes;
     View _layoutNoteBeingAdded;
+
 
 
     //Creates the cell
@@ -123,7 +125,6 @@ public abstract class Note {
                                 case 1:
                                     _highlighted = !_highlighted;
                                     setBorder();
-
 
                                     break;
 //                                    //Move note up

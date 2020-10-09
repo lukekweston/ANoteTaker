@@ -97,6 +97,7 @@ public class NewNoteBookCell extends Note {
         openButton.setOnClickListener(openNotebook);
         noteBookName.setOnClickListener(openNotebook);
 
+
         if(index == null) {
             _layoutAllNotes.addView(_layoutNoteBeingAdded);
         }

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layoutChecklist"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/border"
+        android:orientation="vertical"
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="dp">
+
+
+
+
+        <ImageButton
+            android:id="@+id/menuButton"
+            android:layout_width="31dp"
+            android:layout_height="52dp"
+            android:layout_marginStart="372dp"
+            android:layout_marginTop="4dp"
+            android:background="@android:color/transparent"
+            android:elevation="2dp"
+            android:src="@drawable/optionsmenu"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            style="?android:attr/borderlessButtonStyle"/>
+
+
+
+
+        <LinearLayout
+            android:id="@+id/layoutBottom"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="56dp"
+            android:background="@drawable/border"
+            android:orientation="vertical"
+            app:layout_constraintTop_toTopOf="@+id/middleLayout"
+            tools:layout_editor_absoluteX="28dp">
+
+            <LinearLayout
+                android:id="@+id/layoutItems"
+                android:layout_width="411dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <ImageButton
+                android:id="@+id/buttonAdd"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="312dp"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="2dp"
+                android:backgroundTint="@color/cardview_shadow_end_color"
+                android:src="@drawable/addsmall"
+                android:text="Add"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+
+        </LinearLayout>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
