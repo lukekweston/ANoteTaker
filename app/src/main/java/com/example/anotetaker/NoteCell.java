@@ -107,8 +107,13 @@ public class NoteCell extends Note {
             setListListener(contentsOnNote);
         }
 
+
         if (_contents != null) {
-            contentsOnNote.append(_contents);
+            Log.e("hmma", _contents);
+            contentsOnNote.setText(_contents);
+        }
+        else{
+            contentsOnNote.setText("");
         }
 
 
@@ -162,101 +167,128 @@ public class NoteCell extends Note {
 
             }
 
-            @Override
+            //String that it was before update
+            String previous = "";
             public void afterTextChanged(Editable editable) {
-                if (contents.hasFocus()) {
-                    String textAll = contents.getText().toString();
-                    //Case deleting last line
-                    if ((textAll.charAt(textAll.length() - 1) == '•' ||
-                            (textAll.length() > 2 && textAll.charAt(textAll.length() - 2) == '\n' && textAll.charAt(textAll.length() - 1) == ' '))) {
-                        textAll = textAll.substring(0, textAll.length() - 1);
-                    }
-                    //Case if adding a new line
-                    else if (textAll.charAt(textAll.length() - 1) == '\n') {
-                        textAll += "• ";
-                    }
-                    String[] text = textAll.split("\n");
-                    String output = "";
-                    int cursorPostition = contents.getSelectionStart();
-                    for (String line : text) {
-                        //Edgecase for if user tries to delete the bullet point on the first line
-                        if (line == text[0]) {
-                            line = line.replace("• ", "").replace("•", "");
-                            if (line.length() > 0 && line.charAt(0) == ' ') {
-                                line = line.substring(1);
+                //formatted string to use
+                String output = "";
+                //Get current string
+                String textAll = editable.toString();
+                int cursorPosition = contents.getSelectionStart();
+                //if empty set the contents to a bullet point
+                if (textAll.isEmpty() || textAll.equals("•") || textAll.equals(" ")){
+                    output = "• \n";
+                    cursorPosition = 2;
+                }
+                //String is increasing in size, or character is being replaced
+                else {
+                    if (textAll.length() >= previous.length()) {
+                        //Appending to the end
+                        output = textAll;
+                        if (cursorPosition == textAll.length()) {
+                            //adding new line (last char is new line)
+                            if (textAll.charAt(textAll.length() - 1) == '\n') {
+                                output += "• ";
+                                cursorPosition += 2;
                             }
-                            line = "• " + line;
+                        } else {
+                            String[] lines = textAll.split("\n");
+                            output = "";
+                            for (String line : lines) {
+                                if (line.equals("") || line.equals(" ") || line.equals("•")) {
+                                    line = "• ";
+                                }
+                                if (line.charAt(0) != '•') {
+                                    String letterToInsert = Character.toString(line.charAt(0));
+                                    line = line.replace("• ", "").replace("•", "");
+                                    line = "• " + line;
+                                    //cursorPosition += 2;
+
+                                } else if (line.charAt(1) != ' ') {
+                                    line = line.replace("•", "");
+                                    line = "• " + line.substring(0, 1) + line.substring(2, line.length());
+                                    cursorPosition += 1;
+                                }
+                                output += line + "\n";
+                            }
+
+                        }
+
+
+                    }
+
+                    //String is smaller or character is being replaced
+                    if (textAll.length() <= previous.length()) {
+                        String[] lines = textAll.split("\n");
+                        output = "";
+                        for (String line : lines) {
+                            //Boolean value used later because line gets changed
+                            boolean firstline = line == lines[0];
+
+                            //deleting empty line
+                            if (line.length() <= 1) {
+                                continue;
+                            }
+
+
+                            //deleting the bullet point
+                            else if (line.charAt(0) != '•' || line.charAt(1) != ' ') {
+
+                                if (output.length() >= 1 && output.charAt(output.length() - 1) == '\n') {
+                                    output = output.substring(0, output.length() - 1);
+                                }
+                                if (line.charAt(0) != '•') {
+                                    line = line.substring(1, line.length());
+                                    cursorPosition -= 1;
+                                    //line = line.substring(0, 1) + line.substring(2,line.length());
+                                } else {
+                                    line = line.substring(1, line.length());
+                                    cursorPosition -= 2;
+                                }
+                                //Special case for first line
+                                if(firstline){
+                                    line = "• " + line;
+                                    cursorPosition = 2;
+                                }
+
+
+                            }
                             output += line + "\n";
-                            continue;
                         }
-                        //Del last line
-                        if (line.equals("•")) {
-                            continue;
-                        }
-                        //Deleting a line mid section
-                        //Deleting the space
-                        if ((line.length() >= 2 && line.charAt(0) == '•' && line.charAt(1) != ' ')) {
-                            //Remove bullet point
-                            line = line.replace("•", "");
-                            //add to previous line by removing "\n" at the end of previous line
-                            output = output.substring(0, output.length() - 1) + line + "\n";
-                            //increment cursor -2, for the size of the bullet point
-                            cursorPostition -= 2;
-                        }
-                        //deleting the bullet point
-                        else if ((line.length() > 2 && line.charAt(0) == ' ' && line.charAt(1) != '•')) {
-                            line = line.substring(1, line.length());
-                            output = output.substring(0, output.length() - 1) + line + "\n";
-                            cursorPostition -= 1;
-
-                        }
-                        //normal lines
-                        else {
-                            line = line.replace("• ", "").replace("•", "");
-                            line = "• " + line;
-                            output += line + "\n";
-                        }
-                    }
-                    //Check if cursor is being written in the bullet point area
-                    try {
-                        if (output.charAt(cursorPostition - 1) == '•') {
-                            cursorPostition += 2;
-                        }
-                    } catch (Exception e) {
 
                     }
-                    //Make the cursor position the same as the output length if we are adding to the last character
-                    if (cursorPostition == contents.getText().toString().length()) {
-                        cursorPostition = output.length();
-                    }
-
-                    //Remove last end line character
-                    if (output.charAt(output.length() - 1) == '\n') {
-                        output = output.substring(0, output.length() - 1);
-                    }
-                    //Remove this listener so when we update the text it does not trigger this making an infinite loop
-                    contents.removeTextChangedListener(this);
-
-                    //Update the Contents by changing the editable text, IMPORTANT, is faster
-                    editable.replace(0, editable.length(), output);
-
-                    //Set the cursor to the last position if there was an error
-                    if (cursorPostition >= output.length()) {
-                        contents.setSelection(output.length());
-                    } else {
-                        //Add 2 to the cursor, for adding a bullet point mid way
-                        if (output.length() - textAll.length() >= 2) {
-                            cursorPostition += 2;
-                        }
-                        contents.setSelection(cursorPostition);
-                    }
-                    //Add the listener back
-                    contents.addTextChangedListener(this);
-                    _contents = contents.getText().toString();
                 }
 
+                //Remove last end line character
+                if (output.length() > 0 && output.charAt(output.length() - 1) == '\n') {
+                    output = output.substring(0, output.length() - 1);
+                }
+
+
+
+                contents.removeTextChangedListener(this);
+
+                //Update the Contents by changing the editable text, IMPORTANT, is faster
+                editable.replace(0, editable.length(), output);
+
+                //Set the cursor to the last position if there was an error
+                if (cursorPosition >= output.length()) {
+                    contents.setSelection(output.length());
+                } else {
+                    //Add 2 to the cursor, for adding a bullet point mid way
+                    if (output.length() - textAll.length() >= 2) {
+                        cursorPosition += 2;
+                    }
+                   contents.setSelection(cursorPosition);
+                }
+                //Add the listener back
+                contents.addTextChangedListener(this);
+                _contents = contents.getText().toString();
+                previous = output;
+
             }
-        });
+
+    });
 
 
     }
