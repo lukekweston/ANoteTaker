@@ -202,7 +202,7 @@ public class NoteCell extends Note {
                                     String letterToInsert = Character.toString(line.charAt(0));
                                     line = line.replace("• ", "").replace("•", "");
                                     line = "• " + line;
-                                    //cursorPosition += 2;
+                                    cursorPosition += 2;
 
                                 } else if (line.charAt(1) != ' ') {
                                     line = line.replace("•", "");
@@ -253,6 +253,12 @@ public class NoteCell extends Note {
 
 
                             }
+                            //For deleting the just the new line character between lines (deletes 2nd bullet point)
+                            if(line.contains("• ") && line.replace("• ","").length() != line.length() -2){
+                                line = "• " + line.replace("• ","");
+                                Log.e("not equal", "not equal");
+                            }
+
                             output += line + "\n";
                         }
 

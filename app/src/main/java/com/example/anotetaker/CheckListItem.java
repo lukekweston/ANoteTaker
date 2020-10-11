@@ -7,6 +7,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -50,6 +51,9 @@ public class CheckListItem extends Note{
                     return true;  // Blocks input from hardware keyboards.
                 }
             });
+        }
+        else{
+            editableText.requestFocus();
         }
 
 
