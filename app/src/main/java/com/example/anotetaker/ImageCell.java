@@ -9,6 +9,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -104,6 +105,18 @@ public class ImageCell extends Note {
             if (imgFile.exists()) {
                 displayImage = _layoutNoteBeingAdded.findViewById(R.id.imageView);
                 Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+
+                DisplayMetrics displayMetrics = new DisplayMetrics();
+                int width = displayMetrics.widthPixels;
+                Log.e("width", width + "");
+                float rescaleSize = width / myBitmap.getWidth();
+                Log.e("recale", rescaleSize + "");
+                Log.e("width before", myBitmap.getWidth() + "");
+                Log.e("width after", Math.round(myBitmap.getWidth() * rescaleSize) + "");
+                Log.e("height before", myBitmap.getHeight() + "");
+                Log.e("height after", Math.round(myBitmap.getHeight() * rescaleSize) + "");
+//                myBitmap = Bitmap.createScaledBitmap(myBitmap, Math.round(myBitmap.getWidth() * rescaleSize), Math.round(myBitmap.getHeight() * rescaleSize), true);
+
                 displayImage.setImageBitmap(myBitmap);
                 addImageFromFile.setVisibility(View.INVISIBLE);
                 addImageFromCamera.setVisibility(View.INVISIBLE);
@@ -178,8 +191,7 @@ public class ImageCell extends Note {
         intent.putExtra(MediaStore.EXTRA_OUTPUT, ((NoteActivity) _c).imageUri);
         ((Activity) _c).startActivityForResult(intent, CAMERA);
 
-//        Intent intent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-//        ((Activity) _c).startActivityForResult(intent, CAMERA);
+
 
     }
 

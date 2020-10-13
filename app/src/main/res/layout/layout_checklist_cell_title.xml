@@ -93,7 +93,7 @@
                     android:layout_marginStart="312dp"
                     android:layout_marginTop="2dp"
                     android:layout_marginBottom="2dp"
-                    android:backgroundTint="@color/cardview_shadow_end_color"
+                    android:backgroundTint="#ffffff"
                     android:src="@drawable/addsmall"
                     android:text="Add"
                     app:layout_constraintStart_toStartOf="parent"

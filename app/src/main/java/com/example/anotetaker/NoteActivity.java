@@ -12,6 +12,7 @@ makes code spagehtti for adding an image
 package com.example.anotetaker;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -65,11 +66,10 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 public class NoteActivity extends AppCompatActivity {
 
     ImageButton buttonAdd;
-    ScrollView scrollView;
+
     public LinearLayout layout, layoutAllNotes;
 
-    //border used in all layouts
-    GradientDrawable border;
+
     String currentFolder = "";
 
     public static Uri imageUri = null;
@@ -122,7 +122,6 @@ public class NoteActivity extends AppCompatActivity {
         currentFolder = mPrefs.getString(getString(R.string.curWorkingFolder), defaultValue);
 
 
-
         getSupportActionBar().setTitle(currentFolder);
 
 
@@ -163,11 +162,11 @@ public class NoteActivity extends AppCompatActivity {
 
     }
 
-    public void removeAutoSave(){
+    public void removeAutoSave() {
         timer.cancel();
     }
 
-    public void onPause(){
+    public void onPause() {
         removeAutoSave();
         super.onPause();
     }
@@ -176,7 +175,7 @@ public class NoteActivity extends AppCompatActivity {
     private void selectNoteTypeDialog() {
         AlertDialog.Builder pictureDialog = new AlertDialog.Builder(this);
         pictureDialog.setTitle("Select Note to add");
-        String[] pictureDialogItems = {"Text note", "Text note - bullet point", "Image", "Add Checklist", "Exta notebook"};
+        String[] pictureDialogItems = {"Text note", "Text note - bullet point", "Text note - list", "Image", "Add Checklist", "Exta notebook"};
         pictureDialog.setItems(pictureDialogItems,
                 new DialogInterface.OnClickListener() {
                     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -184,27 +183,32 @@ public class NoteActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         switch (which) {
                             case 0:
-                                NoteCell nC = new NoteCell(null, null, null, NoteCell.Type.text,true, notesColour, false, NoteActivity.this, layoutAllNotes);
+                                NoteCell nC = new NoteCell(null, null, null, NoteCell.Type.text, true, notesColour, false, NoteActivity.this, layoutAllNotes);
                                 notesDisplayed.add(nC);
                                 nC.createNote(null);
                                 break;
                             case 1:
-                                nC = new NoteCell(null, null, null, NoteCell.Type.bulletpoint,true, notesColour, false, NoteActivity.this, layoutAllNotes);
+                                nC = new NoteCell(null, null, null, NoteCell.Type.bulletpoint, true, notesColour, false, NoteActivity.this, layoutAllNotes);
                                 notesDisplayed.add(nC);
                                 nC.createNote(null);
                                 break;
                             case 2:
+                                nC = new NoteCell(null, null, null, NoteCell.Type.list, true, notesColour, false, NoteActivity.this, layoutAllNotes);
+                                notesDisplayed.add(nC);
+                                nC.createNote(null);
+                                break;
+                            case 3:
                                 ImageCell iC = new ImageCell(null, null, null, true, notesColour, false, NoteActivity.this, layoutAllNotes);
                                 notesDisplayed.add(iC);
                                 iC.createNote(null);
                                 break;
-                                //Check list
-                            case 3:
+                            //Check list
+                            case 4:
                                 CheckListCell cLC = new CheckListCell(null, null, true, notesColour, false, NoteActivity.this, layoutAllNotes);
                                 notesDisplayed.add(cLC);
                                 cLC.createNote(null);
                                 break;
-                            case 4:
+                            case 5:
                                 //TODO: make this pop up better
                             {
                                 AlertDialog.Builder builder = new AlertDialog.Builder(NoteActivity.this);
@@ -225,8 +229,6 @@ public class NoteActivity extends AppCompatActivity {
                                         NewNoteBookCell nNNB = new NewNoteBookCell(currentFolder + "/" + input.getText().toString().replace("/", "-"), NoteActivity.this, layoutAllNotes);
                                         notesDisplayed.add(nNNB);
                                         nNNB.createNote(null);
-
-
 
 
                                     }
@@ -322,8 +324,8 @@ public class NoteActivity extends AppCompatActivity {
 
 
                 return true;
-            //TODO: make this change the primary dark colour, so the whole theme can change, also make the colour save/loadable
-            case R.id.setColour:
+
+            case R.id.setColour: {
                 int[] androidColors = getResources().getIntArray(R.array.androidcolors);
                 int randomAndroidColor = androidColors[new Random().nextInt(androidColors.length)];
                 getTheme().applyStyle(randomAndroidColor, true);
@@ -354,15 +356,23 @@ public class NoteActivity extends AppCompatActivity {
 
 
                 return true;
+            }
 
-            //getSupportActionBar().setBackgroundDrawable(new ColorDrawable(randomAndroidColor));
+            case R.id.setReminder: {
+                Calendar cal = Calendar.getInstance();
+                Intent intent = new Intent(Intent.ACTION_EDIT);
+                intent.setType("vnd.android.cursor.item/event");
+                intent.putExtra("beginTime", cal.getTimeInMillis());
+                intent.putExtra("allDay", false);
+                intent.putExtra("rrule", "FREQ=DAILY");
+                intent.putExtra("endTime", cal.getTimeInMillis() + 60 * 60 * 1000);
+
+                intent.putExtra("title", currentFolder);
 
 
-//                layout.setBackgroundColor(randomAndroidColor);
-//                layoutAllNotes.setBackgroundColor(randomAndroidColor);
-
-            ///startActivity(new Intent(this, EmailIntent.class));
-            //return true;
+                this.startActivity(intent);
+                return true;
+            }
             case R.id.delete:
 
                 builder = new AlertDialog.Builder(this);
@@ -488,16 +498,14 @@ public class NoteActivity extends AppCompatActivity {
                                     }
 
                                     //get the type of the note
-                                    if(line.split(" ")[0].equals("type#%^$")){
+                                    if (line.split(" ")[0].equals("type#%^$")) {
                                         keepFillingData = false;
                                         Log.e("split", line.split(" ")[1]);
-                                        if(line.split(" ")[1].equals("text")){
+                                        if (line.split(" ")[1].equals("text")) {
                                             type = NoteCell.Type.text;
-                                        }
-                                        else if(line.split( " ")[1].equals("bulletpoint")){
+                                        } else if (line.split(" ")[1].equals("bulletpoint")) {
                                             type = NoteCell.Type.bulletpoint;
-                                        }
-                                        else if(line.split(" ")[1].equals("list")){
+                                        } else if (line.split(" ")[1].equals("list")) {
                                             type = NoteCell.Type.list;
                                         }
                                         continue;
@@ -519,7 +527,7 @@ public class NoteActivity extends AppCompatActivity {
                                 }
                                 //Remove the last new line character from contents
                                 contents = contents.substring(0, contents.length() - 1);
-                                NoteCell nC = new NoteCell(title, date, contents, type, noTitle,  notesColour, highlighted, NoteActivity.this, layoutAllNotes);
+                                NoteCell nC = new NoteCell(title, date, contents, type, noTitle, notesColour, highlighted, NoteActivity.this, layoutAllNotes);
                                 notesDisplayed.add(nC);
                                 nC.createNote(null);
 
@@ -597,7 +605,7 @@ public class NoteActivity extends AppCompatActivity {
 
                                 }
                                 //insert the noteBook if it has not been deleted
-                                if(!noteBookName.equals("!@#$deleted$#@!")) {
+                                if (!noteBookName.equals("!@#$deleted$#@!")) {
                                     NewNoteBookCell nNBC = new NewNoteBookCell(noteBookName, NoteActivity.this, layoutAllNotes);
                                     notesDisplayed.add(nNBC);
                                     nNBC.createNote(null);
@@ -605,7 +613,7 @@ public class NoteActivity extends AppCompatActivity {
 
                             }
 
-                            if(line.equals("CheckListCell")){
+                            if (line.equals("CheckListCell")) {
 
                                 Boolean highlighted = false;
                                 String title = null;
@@ -636,8 +644,6 @@ public class NoteActivity extends AppCompatActivity {
                                     }
 
 
-
-
                                     //get if the note has or hasnt got a title
                                     if (line.split(" ")[0].equals("noTitle#%^$")) {
                                         noTitle = Boolean.parseBoolean(line.split(" ")[1]);
@@ -646,14 +652,14 @@ public class NoteActivity extends AppCompatActivity {
 
 
                                     //get the check list items
-                                    if(line.equals("CheckListItem")){
+                                    if (line.equals("CheckListItem")) {
                                         CheckListCell cLC = new CheckListCell(title, date, noTitle, notesColour, highlighted, NoteActivity.this, layoutAllNotes);
                                         notesDisplayed.add(cLC);
                                         cLC.createNote(null);
 
                                         Boolean checked = false;
                                         String contents = "";
-                                        while(!line.equals("Layout end")){
+                                        while (!line.equals("Layout end")) {
                                             line = reader.readLine();
                                             if (line.split(" ")[0].equals("checked#%^$")) {
                                                 checked = Boolean.parseBoolean(line.split(" ")[1]);
@@ -733,13 +739,12 @@ public class NoteActivity extends AppCompatActivity {
             //OutputStreamWriter outputStreamWriter = new OutputStreamWriter(NoteActivity.this.openFileOutput(NOTEBOOK_DIRECTORY +"/" + fileName, NoteActivity.this.MODE_PRIVATE));
 
             for (Note n : notesDisplayed) {
-                if(!n._deleted) {
+                if (!n._deleted) {
                     bw.write("Layout start" + "\n");
                     bw.write(n.saveNote());
                 }
 
                 bw.write("Layout end" + "\n");
-
 
 
             }
@@ -774,8 +779,7 @@ public class NoteActivity extends AppCompatActivity {
 
             //Call back button to return to the layout above this
             goBacktoPreviousLayout(true);
-        }
-        catch (Exception e){
+        } catch (Exception e) {
 
         }
 
@@ -783,7 +787,7 @@ public class NoteActivity extends AppCompatActivity {
     }
 
     //Removes the link from the previous layout by renaming the filnename in the newnotebookcell to !@#$deleted$#@!
-    public void removeLinkToSelfFromPreviousLayout(){
+    public void removeLinkToSelfFromPreviousLayout() {
         Log.e("previous", currentFolder);
         String previousFolder = NOTEBOOK_DIRECTORY + "/" + currentFolder.substring(0, currentFolder.lastIndexOf("/")) + ".txt";
         String newFile = "";
@@ -799,17 +803,16 @@ public class NoteActivity extends AppCompatActivity {
                 while (line != null) {
                     Log.e("line", line);
                     newFile += line + "\n";
-                    if(line.equals("LayoutNewNoteBookCell")){
-                        while(!line.equals("Layout end")){
+                    if (line.equals("LayoutNewNoteBookCell")) {
+                        while (!line.equals("Layout end")) {
                             line = reader.readLine();
                             Log.e("hmm", line);
-                            if(line.split(" ")[0].equals("filename#%^$") && line.split(" ")[1].equals(currentFolder)){
+                            if (line.split(" ")[0].equals("filename#%^$") && line.split(" ")[1].equals(currentFolder)) {
 
                                 Log.e(currentFolder, line.split(" ")[1]);
-                                newFile += "filename#%^$" + " !@#$deleted$#@!" +"\n";
+                                newFile += "filename#%^$" + " !@#$deleted$#@!" + "\n";
 
-                            }
-                            else {
+                            } else {
                                 newFile += line + "\n";
                             }
                         }
@@ -820,16 +823,16 @@ public class NoteActivity extends AppCompatActivity {
                 is.close();
             }
 
-        }catch (Exception e){
+        } catch (Exception e) {
 
         }
         //Save the file
-        try{
+        try {
             BufferedWriter bw = new BufferedWriter(new FileWriter(previousFolder));
             bw.write(newFile);
             bw.close();
 
-        }catch (Exception e){
+        } catch (Exception e) {
 
         }
 
@@ -860,7 +863,7 @@ public class NoteActivity extends AppCompatActivity {
         //Remove the auto save and save the layout
         removeAutoSave();
         //If not deleting save the layout
-        if(!deleting) {
+        if (!deleting) {
             saveItems(layoutAllNotes);
         }
 
@@ -879,7 +882,6 @@ public class NoteActivity extends AppCompatActivity {
             intent.putExtra("activity", "right");
             startActivity(intent);
             this.finishAndRemoveTask();
-
 
 
             return;

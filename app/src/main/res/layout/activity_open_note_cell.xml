@@ -34,7 +34,7 @@
             android:layout_width="57dp"
             android:layout_height="57dp"
             android:layout_weight="1"
-            android:backgroundTint="@color/cardview_shadow_end_color"
+            android:backgroundTint="#ffffff"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/noteNametextView"
             app:layout_constraintTop_toTopOf="parent"
