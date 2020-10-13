@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 
@@ -41,6 +42,7 @@ public abstract class Note {
 
 
 
+
     //Creates the cell
     //Index for if the note is being inserted
     public abstract void createNote(Integer index);
@@ -56,6 +58,9 @@ public abstract class Note {
 
     //Creates and sets a border around the note
     public void setBorder(){
+        if(_borderColor == -1){
+            _borderColor = Color.BLACK;
+        }
         if (_borderColor != -1 || _highlighted) {
             border = new GradientDrawable();
             border.setColor(0xFFFFFFFF);
@@ -139,7 +144,7 @@ public abstract class Note {
                                     break;
                                 //Highlight note
                                 case 1:
-                                    _highlighted = !_highlighted;
+                                    highlightChange();
                                     setBorder();
 
                                     break;
@@ -193,5 +198,8 @@ public abstract class Note {
         }
     };
 
+    public void highlightChange(){
+        _highlighted = !_highlighted;
+    }
 
 }

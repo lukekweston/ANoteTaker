@@ -200,7 +200,7 @@ public class NoteActivity extends AppCompatActivity {
                                 break;
                                 //Check list
                             case 3:
-                                CheckListCell cLC = new CheckListCell(null, null, false, notesColour, false, NoteActivity.this, layoutAllNotes);
+                                CheckListCell cLC = new CheckListCell(null, null, true, notesColour, false, NoteActivity.this, layoutAllNotes);
                                 notesDisplayed.add(cLC);
                                 cLC.createNote(null);
                                 break;
