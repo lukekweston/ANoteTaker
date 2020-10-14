@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
@@ -19,6 +20,10 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.TransitionOptions;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import java.io.File;
 import java.time.LocalDateTime;
@@ -70,6 +75,14 @@ public class ImageCell extends Note {
 
 
     public void setDisplayImage(String filelocation, Bitmap image) {
+        //get the width of the image and scale on this so that the image always fills the
+        //width of the display it is in
+        int width = displayImage.getDrawable().getIntrinsicWidth();
+        float rescaleSize = (float) width / (float) image.getWidth();
+        //Rescale the bit map
+        image = Bitmap.createScaledBitmap(image, Math.round(image.getWidth() * rescaleSize)
+                , Math.round(image.getHeight() * rescaleSize), true);
+        //Glide.with(_c).load(new File(filelocation)).diskCacheStrategy(DiskCacheStrategy.ALL).thumbnail(0.5f).into(displayImage);
         displayImage.setImageBitmap(image);
         _fileLocation = filelocation;
         addImageFromCamera.setVisibility(View.INVISIBLE);
@@ -78,6 +91,8 @@ public class ImageCell extends Note {
 
 
     }
+
+
 
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -119,6 +134,9 @@ public class ImageCell extends Note {
                 addImageFromFile.setVisibility(View.INVISIBLE);
                 addImageFromCamera.setVisibility(View.INVISIBLE);
 
+            }
+            else{
+                Log.e("file not exits", _fileLocation);
             }
 
         }

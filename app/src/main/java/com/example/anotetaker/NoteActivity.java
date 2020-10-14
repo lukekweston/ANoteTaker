@@ -37,6 +37,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
@@ -932,10 +934,15 @@ public class NoteActivity extends AppCompatActivity {
             if (data != null) {
                 Uri contentURI = data.getData();
                 try {
+
                     Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), contentURI);
-                    String path = saveImage(bitmap);
-                    Toast.makeText(getApplicationContext(), "Image Saved!", Toast.LENGTH_SHORT).show();
+                    String path  = ImageFilePath.getPath(this, data.getData());
+                   // String path = contentURI.getPath().split(":")[1]+".jpg";
+                    Log.e("path", path);
+                   // String path = saveImage(bitmap);
                     setDisplayImage(path, bitmap);
+
+                    Toast.makeText(getApplicationContext(), "Image Saved!", Toast.LENGTH_SHORT).show();
                     saveItems(layoutAllNotes);
 
 
@@ -987,6 +994,7 @@ public class NoteActivity extends AppCompatActivity {
 
             //displayImage.setImageBitmap(rotatedBitmap);
             String fileLocation = saveImage(rotatedBitmap);
+
             setDisplayImage(fileLocation, rotatedBitmap);
             saveItems(layoutAllNotes);
 
