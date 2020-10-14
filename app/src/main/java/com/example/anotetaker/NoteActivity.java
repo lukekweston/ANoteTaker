@@ -26,6 +26,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.InputType;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -252,6 +253,19 @@ public class NoteActivity extends AppCompatActivity {
         //saveItems(layoutItems);
         super.onDestroy();
 
+    }
+
+
+    //Control back button
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event)
+    {
+        if(keyCode == KeyEvent.KEYCODE_BACK)
+        {
+            goBackToPreviousLayout(false);
+            return true;
+        }
+        return false;
     }
 
 
