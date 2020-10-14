@@ -100,9 +100,13 @@ public class InitialStartActivity extends AppCompatActivity {
                 is.close();
 
 
-                // String lastFile = "list/deep/deepest";
+                //Checks if we were last in the main menu
+                if(lastFile.equals("MainMenu")){
+                    this.startActivity(new Intent(this, MainMenuActivity.class));
+                    return;
+                }
 
-
+                //Else opens the note book
                 //Open the note book
                 SharedPreferences mPrefs = this.getSharedPreferences("NotebookNameValue", 0);
                 SharedPreferences.Editor editor = mPrefs.edit();
@@ -116,6 +120,7 @@ public class InitialStartActivity extends AppCompatActivity {
         } catch (Exception e) {
 
         }
+        //Any errors will default back to opening main menu
         this.startActivity(new Intent(this, MainMenuActivity.class));
 
 

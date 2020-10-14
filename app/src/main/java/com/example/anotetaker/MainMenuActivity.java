@@ -12,7 +12,9 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.util.ArrayList;
 
 public class MainMenuActivity extends AppCompatActivity {
@@ -29,6 +31,7 @@ public class MainMenuActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
 
+        saveCurrentLocation();
         setContentView(R.layout.activity_main_menu);
 
         //Set the animation for opening this intent
@@ -39,8 +42,6 @@ public class MainMenuActivity extends AppCompatActivity {
 
         loadNoteBooks();
 
-
-//        requestMultiplePermissions();
 
         ImageButton addButton = (ImageButton) findViewById(R.id.addBtn);
 
@@ -89,39 +90,19 @@ public class MainMenuActivity extends AppCompatActivity {
 
     }
 
-//    private void requestMultiplePermissions() {
-//        Dexter.withActivity(this)
-//                .withPermissions(
-//                        Manifest.permission.CAMERA,
-//                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
-//                        Manifest.permission.READ_EXTERNAL_STORAGE)
-//                .withListener(new MultiplePermissionsListener() {
-//                    @Override
-//                    public void onPermissionsChecked(MultiplePermissionsReport report) {
-//                        if (report.areAllPermissionsGranted()) {  // check if all permissions are granted
-//                            Toast.makeText(getApplicationContext(), "All permissions are granted by user!", Toast.LENGTH_SHORT).show();
-//                        }
-//
-//                        if (report.isAnyPermissionPermanentlyDenied()) { // check for permanent denial of any permission
-//                            // show alert dialog navigating to Settings
-//                            //openSettingsDialog();
-//                        }
-//                    }
-//
-//                    @Override
-//                    public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions, PermissionToken token) {
-//                        token.continuePermissionRequest();
-//                    }
-//                }).
-//                withErrorListener(new PermissionRequestErrorListener() {
-//                    @Override
-//                    public void onError(DexterError error) {
-//                        Toast.makeText(getApplicationContext(), "Some Error! ", Toast.LENGTH_SHORT).show();
-//                    }
-//                })
-//                .onSameThread()
-//                .check();
-//    }
+    //Saves that we are in the main menu
+    public void saveCurrentLocation() {
+        try {
+            //make or edit existing file
+            File noteBookFile = new File("/data/data/com.example.anotetaker/files" + "/" + "lastImageAddedLocation.txt");
+            BufferedWriter bw = new BufferedWriter(new FileWriter(noteBookFile));
+            bw.write("MainMenu");
+            bw.close();
+        }catch(Exception e){
+
+        }
+
+    }
 
 
     public void loadNoteBooks(){
