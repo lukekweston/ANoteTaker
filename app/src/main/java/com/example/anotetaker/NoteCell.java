@@ -96,10 +96,9 @@ public class NoteCell extends Note {
         //Set up the border
         setBorder();
 
-        //format text
+        //Set the listener to format the text
         if (_type == Type.text) {
-            //remove bullet points
-            _contents = _contents.replace("• ", "").replace("•", "");
+            setPlainTextListener(contentsOnNote);
         }
         if (_type == Type.bulletpoint) {
             setBulletPointListener(contentsOnNote);
@@ -127,6 +126,28 @@ public class NoteCell extends Note {
     }
 
 
+    public void setPlainTextListener(final EditText contents) {
+
+        contents.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2){}
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
+            @Override
+            public void afterTextChanged(Editable editable) {
+                String text = editable.toString();
+                //remove bullet points
+                text = text.replace("• ", "").replace("•", "");
+                contents.removeTextChangedListener(this);
+                contents.setText(text);
+                contents.addTextChangedListener(this);
+                //Saves contents each time this is updated
+                _contents = contents.getText().toString();
+            }
+        });
+
+
+    }
 
 
     public void setBulletPointListener(final EditText contents) {

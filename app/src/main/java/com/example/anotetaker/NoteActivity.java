@@ -35,6 +35,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -65,18 +66,16 @@ public class NoteActivity extends AppCompatActivity {
     ImageButton buttonAdd;
 
     public LinearLayout layout, layoutAllNotes;
+    public ScrollView scrollView;
 
 
     String currentFolder = "";
 
     public static Uri imageUri = null;
 
-    public static boolean startUp = true;
 
     private static final String IMAGE_DIRECTORY = "/data/data/com.example.anotetaker/files/images";
     private static final String NOTEBOOK_DIRECTORY = "/data/data/com.example.anotetaker/files/notebooks";
-    private Context mContext;
-    private ImageView displayImage;  // imageview
     private int GALLERY = 1;
     private static int CAMERA = 2;
 
@@ -92,7 +91,7 @@ public class NoteActivity extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
+    public void onCreate(@Nullable final Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_note_page);
@@ -127,10 +126,13 @@ public class NoteActivity extends AppCompatActivity {
 
 
         layoutAllNotes = (LinearLayout) findViewById(R.id.layoutItems);
+        scrollView = (ScrollView) findViewById(R.id.scrollView);
 
         buttonAdd = (ImageButton) findViewById(R.id.buttonAdd);
 
         loadFolder(currentFolder);
+
+
 
 
         final View.OnClickListener listener = new View.OnClickListener() {
@@ -156,6 +158,23 @@ public class NoteActivity extends AppCompatActivity {
         timer.scheduleAtFixedRate(autoSaveEvent, delay, period);
 
         buttonAdd.setOnClickListener(listener);
+
+
+
+
+
+        Log.e("height", scrollView.getHeight() + "");
+        Log.e("height 2", scrollView.getChildAt(0).getHeight() + "");
+
+        scrollView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
+                Log.e("Scroll view height" ,view.getHeight() + "");
+                scrollView.fullScroll(View.FOCUS_DOWN);
+            }
+        });
+
+
 
 
     }
@@ -247,6 +266,10 @@ public class NoteActivity extends AppCompatActivity {
                     }
                 });
         pictureDialog.show();
+
+
+
+
     }
 
 
@@ -409,7 +432,7 @@ public class NoteActivity extends AppCompatActivity {
 
                 dialog.show();
 
-                Log.e("dsad", "hello");
+
 
                 //DeleteFileDialogFragment delete = new DeleteFileDialogFragment().onCreateDialog();
                 return true;
@@ -448,7 +471,7 @@ public class NoteActivity extends AppCompatActivity {
                     }
 
 
-                    Log.d("StackOverflow", line);
+
 
 
                     if (line.equals("Layout start")) {
@@ -699,10 +722,15 @@ public class NoteActivity extends AppCompatActivity {
 
                 }
                 reader.close();
+
+                //layoutAllNotes.scrollTo(0, layoutAllNotes.getHeight());
+
             }
         } catch (Exception e) {
             Log.e("Exception", "File load failed: " + e.toString());
         }
+        Log.e("scroll", "scrol.");
+        scrollView.fullScroll(View.FOCUS_DOWN);
 
     }
 
