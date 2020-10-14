@@ -936,10 +936,11 @@ public class NoteActivity extends AppCompatActivity {
                 try {
 
                     Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), contentURI);
-                    String path  = ImageFilePath.getPath(this, data.getData());
+//                    String path  = ImageFilePath.getPath(this, data.getData());
                    // String path = contentURI.getPath().split(":")[1]+".jpg";
+//                    Log.e("path", path);
+                    String path = saveImage(bitmap);
                     Log.e("path", path);
-                   // String path = saveImage(bitmap);
                     setDisplayImage(path, bitmap);
 
                     Toast.makeText(getApplicationContext(), "Image Saved!", Toast.LENGTH_SHORT).show();
@@ -1026,11 +1027,13 @@ public class NoteActivity extends AppCompatActivity {
     }
 
     public String saveImage(Bitmap myBitmap) {
+
+        //Use JPEG format, faster and put into byteoutputstream
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        myBitmap.compress(Bitmap.CompressFormat.PNG, 100, bytes);
+        myBitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
 
 
-        //File wallpaperDirectory = new File(Environment.getExternalStorageDirectory() + IMAGE_DIRECTORY);
+
         File wallpaperDirectory = new File(IMAGE_DIRECTORY);
         if (!wallpaperDirectory.exists()) {  // have the object build the directory structure, if needed.
             wallpaperDirectory.mkdirs();

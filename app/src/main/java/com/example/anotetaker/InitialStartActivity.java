@@ -2,6 +2,7 @@ package com.example.anotetaker;
 
 import android.Manifest;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -37,12 +38,17 @@ import androidx.appcompat.app.AppCompatActivity;
 public class InitialStartActivity extends AppCompatActivity {
 
 
+    Context context;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        context = this;
+        //setContentView(R.layout.activity_main_menu);
         requestMultiplePermissions();
 
-        loadPreviousLayout();
+
+
 
 
     }
@@ -58,11 +64,17 @@ public class InitialStartActivity extends AppCompatActivity {
                     public void onPermissionsChecked(MultiplePermissionsReport report) {
                         if (report.areAllPermissionsGranted()) {  // check if all permissions are granted
                             Toast.makeText(getApplicationContext(), "All permissions are granted by user!", Toast.LENGTH_SHORT).show();
+                            loadPreviousLayout();
+                        }
+                        else{
+                            Log.e("bad", "is bad");
+                            android.os.Process.killProcess(android.os.Process.myPid());
                         }
 
-                        if (report.isAnyPermissionPermanentlyDenied()) { // check for permanent denial of any permission
-                            // show alert dialog navigating to Settings
-                            //openSettingsDialog();
+                        if (report.isAnyPermissionPermanentlyDenied()) {
+
+
+
                         }
                     }
 
@@ -99,10 +111,10 @@ public class InitialStartActivity extends AppCompatActivity {
                 String lastFile = reader.readLine();
                 is.close();
 
-
+                Log.e("lastFile", lastFile);
                 //Checks if we were last in the main menu
                 if(lastFile.equals("MainMenu")){
-                    this.startActivity(new Intent(this, MainMenuActivity.class));
+                    this.startActivity(new Intent(context, MainMenuActivity.class));
                     return;
                 }
 
@@ -117,6 +129,7 @@ public class InitialStartActivity extends AppCompatActivity {
                 this.startActivity(new Intent(this, NoteActivity.class));
                 return;
             }
+
         } catch (Exception e) {
 
         }
