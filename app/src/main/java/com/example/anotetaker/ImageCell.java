@@ -107,15 +107,15 @@ public class ImageCell extends Note {
                 Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
 
                 DisplayMetrics displayMetrics = new DisplayMetrics();
-                int width = displayMetrics.widthPixels;
+                int width = displayImage.getDrawable().getIntrinsicWidth();
                 Log.e("width", width + "");
-                float rescaleSize = width / myBitmap.getWidth();
+                float rescaleSize = (float) width / (float) myBitmap.getWidth();
                 Log.e("recale", rescaleSize + "");
                 Log.e("width before", myBitmap.getWidth() + "");
                 Log.e("width after", Math.round(myBitmap.getWidth() * rescaleSize) + "");
                 Log.e("height before", myBitmap.getHeight() + "");
                 Log.e("height after", Math.round(myBitmap.getHeight() * rescaleSize) + "");
-//                myBitmap = Bitmap.createScaledBitmap(myBitmap, Math.round(myBitmap.getWidth() * rescaleSize), Math.round(myBitmap.getHeight() * rescaleSize), true);
+                myBitmap = Bitmap.createScaledBitmap(myBitmap, Math.round(myBitmap.getWidth() * rescaleSize), Math.round(myBitmap.getHeight() * rescaleSize), true);
 
                 displayImage.setImageBitmap(myBitmap);
                 addImageFromFile.setVisibility(View.INVISIBLE);
