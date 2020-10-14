@@ -2,56 +2,33 @@ package com.example.anotetaker;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
 
-import android.Manifest;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.graphics.drawable.GradientDrawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import com.karumi.dexter.Dexter;
-import com.karumi.dexter.MultiplePermissionsReport;
-import com.karumi.dexter.PermissionToken;
-import com.karumi.dexter.listener.DexterError;
-import com.karumi.dexter.listener.PermissionRequest;
-import com.karumi.dexter.listener.PermissionRequestErrorListener;
-import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
-
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainMenuActivity extends AppCompatActivity {
 
 
-    ListView simpleList;
-
-    ArrayList<String> notebooks = new ArrayList<>();
 
     String NOTEBOOK_DIRECTORY = "/data/data/com.example.anotetaker/files/notebooks";
-
     LinearLayout layoutItems;
+
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
         setContentView(R.layout.activity_main_menu);
 
         //Set the animation for opening this intent
@@ -59,16 +36,18 @@ public class MainActivity extends AppCompatActivity {
 
         layoutItems = (LinearLayout) findViewById(R.id.layoutItems);
 
+
         loadNoteBooks();
 
-        requestMultiplePermissions();
+
+//        requestMultiplePermissions();
 
         ImageButton addButton = (ImageButton) findViewById(R.id.addBtn);
 
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainMenuActivity.this);
 
 
                 builder.setTitle("New notebook");
@@ -76,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
                 //TODO: update the layout
                 //Check this https://stackoverflow.com/questions/10903754/input-text-dialog-android
 
-                final EditText input = new EditText(MainActivity.this);
+                final EditText input = new EditText(MainMenuActivity.this);
                 input.setHint("Notebook name");
 //                input.setPadding(
 //                        19, // if you look at android alert_dialog.xml, you will see the message textview have margin 14dp and padding 5dp. This is the reason why I use 19 here
@@ -92,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int id) {
 
 
-                        new NewNoteBookCell(input.getText().toString().replace("/","-"), MainActivity.this, layoutItems).createNote(null);
+                        new NewNoteBookCell(input.getText().toString().replace("/","-"), MainMenuActivity.this, layoutItems).createNote(null);
 
                     }
                 });
@@ -110,39 +89,39 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void requestMultiplePermissions() {
-        Dexter.withActivity(this)
-                .withPermissions(
-                        Manifest.permission.CAMERA,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                        Manifest.permission.READ_EXTERNAL_STORAGE)
-                .withListener(new MultiplePermissionsListener() {
-                    @Override
-                    public void onPermissionsChecked(MultiplePermissionsReport report) {
-                        if (report.areAllPermissionsGranted()) {  // check if all permissions are granted
-                            Toast.makeText(getApplicationContext(), "All permissions are granted by user!", Toast.LENGTH_SHORT).show();
-                        }
-
-                        if (report.isAnyPermissionPermanentlyDenied()) { // check for permanent denial of any permission
-                            // show alert dialog navigating to Settings
-                            //openSettingsDialog();
-                        }
-                    }
-
-                    @Override
-                    public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions, PermissionToken token) {
-                        token.continuePermissionRequest();
-                    }
-                }).
-                withErrorListener(new PermissionRequestErrorListener() {
-                    @Override
-                    public void onError(DexterError error) {
-                        Toast.makeText(getApplicationContext(), "Some Error! ", Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .onSameThread()
-                .check();
-    }
+//    private void requestMultiplePermissions() {
+//        Dexter.withActivity(this)
+//                .withPermissions(
+//                        Manifest.permission.CAMERA,
+//                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+//                        Manifest.permission.READ_EXTERNAL_STORAGE)
+//                .withListener(new MultiplePermissionsListener() {
+//                    @Override
+//                    public void onPermissionsChecked(MultiplePermissionsReport report) {
+//                        if (report.areAllPermissionsGranted()) {  // check if all permissions are granted
+//                            Toast.makeText(getApplicationContext(), "All permissions are granted by user!", Toast.LENGTH_SHORT).show();
+//                        }
+//
+//                        if (report.isAnyPermissionPermanentlyDenied()) { // check for permanent denial of any permission
+//                            // show alert dialog navigating to Settings
+//                            //openSettingsDialog();
+//                        }
+//                    }
+//
+//                    @Override
+//                    public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions, PermissionToken token) {
+//                        token.continuePermissionRequest();
+//                    }
+//                }).
+//                withErrorListener(new PermissionRequestErrorListener() {
+//                    @Override
+//                    public void onError(DexterError error) {
+//                        Toast.makeText(getApplicationContext(), "Some Error! ", Toast.LENGTH_SHORT).show();
+//                    }
+//                })
+//                .onSameThread()
+//                .check();
+//    }
 
 
     public void loadNoteBooks(){
@@ -168,11 +147,13 @@ public class MainActivity extends AppCompatActivity {
 
         for (String nb : notebooks) {
 
-            new NewNoteBookCell(nb, MainActivity.this, layoutItems).createNote(null);
+            new NewNoteBookCell(nb, MainMenuActivity.this, layoutItems).createNote(null);
         }
 
 
     }
+
+
 
 
 

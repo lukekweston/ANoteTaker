@@ -12,7 +12,6 @@ makes code spagehtti for adding an image
 package com.example.anotetaker;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -20,7 +19,6 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.GradientDrawable;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
@@ -28,7 +26,6 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.InputType;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -37,8 +34,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
@@ -61,7 +56,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
 
 public class NoteActivity extends AppCompatActivity {
 
@@ -74,6 +68,7 @@ public class NoteActivity extends AppCompatActivity {
 
     public static Uri imageUri = null;
 
+    public static boolean startUp = true;
 
     private static final String IMAGE_DIRECTORY = "/data/data/com.example.anotetaker/files/images";
     private static final String NOTEBOOK_DIRECTORY = "/data/data/com.example.anotetaker/files/notebooks";
@@ -175,7 +170,7 @@ public class NoteActivity extends AppCompatActivity {
     private void selectNoteTypeDialog() {
         AlertDialog.Builder pictureDialog = new AlertDialog.Builder(this);
         pictureDialog.setTitle("Select Note to add");
-        String[] pictureDialogItems = {"Text note", "Text note - bullet point", "Text note - list", "Image", "Add Checklist", "Exta notebook"};
+        String[] pictureDialogItems = {"Text note", "Text note - bullet point", "Image", "Add Checklist", "Exta notebook"};
         pictureDialog.setItems(pictureDialogItems,
                 new DialogInterface.OnClickListener() {
                     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -192,23 +187,23 @@ public class NoteActivity extends AppCompatActivity {
                                 notesDisplayed.add(nC);
                                 nC.createNote(null);
                                 break;
+//                            case 2:
+//                                nC = new NoteCell(null, null, null, NoteCell.Type.list, true, notesColour, false, NoteActivity.this, layoutAllNotes);
+//                                notesDisplayed.add(nC);
+//                                nC.createNote(null);
+//                                break;
                             case 2:
-                                nC = new NoteCell(null, null, null, NoteCell.Type.list, true, notesColour, false, NoteActivity.this, layoutAllNotes);
-                                notesDisplayed.add(nC);
-                                nC.createNote(null);
-                                break;
-                            case 3:
                                 ImageCell iC = new ImageCell(null, null, null, true, notesColour, false, NoteActivity.this, layoutAllNotes);
                                 notesDisplayed.add(iC);
                                 iC.createNote(null);
                                 break;
                             //Check list
-                            case 4:
+                            case 3:
                                 CheckListCell cLC = new CheckListCell(null, null, true, notesColour, false, NoteActivity.this, layoutAllNotes);
                                 notesDisplayed.add(cLC);
                                 cLC.createNote(null);
                                 break;
-                            case 5:
+                            case 4:
                                 //TODO: make this pop up better
                             {
                                 AlertDialog.Builder builder = new AlertDialog.Builder(NoteActivity.this);
@@ -275,7 +270,7 @@ public class NoteActivity extends AppCompatActivity {
 
             //Check if the back button has been pressed
             case android.R.id.home:
-                goBacktoPreviousLayout(false);
+                goBackToPreviousLayout(false);
                 return true;
 
 
@@ -414,6 +409,7 @@ public class NoteActivity extends AppCompatActivity {
     public void loadFolder(String folderName) {
         //Add file extenstion
         folderName = folderName + ".txt";
+        Log.e("load", folderName);
         try {
             FileInputStream is;
             BufferedReader reader;
@@ -695,7 +691,23 @@ public class NoteActivity extends AppCompatActivity {
     }
 
 
+    //Saves the location that we are currently in for loading next time
+    public void saveCurrentLocation() {
+        try {
+            //make or edit existing file
+            File noteBookFile = new File("/data/data/com.example.anotetaker/files" + "/" + "lastImageAddedLocation.txt");
+            BufferedWriter bw = new BufferedWriter(new FileWriter(noteBookFile));
+            bw.write(currentFolder);
+            bw.close();
+        }catch(Exception e){
+
+        }
+
+    }
+
     public void saveItems(LinearLayout layoutItems) {
+        saveCurrentLocation();
+
         //todo: make folders and save files as the folder name
         String fileName = currentFolder + ".txt";
         //  Log.e("filename", fileName);
@@ -778,7 +790,7 @@ public class NoteActivity extends AppCompatActivity {
             }
 
             //Call back button to return to the layout above this
-            goBacktoPreviousLayout(true);
+            goBackToPreviousLayout(true);
         } catch (Exception e) {
 
         }
@@ -858,7 +870,7 @@ public class NoteActivity extends AppCompatActivity {
 
     }
 
-    public void goBacktoPreviousLayout(Boolean deleting) {
+    public void goBackToPreviousLayout(Boolean deleting) {
 
         //Remove the auto save and save the layout
         removeAutoSave();
@@ -866,7 +878,6 @@ public class NoteActivity extends AppCompatActivity {
         if (!deleting) {
             saveItems(layoutAllNotes);
         }
-
         if (currentFolder.contains("/")) {
 
             //Split out the last notebook in the chain
@@ -886,7 +897,7 @@ public class NoteActivity extends AppCompatActivity {
 
             return;
         }
-        startActivity(new Intent(NoteActivity.this, MainActivity.class));
+        startActivity(new Intent(NoteActivity.this, MainMenuActivity.class));
 
     }
 

@@ -84,6 +84,7 @@ public class NewNoteBookCell extends Note {
                 }
                     SharedPreferences mPrefs = _c.getSharedPreferences("NotebookNameValue", 0);
                     SharedPreferences.Editor editor = mPrefs.edit();
+                    Log.e("hello", _c.getString(R.string.curWorkingFolder) + "!"+ (String) noteBookName.getText());
                     editor.putString(_c.getString(R.string.curWorkingFolder), (String) noteBookName.getText());
                     editor.commit();
 
