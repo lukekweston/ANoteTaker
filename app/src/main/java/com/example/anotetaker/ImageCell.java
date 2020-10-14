@@ -106,17 +106,15 @@ public class ImageCell extends Note {
                 displayImage = _layoutNoteBeingAdded.findViewById(R.id.imageView);
                 Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
 
-                DisplayMetrics displayMetrics = new DisplayMetrics();
+                //get the width of the image and scale on this so that the image always fills the
+                //width of the display it is in
                 int width = displayImage.getDrawable().getIntrinsicWidth();
-                Log.e("width", width + "");
                 float rescaleSize = (float) width / (float) myBitmap.getWidth();
-                Log.e("recale", rescaleSize + "");
-                Log.e("width before", myBitmap.getWidth() + "");
-                Log.e("width after", Math.round(myBitmap.getWidth() * rescaleSize) + "");
-                Log.e("height before", myBitmap.getHeight() + "");
-                Log.e("height after", Math.round(myBitmap.getHeight() * rescaleSize) + "");
-                myBitmap = Bitmap.createScaledBitmap(myBitmap, Math.round(myBitmap.getWidth() * rescaleSize), Math.round(myBitmap.getHeight() * rescaleSize), true);
+                //Rescale the bit map
+                myBitmap = Bitmap.createScaledBitmap(myBitmap, Math.round(myBitmap.getWidth() * rescaleSize)
+                        , Math.round(myBitmap.getHeight() * rescaleSize), true);
 
+                //Set the bitmap
                 displayImage.setImageBitmap(myBitmap);
                 addImageFromFile.setVisibility(View.INVISIBLE);
                 addImageFromCamera.setVisibility(View.INVISIBLE);
