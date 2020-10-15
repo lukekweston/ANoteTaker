@@ -103,12 +103,8 @@ public class NoteCell extends Note {
         if (_contents != null && _contents.length() > 0) {
             contentsOnNote.setText(_contents);
         }
-        //Work around for the title layout wrapping back over the stuff above it if its only one line and a title
-        //TODO fix the layout so this does not happen
         else{
-
-                contentsOnNote.setText("");
-
+            contentsOnNote.setText("");
         }
 
         contentsOnNote.requestFocus();

@@ -37,6 +37,8 @@
             android:layout_marginTop="8dp"
             android:ems="10"
             android:text=""
+            android:singleLine="true"
+            android:maxLines="1"
             android:hint="Title"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
