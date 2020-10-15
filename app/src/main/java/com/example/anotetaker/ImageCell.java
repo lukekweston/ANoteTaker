@@ -13,6 +13,7 @@ import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -29,6 +30,9 @@ import java.io.File;
 import java.time.LocalDateTime;
 
 import androidx.annotation.RequiresApi;
+import androidx.core.content.FileProvider;
+
+import static androidx.core.content.FileProvider.getUriForFile;
 
 
 public class ImageCell extends Note {
@@ -74,7 +78,28 @@ public class ImageCell extends Note {
     }
 
 
-    public void setDisplayImage(String filelocation, Bitmap image) {
+    //Listener that allows the displayed image to be opened in gallery
+    public View.OnClickListener openGallery(){
+        return (new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.e("file location", _fileLocation);
+                Intent intent = new Intent();
+                intent.setAction(Intent.ACTION_VIEW);
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                Uri photoURI = getUriForFile(_c, "com.mydomain.fileprovider", (new File(_fileLocation)));
+                intent.setDataAndType(photoURI, "image/*");
+                _c.startActivity(intent);
+
+            }
+
+        });
+
+    }
+
+
+
+    public void setDisplayImage(final String fileLocation, Bitmap image) {
         //get the width of the image and scale on this so that the image always fills the
         //width of the display it is in
         int width = displayImage.getDrawable().getIntrinsicWidth();
@@ -82,12 +107,14 @@ public class ImageCell extends Note {
         //Rescale the bit map
         image = Bitmap.createScaledBitmap(image, Math.round(image.getWidth() * rescaleSize)
                 , Math.round(image.getHeight() * rescaleSize), true);
-        //Glide.with(_c).load(new File(filelocation)).diskCacheStrategy(DiskCacheStrategy.ALL).thumbnail(0.5f).into(displayImage);
+        //Glide.with(_c).load(new File(fileLocation)).diskCacheStrategy(DiskCacheStrategy.ALL).thumbnail(0.5f).into(displayImage);
         displayImage.setImageBitmap(image);
-        _fileLocation = filelocation;
+        _fileLocation = fileLocation;
         addImageFromCamera.setVisibility(View.INVISIBLE);
         addImageFromFile.setVisibility(View.INVISIBLE);
         ADDINGIMAGE = false;
+
+        displayImage.setOnClickListener(openGallery());
 
 
     }
@@ -133,6 +160,8 @@ public class ImageCell extends Note {
                 displayImage.setImageBitmap(myBitmap);
                 addImageFromFile.setVisibility(View.INVISIBLE);
                 addImageFromCamera.setVisibility(View.INVISIBLE);
+
+                displayImage.setOnClickListener(openGallery());
 
             }
             else{

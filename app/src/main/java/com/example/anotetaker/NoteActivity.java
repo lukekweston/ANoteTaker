@@ -23,6 +23,7 @@ import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.provider.MediaStore;
 import android.text.InputType;
 import android.util.Log;
@@ -31,6 +32,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -56,10 +58,14 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
+
+import static androidx.core.content.FileProvider.getUriForFile;
 
 public class NoteActivity extends AppCompatActivity {
 
@@ -133,59 +139,69 @@ public class NoteActivity extends AppCompatActivity {
         loadFolder(currentFolder);
 
 
-
-
-        final View.OnClickListener listener = new View.OnClickListener() {
+        buttonAdd.setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onClick(View view) {
-
+                //Set the scroll view listener to update if an item is added
+                scrollView.addOnLayoutChangeListener(scrollViewListener());
                 selectNoteTypeDialog();
-            }
-        };
-
-
-//        Todo make this listener work better
-        timer = new Timer();
-        int delay = 0;
-        int period = 2000;
-        autoSaveEvent = new TimerTask() {
-            @Override
-            public void run() {
-                saveItems(layoutAllNotes);
-            }
-        };
-        timer.scheduleAtFixedRate(autoSaveEvent, delay, period);
-
-        buttonAdd.setOnClickListener(listener);
-
-
-
-
-
-        Log.e("height", scrollView.getHeight() + "");
-        Log.e("height 2", scrollView.getChildAt(0).getHeight() + "");
-
-        scrollView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-            @Override
-            public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
-                Log.e("Scroll view height" ,view.getHeight() + "");
-                scrollView.fullScroll(View.FOCUS_DOWN);
             }
         });
 
 
+//        Todo make this listener work better
+//        timer = new Timer();
+//        int delay = 0;
+//        int period = 2000;
+//        autoSaveEvent = new TimerTask() {
+//            @Override
+//            public void run() {
+//                saveItems(layoutAllNotes);
+//            }
+//        };
+//        timer.scheduleAtFixedRate(autoSaveEvent, delay, period);
+
+
+        //Set the scroll viewlistener for when everything has loaded
+        scrollView.addOnLayoutChangeListener(scrollViewListener());
+
+
+        //remove text focus of loaded items
+        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
 
     }
 
+    //Listener for scroll view that moves the scroll to the bottom after it gets updated
+    //This listerner then removes its self to stop its self interfering with adding titles
+    //and check list items
+    public View.OnLayoutChangeListener scrollViewListener() {
+        return (new View.OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
+                scrollView.fullScroll(View.FOCUS_DOWN);
+                scrollView.removeOnLayoutChangeListener(this);
+            }
+        });
+    }
+
+
     public void removeAutoSave() {
-        timer.cancel();
+        //timer.cancel();
     }
 
     public void onPause() {
+        saveItems(layoutAllNotes);
         removeAutoSave();
         super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.e("hello", "stop");
+        saveItems(layoutAllNotes);
     }
 
 
@@ -268,8 +284,6 @@ public class NoteActivity extends AppCompatActivity {
         pictureDialog.show();
 
 
-
-
     }
 
 
@@ -283,10 +297,8 @@ public class NoteActivity extends AppCompatActivity {
 
     //Control back button
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event)
-    {
-        if(keyCode == KeyEvent.KEYCODE_BACK)
-        {
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
             goBackToPreviousLayout(false);
             return true;
         }
@@ -433,7 +445,6 @@ public class NoteActivity extends AppCompatActivity {
                 dialog.show();
 
 
-
                 //DeleteFileDialogFragment delete = new DeleteFileDialogFragment().onCreateDialog();
                 return true;
 
@@ -469,9 +480,6 @@ public class NoteActivity extends AppCompatActivity {
                         buttonAdd.setColorFilter(notesColour);
 
                     }
-
-
-
 
 
                     if (line.equals("Layout start")) {
@@ -743,7 +751,7 @@ public class NoteActivity extends AppCompatActivity {
             BufferedWriter bw = new BufferedWriter(new FileWriter(noteBookFile));
             bw.write(currentFolder);
             bw.close();
-        }catch(Exception e){
+        } catch (Exception e) {
 
         }
 
@@ -965,7 +973,7 @@ public class NoteActivity extends AppCompatActivity {
 
                     Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), contentURI);
 //                    String path  = ImageFilePath.getPath(this, data.getData());
-                   // String path = contentURI.getPath().split(":")[1]+".jpg";
+                    // String path = contentURI.getPath().split(":")[1]+".jpg";
 //                    Log.e("path", path);
                     String path = saveImage(bitmap);
                     Log.e("path", path);
@@ -1061,7 +1069,6 @@ public class NoteActivity extends AppCompatActivity {
         myBitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
 
 
-
         File wallpaperDirectory = new File(IMAGE_DIRECTORY);
         if (!wallpaperDirectory.exists()) {  // have the object build the directory structure, if needed.
             wallpaperDirectory.mkdirs();
@@ -1088,6 +1095,7 @@ public class NoteActivity extends AppCompatActivity {
         }
         return "";
     }
+
 
 
     ////####################################################################################################################################

@@ -109,7 +109,6 @@ public class NoteCell extends Note {
 
 
         if (_contents != null) {
-            Log.e("hmma", _contents);
             contentsOnNote.setText(_contents);
         }
         else{
@@ -136,10 +135,12 @@ public class NoteCell extends Note {
             @Override
             public void afterTextChanged(Editable editable) {
                 String text = editable.toString();
+                int cursorPosition = contents.getSelectionStart();
                 //remove bullet points
                 text = text.replace("• ", "").replace("•", "");
                 contents.removeTextChangedListener(this);
                 contents.setText(text);
+                contents.setSelection(cursorPosition);
                 contents.addTextChangedListener(this);
                 //Saves contents each time this is updated
                 _contents = contents.getText().toString();
