@@ -55,6 +55,7 @@
             android:gravity="start|top"
             android:inputType="textMultiLine"
             android:padding="15dp"
+            android:minLines="2"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:layout_editor_absoluteX="0dp" />

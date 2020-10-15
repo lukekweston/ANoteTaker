@@ -84,6 +84,7 @@
             android:gravity="start|top"
             android:inputType="textMultiLine"
             android:padding="10dp"
+            android:minLines="2"
             app:layout_constraintTop_toBottomOf="@+id/frameLayout"
             tools:layout_editor_absoluteX="0dp" />
 
