@@ -385,7 +385,7 @@ public class NoteActivity extends AppCompatActivity {
                 this.overridePendingTransition(R.anim.anim_none, R.anim.anim_none);
                 //set extra value so the animation will be disabled of a new intent
                 intent.putExtra("activity", "reload");
-                timer.cancel();
+             //   timer.cancel();
                 //Was not shutting intent while a task was operating, was causing errors, this fixes it
                 while (true) {
                     try {
@@ -656,12 +656,15 @@ public class NoteActivity extends AppCompatActivity {
 
                             }
 
+                            //Add checklist note
                             if (line.equals("CheckListCell")) {
 
                                 Boolean highlighted = false;
                                 String title = null;
                                 String date = null;
                                 Boolean noTitle = false;
+
+                                Boolean added = false;
 
                                 while (!line.equals("Layout end")) {
                                     line = reader.readLine();
@@ -698,6 +701,7 @@ public class NoteActivity extends AppCompatActivity {
                                     if (line.equals("CheckListItem")) {
                                         CheckListCell cLC = new CheckListCell(title, date, noTitle, notesColour, highlighted, NoteActivity.this, layoutAllNotes);
                                         notesDisplayed.add(cLC);
+                                        added = true;
                                         cLC.createNote(null);
 
                                         Boolean checked = false;
@@ -716,6 +720,12 @@ public class NoteActivity extends AppCompatActivity {
                                             }
                                         }
                                     }
+                                }
+                                if(!added){
+                                    Log.e("hello","hmm");
+                                    CheckListCell cLC = new CheckListCell(title, date, noTitle, notesColour, highlighted, NoteActivity.this, layoutAllNotes);
+                                    notesDisplayed.add(cLC);
+                                    cLC.createNote(null);
                                 }
 
 

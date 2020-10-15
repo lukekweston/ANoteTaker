@@ -108,12 +108,22 @@ public class NoteCell extends Note {
         }
 
 
-        if (_contents != null) {
+
+        if (_contents != null && _contents.length() > 0) {
             contentsOnNote.setText(_contents);
         }
+        //Work around for the title layout wrapping back over the stuff above it if its only one line and a title
+        //TODO fix the layout so this does not happen
         else{
-            contentsOnNote.setText("");
+            if(!_noTitle){
+                contentsOnNote.setText("\n");
+            }
+            else {
+                contentsOnNote.setText("");
+            }
+
         }
+
 
 
         if (index == null) {
@@ -121,6 +131,7 @@ public class NoteCell extends Note {
         } else {
             _layoutAllNotes.addView(_layoutNoteBeingAdded, index);
         }
+
 
     }
 
@@ -139,8 +150,9 @@ public class NoteCell extends Note {
                 //remove bullet points
                 text = text.replace("• ", "").replace("•", "");
                 contents.removeTextChangedListener(this);
-                contents.setText(text);
-                contents.setSelection(cursorPosition);
+                //contents.setText(text);
+                //Update the Contents by changing the editable text, IMPORTANT, is faster
+                editable.replace(0, editable.length(), text);
                 contents.addTextChangedListener(this);
                 //Saves contents each time this is updated
                 _contents = contents.getText().toString();
