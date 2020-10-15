@@ -1,29 +1,20 @@
 package com.example.anotetaker;
 
 import android.content.Context;
-import android.content.DialogInterface;
-import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.lang.reflect.Array;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AlertDialog;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 public class NoteCell extends Note {
@@ -115,15 +106,12 @@ public class NoteCell extends Note {
         //Work around for the title layout wrapping back over the stuff above it if its only one line and a title
         //TODO fix the layout so this does not happen
         else{
-            if(!_noTitle){
-                contentsOnNote.setText("\n");
-            }
-            else {
+
                 contentsOnNote.setText("");
-            }
 
         }
 
+        contentsOnNote.requestFocus();
 
 
         if (index == null) {
