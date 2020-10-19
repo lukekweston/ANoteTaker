@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -22,7 +23,7 @@ public class MainMenuActivity extends AppCompatActivity {
 
 
     String NOTEBOOK_DIRECTORY = "/data/data/com.example.anotetaker/files/notebooks";
-    LinearLayout layoutItems;
+    LinearLayout menuItems;
 
 
 
@@ -37,7 +38,7 @@ public class MainMenuActivity extends AppCompatActivity {
         //Set the animation for opening this intent
         this.overridePendingTransition(R.anim.anim_slide_in_right, R.anim.anim_slide_out_right);
 
-        layoutItems = (LinearLayout) findViewById(R.id.layoutItems);
+        menuItems = (LinearLayout) findViewById(R.id.layoutItems);
 
 
         loadNoteBooks();
@@ -72,7 +73,7 @@ public class MainMenuActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int id) {
 
 
-                        new NewNoteBookCell(input.getText().toString().replace("/","-"), MainMenuActivity.this, layoutItems).createNote(null);
+                        new NewNoteBookCell(input.getText().toString().replace("/","-"), MainMenuActivity.this, menuItems).createNote(null);
 
                     }
                 });
@@ -128,7 +129,7 @@ public class MainMenuActivity extends AppCompatActivity {
 
         for (String nb : notebooks) {
 
-            new NewNoteBookCell(nb, MainMenuActivity.this, layoutItems).createNote(null);
+            new NewNoteBookCell(nb, MainMenuActivity.this, menuItems).createNote(null);
         }
 
 

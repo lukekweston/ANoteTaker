@@ -355,6 +355,29 @@ public class NoteActivity extends AppCompatActivity {
 
                 builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
+                        String currentNoteBook = currentFolder;
+
+                        //Split out the current level folder if the notebook is many deep
+                        if(currentFolder.contains("/")){
+                            currentFolder = currentFolder.substring(0, currentFolder.lastIndexOf("/")) + "/";
+                        }
+                        else{
+                            currentFolder = "";
+                        }
+                        String newNoteBookName = input.getText().toString().replace("/", "-");
+
+                        currentFolder += newNoteBookName;
+
+                        for(Note note : notesDisplayed){
+                            if(note instanceof NewNoteBookCell){
+                                Log.e("notebooke name", ((NewNoteBookCell) note)._noteBookFile);
+                                ((NewNoteBookCell) note)._noteBookFile = ((NewNoteBookCell) note)._noteBookFile.replace(currentNoteBook, newNoteBookName);
+                            }
+                        }
+
+                        saveItems(layoutAllNotes);
+
+
                         // User clicked OK button
                     }
                 });
