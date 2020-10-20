@@ -172,7 +172,7 @@ public class NoteActivity extends AppCompatActivity {
     //On pause and stop if not deleting then saveItems
     public void onPause() {
         if (!deleting) {
-            saveItems(layoutAllNotes);
+            saveItems();
         }
         super.onPause();
     }
@@ -180,7 +180,7 @@ public class NoteActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         if (!deleting) {
-            saveItems(layoutAllNotes);
+            saveItems();
         }
         super.onStop();
     }
@@ -314,54 +314,40 @@ public class NoteActivity extends AppCompatActivity {
 
             case R.id.rename_notebook:
 
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-
-                builder.setTitle("Rename notebook");
-
-                // Set up the input
-
-                //TODO: update the layout
-
-                //Check this https://stackoverflow.com/questions/10903754/input-text-dialog-android
-
-                final EditText input = new EditText(this);
-
-                //Gets and sets the hint to the final notebook
+                //Create the pop up for getting the title of the new sub note book
+                AlertDialog.Builder alertDialog = new AlertDialog.Builder(NoteActivity.this);
+                alertDialog.setTitle("New Rename notebook");
+                final EditText input = new EditText(NoteActivity.this);
                 input.setHint(currentFolder.split("/").length > 0 ? currentFolder.split("/")[currentFolder.split("/").length - 1] : currentFolder);
-//                input.setPadding(
-//                        19, // if you look at android alert_dialog.xml, you will see the message textview have margin 14dp and padding 5dp. This is the reason why I use 19 here
-//                        0,
-//                        19,
-//                        0
-//                );
+                //Add a linear layout to pad the view
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT);
+                lp.setMargins(36, 36, 36, 36);
+                input.setLayoutParams(lp);
+                RelativeLayout container = new RelativeLayout(NoteActivity.this);
+                RelativeLayout.LayoutParams rlParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+                container.setLayoutParams(rlParams);
+                container.addView(input);
 
-                input.setInputType(InputType.TYPE_CLASS_TEXT);
-                builder.setView(input);
+                alertDialog.setView(container);
 
-                //builder.set
-
-
-                builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                //Set the confirm button
+                alertDialog.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-
+                        //get the new notebook name and rename
                         String newNoteBookName = input.getText().toString().replace("/", "-");
                         rename(newNoteBookName);
-
-
-                        // User clicked OK button
                     }
                 });
 
-                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                //Cancel, do nothing
+                alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         // User cancelled the dialog
                     }
                 });
-
-
-                builder.show();
-
+                alertDialog.show();
 
                 return true;
 
@@ -373,7 +359,7 @@ public class NoteActivity extends AppCompatActivity {
                 //set the color of the note
                 notesColour = randomAndroidColor;
                 //save note with the new color
-                saveItems(layoutAllNotes);
+                saveItems();
                 //load the items to redraw
                 Intent intent = getIntent();
                 this.overridePendingTransition(R.anim.anim_none, R.anim.anim_none);
@@ -415,7 +401,7 @@ public class NoteActivity extends AppCompatActivity {
             }
             case R.id.delete:
 
-                builder = new AlertDialog.Builder(this);
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
 
                 builder.setMessage("Are you sure you want to delete this notebook?")
@@ -448,17 +434,19 @@ public class NoteActivity extends AppCompatActivity {
         }
     }
 
+
+    //Loads the notes and displayes it from a file
     @RequiresApi(api = Build.VERSION_CODES.O)
     @SuppressLint("ResourceType")
-    public void loadFolder(String folderName) {
+    public void loadFolder(String fileName) {
         //Add file extenstion
-        folderName = folderName + ".txt";
-        Log.e("load", folderName);
+        fileName = fileName + ".txt";
+        Log.e("load", fileName);
         try {
             FileInputStream is;
             BufferedReader reader;
-            final File file = new File(NOTEBOOK_DIRECTORY + "/" + folderName);
-
+            final File file = new File(NOTEBOOK_DIRECTORY + "/" + currentFolder + ".txt");
+            //Check file actually exists
             if (file.exists()) {
                 Log.e("loading", "loading");
                 is = new FileInputStream(file);
@@ -475,23 +463,19 @@ public class NoteActivity extends AppCompatActivity {
 
                     }
 
-
+                    //Find when a new layout starts
                     if (line.equals("Layout start")) {
 
-                        //Set up the note that is being inserted
+
+                        //Loop till the end of the current layout being loaded
                         while (!line.equals("Layout end")) {
                             line = reader.readLine();
 
-                            //Bool to no use the layoutnotes.addview
 
-
-                            //Todo: make this work with more layouts
-                            //Title and text note
+                            //load in and create a note cell
                             if (line.equals("LayoutNoteCell")) {
 
-                                Log.e("line", line);
-
-
+                                //Variables used to create the noteCell
                                 boolean highlighted = false;
                                 String title = null;
                                 String date = null;
@@ -499,13 +483,14 @@ public class NoteActivity extends AppCompatActivity {
                                 NoteCell.Type type = null;
                                 boolean noTitle = false;
 
-
+                                //Bool for adding multiple lines of text to the contents
                                 Boolean keepFillingData = false;
+                                //Loop till the end of the layout note
                                 while (!line.equals("Layout end")) {
                                     line = reader.readLine();
                                     Log.e("line", line);
 
-
+                                    //Get if the note is highlighted
                                     if (line.split(" ")[0].equals("highlighted#%^$")) {
                                         keepFillingData = false;
                                         highlighted = Boolean.parseBoolean(line.split(" ")[1]);
@@ -564,8 +549,10 @@ public class NoteActivity extends AppCompatActivity {
                                 }
                                 //Remove the last new line character from contents
                                 contents = contents.substring(0, contents.length() - 1);
+                                //Create the note add it to the list
                                 NoteCell nC = new NoteCell(title, date, contents, type, noTitle, notesColour, highlighted, NoteActivity.this, layoutAllNotes);
                                 notesDisplayed.add(nC);
+                                //Display the added note
                                 nC.createNote(null);
 
                             }
@@ -573,6 +560,7 @@ public class NoteActivity extends AppCompatActivity {
                             //Add image note
                             if (line.equals("LayoutImageCell")) {
 
+                                //Variables for creating a new image cell
                                 Boolean highlighted = false;
                                 String title = null;
                                 String date = null;
@@ -618,11 +606,10 @@ public class NoteActivity extends AppCompatActivity {
 
 
                                 }
+                                //Create the cell add it to the list and display it
                                 ImageCell iC = new ImageCell(title, date, fileLocation, noTitle, notesColour, highlighted, NoteActivity.this, layoutAllNotes);
                                 notesDisplayed.add(iC);
                                 iC.createNote(null);
-
-
                             }
 
 
@@ -658,6 +645,7 @@ public class NoteActivity extends AppCompatActivity {
                                 String date = null;
                                 Boolean noTitle = false;
 
+                                //flag for checking if a checklistcell has been added with sub items
                                 Boolean added = false;
 
                                 while (!line.equals("Layout end")) {
@@ -690,7 +678,7 @@ public class NoteActivity extends AppCompatActivity {
                                         continue;
                                     }
 
-
+                                    //Adds a checklistcell that contains sub items
                                     //get the check list items
                                     if (line.equals("CheckListItem")) {
                                         CheckListCell cLC = new CheckListCell(title, date, noTitle, notesColour, highlighted, NoteActivity.this, layoutAllNotes);
@@ -700,6 +688,7 @@ public class NoteActivity extends AppCompatActivity {
 
                                         Boolean checked = false;
                                         String contents = "";
+                                        //Loop through and add each of the checklist items
                                         while (!line.equals("Layout end")) {
                                             line = reader.readLine();
                                             if (line.split(" ")[0].equals("checked#%^$")) {
@@ -715,8 +704,8 @@ public class NoteActivity extends AppCompatActivity {
                                         }
                                     }
                                 }
+                                //Add the Checklist cell if there was no items to add to it
                                 if (!added) {
-                                    Log.e("hello", "hmm");
                                     CheckListCell cLC = new CheckListCell(title, date, noTitle, notesColour, highlighted, NoteActivity.this, layoutAllNotes);
                                     notesDisplayed.add(cLC);
                                     cLC.createNote(null);
@@ -760,14 +749,18 @@ public class NoteActivity extends AppCompatActivity {
 
 
         //Rename the links in the current notebook
+        int i = 0;
         for (Note note : notesDisplayed) {
             if (note instanceof NewNoteBookCell) {
                 ((NewNoteBookCell) note)._noteBookFile = ((NewNoteBookCell) note)._noteBookFile.replace(previousFolder, currentFolder);
+                layoutAllNotes.removeView(note._layoutNoteBeingAdded);
+                note.createNote(i);
             }
+            i+= 1;
         }
 
         //Save updated file
-        saveItems(layoutAllNotes);
+        saveItems();
 
         //Rename current directory
         File dirOld = new File(NOTEBOOK_DIRECTORY + "/" + previousFolder);
@@ -788,8 +781,9 @@ public class NoteActivity extends AppCompatActivity {
         //Update the file name at the top
         getSupportActionBar().setTitle(currentFolder);
 
+
         //Save updated file
-        saveItems(layoutAllNotes);
+        saveItems();
 
 
     }
@@ -840,7 +834,7 @@ public class NoteActivity extends AppCompatActivity {
 
     }
 
-
+    //Updates the links in the current file
     public void updateNoteBookLinksInFile(String previousFolder, String renamedFolder, String fileToBeUpdated) {
 
         Log.e("File being updated", fileToBeUpdated);
@@ -904,14 +898,14 @@ public class NoteActivity extends AppCompatActivity {
 
     }
 
-    public void saveItems(LinearLayout layoutItems) {
-        Log.e("saveing", "saving");
+    //Saves all the items that are displayed in the display
+    public void saveItems() {
+
+        //Save the location we are in for loading
         saveCurrentLocation();
 
-        //todo: make folders and save files as the folder name
         String fileName = currentFolder + ".txt";
-        //  Log.e("filename", fileName);
-        int itemCount = layoutItems.getChildCount();
+
         try {
 
             //Check directory exists
@@ -1087,7 +1081,7 @@ public class NoteActivity extends AppCompatActivity {
 
         //If not deleting save the layout
         if (!deleting) {
-            saveItems(layoutAllNotes);
+            saveItems();
         }
 
         if (currentFolder.contains("/")) {
@@ -1142,7 +1136,7 @@ public class NoteActivity extends AppCompatActivity {
                     setDisplayImage(path, bitmap);
 
                     Toast.makeText(getApplicationContext(), "Image Saved!", Toast.LENGTH_SHORT).show();
-                    saveItems(layoutAllNotes);
+                    saveItems();
 
 
                 } catch (IOException e) {
@@ -1195,7 +1189,7 @@ public class NoteActivity extends AppCompatActivity {
             String fileLocation = saveImage(rotatedBitmap);
 
             setDisplayImage(fileLocation, rotatedBitmap);
-            saveItems(layoutAllNotes);
+            saveItems();
 
             Toast.makeText(getApplicationContext(), "Image Saved!", Toast.LENGTH_SHORT).show();
         }

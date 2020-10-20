@@ -77,7 +77,7 @@ public class NewNoteBookCell extends Note {
             @Override
             public void onClick(View view) {
                 try {
-                    ((NoteActivity) _c).saveItems(((NoteActivity) _c).layoutAllNotes);
+                    ((NoteActivity) _c).saveItems();
                     ((NoteActivity) _c).finishAndRemoveTask();
 
                 }
