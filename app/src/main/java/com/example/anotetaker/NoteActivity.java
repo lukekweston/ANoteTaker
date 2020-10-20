@@ -85,6 +85,8 @@ public class NoteActivity extends AppCompatActivity {
     private int GALLERY = 1;
     private static int CAMERA = 2;
 
+    public boolean deleting = false;
+
     public int notesColour = -1;
 
     public ArrayList<Note> notesDisplayed = new ArrayList<Note>();
@@ -192,7 +194,9 @@ public class NoteActivity extends AppCompatActivity {
     }
 
     public void onPause() {
-        saveItems(layoutAllNotes);
+        if(!deleting) {
+            saveItems(layoutAllNotes);
+        }
         removeAutoSave();
         super.onPause();
     }
@@ -201,7 +205,9 @@ public class NoteActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         Log.e("hello", "stop");
-        saveItems(layoutAllNotes);
+        if(!deleting) {
+            saveItems(layoutAllNotes);
+        }
     }
 
 
@@ -299,7 +305,7 @@ public class NoteActivity extends AppCompatActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            goBackToPreviousLayout(false);
+            goBackToPreviousLayout();
             return true;
         }
         return false;
@@ -321,7 +327,7 @@ public class NoteActivity extends AppCompatActivity {
 
             //Check if the back button has been pressed
             case android.R.id.home:
-                goBackToPreviousLayout(false);
+                goBackToPreviousLayout();
                 return true;
 
 
@@ -993,17 +999,33 @@ public class NoteActivity extends AppCompatActivity {
             if (dir.exists() && dir.isDirectory()) {
                 deleteFilesInDir(dir);
             }
+
+            File d = new File(NOTEBOOK_DIRECTORY);
+            String[] children = d.list();
+            for (String child : children) {
+                Log.e("before", child.toString());
+            }
+
             //Delete current notebook file
             File currentNoteBook = new File(NOTEBOOK_DIRECTORY + "/" + currentFolder + ".txt");
             Log.e("gi", currentNoteBook.toString());
 
             currentNoteBook.delete();
+
+
+
+            children = d.list();
+            for (String child : children) {
+                Log.e("after", child.toString());
+            }
+
             if (currentFolder.contains("/")) {
                 removeLinkToSelfFromPreviousLayout();
             }
 
             //Call back button to return to the layout above this
-            goBackToPreviousLayout(true);
+            deleting = true;
+            goBackToPreviousLayout();
         } catch (Exception e) {
 
         }
@@ -1015,6 +1037,7 @@ public class NoteActivity extends AppCompatActivity {
     public void removeLinkToSelfFromPreviousLayout() {
         Log.e("previous", currentFolder);
         String previousFolder = NOTEBOOK_DIRECTORY + "/" + currentFolder.substring(0, currentFolder.lastIndexOf("/")) + ".txt";
+        Log.e("previous folder", previousFolder);
         String newFile = "";
         //Load and change the file
         try {
@@ -1032,7 +1055,7 @@ public class NoteActivity extends AppCompatActivity {
                         while (!line.equals("Layout end")) {
                             line = reader.readLine();
                             Log.e("hmm", line);
-                            if (line.split(" ")[0].equals("filename#%^$") && line.split(" ")[1].equals(currentFolder)) {
+                            if (line.split(" ")[0].equals("filename#%^$") && line.equals("filename#%^$ " + currentFolder)) {
 
                                 Log.e(currentFolder, line.split(" ")[1]);
                                 newFile += "filename#%^$" + " !@#$deleted$#@!" + "\n";
@@ -1083,7 +1106,7 @@ public class NoteActivity extends AppCompatActivity {
 
     }
 
-    public void goBackToPreviousLayout(Boolean deleting) {
+    public void goBackToPreviousLayout() {
 
         //Remove the auto save and save the layout
         removeAutoSave();
@@ -1091,6 +1114,7 @@ public class NoteActivity extends AppCompatActivity {
         if (!deleting) {
             saveItems(layoutAllNotes);
         }
+
         if (currentFolder.contains("/")) {
 
             //Split out the last notebook in the chain
@@ -1110,7 +1134,9 @@ public class NoteActivity extends AppCompatActivity {
 
             return;
         }
+
         startActivity(new Intent(NoteActivity.this, MainMenuActivity.class));
+
 
     }
 

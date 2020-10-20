@@ -35,6 +35,12 @@ public class MainMenuActivity extends AppCompatActivity {
         saveCurrentLocation();
         setContentView(R.layout.activity_main_menu);
 
+        File d = new File(NOTEBOOK_DIRECTORY);
+        String[] children = d.list();
+        for (String child : children) {
+            Log.e("menu", child.toString());
+        }
+
         //Set the animation for opening this intent
         this.overridePendingTransition(R.anim.anim_slide_in_right, R.anim.anim_slide_out_right);
 
