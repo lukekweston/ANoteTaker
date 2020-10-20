@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import androidx.annotation.RequiresApi;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+//Note for displaying text
 public class NoteCell extends Note {
 
 
@@ -99,7 +100,7 @@ public class NoteCell extends Note {
         }
 
 
-
+        //Forces there to be a bullet point dispalyed
         if (_contents != null && _contents.length() > 0) {
             contentsOnNote.setText(_contents);
         }
@@ -119,7 +120,7 @@ public class NoteCell extends Note {
 
     }
 
-
+    //Listener for handling plain text
     public void setPlainTextListener(final EditText contents) {
 
         contents.addTextChangedListener(new TextWatcher() {
@@ -146,7 +147,7 @@ public class NoteCell extends Note {
 
     }
 
-
+    //Listener that formats bullet points
     public void setBulletPointListener(final EditText contents) {
 
         contents.addTextChangedListener(new TextWatcher() {

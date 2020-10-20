@@ -12,7 +12,6 @@ makes code spagehtti for adding an image
 package com.example.anotetaker;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -23,9 +22,7 @@ import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.provider.MediaStore;
-import android.text.InputType;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -35,7 +32,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
@@ -131,7 +127,7 @@ public class NoteActivity extends AppCompatActivity {
         buttonAdd = (ImageButton) findViewById(R.id.buttonAdd);
 
         //Load the existing items
-        loadFolder(currentFolder);
+        loadFolder();
 
         //Set the buttons listener to open a menu to select the type of item to add
         buttonAdd.setOnClickListener(new View.OnClickListener() {
@@ -189,7 +185,7 @@ public class NoteActivity extends AppCompatActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            goBackToPreviousLayout();
+            goBackParentLayout();
             return true;
         }
         return false;
@@ -256,10 +252,10 @@ public class NoteActivity extends AppCompatActivity {
                                         //Get the name of the new note book, remove / as it will interfer with the folder structures
                                         String newNoteBook = currentFolder + "/" + input.getText().toString().replace("/", "-");
                                         //Check a note book with this name doesnt already exist
-                                        for(Note n : notesDisplayed){
-                                            if(n instanceof NewNoteBookCell){
+                                        for (Note n : notesDisplayed) {
+                                            if (n instanceof NewNoteBookCell) {
                                                 //If it does exist, print error toast and return
-                                                if(((NewNoteBookCell) n)._noteBookFile.equals(newNoteBook)){
+                                                if (((NewNoteBookCell) n)._noteBookFile.equals(newNoteBook)) {
                                                     Toast.makeText(getApplicationContext(), "Note book with title " + newNoteBook + " already exists", Toast.LENGTH_LONG).show();
                                                     return;
                                                 }
@@ -292,7 +288,6 @@ public class NoteActivity extends AppCompatActivity {
     }
 
 
-
     //Create the menu
     public boolean onCreateOptionsMenu(Menu menu) {
 
@@ -308,7 +303,7 @@ public class NoteActivity extends AppCompatActivity {
 
             //Check if the back button has been pressed
             case android.R.id.home:
-                goBackToPreviousLayout();
+                goBackParentLayout();
                 return true;
 
 
@@ -438,10 +433,7 @@ public class NoteActivity extends AppCompatActivity {
     //Loads the notes and displayes it from a file
     @RequiresApi(api = Build.VERSION_CODES.O)
     @SuppressLint("ResourceType")
-    public void loadFolder(String fileName) {
-        //Add file extenstion
-        fileName = fileName + ".txt";
-        Log.e("load", fileName);
+    public void loadFolder() {
         try {
             FileInputStream is;
             BufferedReader reader;
@@ -756,7 +748,7 @@ public class NoteActivity extends AppCompatActivity {
                 layoutAllNotes.removeView(note._layoutNoteBeingAdded);
                 note.createNote(i);
             }
-            i+= 1;
+            i += 1;
         }
 
         //Save updated file
@@ -914,7 +906,6 @@ public class NoteActivity extends AppCompatActivity {
                 Log.e("dir", NOTEBOOK_DIRECTORY + "/" + fileName.split("/")[0]);
 
                 //Get path to file ( splits off the last element, the file name)
-                //TODO: is there a simpler way to do this
                 String filePath = "";
                 String[] filePathSplit = fileName.split("/");
                 for (int i = 0; i < filePathSplit.length - 1; i++) {
@@ -940,10 +931,9 @@ public class NoteActivity extends AppCompatActivity {
             BufferedWriter bw = new BufferedWriter(new FileWriter(noteBookFile));
 
             bw.write("color " + Integer.toString(notesColour) + "\n");
-            Log.e("what", Integer.toString(notesColour));
 
-            //OutputStreamWriter outputStreamWriter = new OutputStreamWriter(NoteActivity.this.openFileOutput(NOTEBOOK_DIRECTORY +"/" + fileName, NoteActivity.this.MODE_PRIVATE));
 
+            //Write into the saved file the information from all of the notes displayed
             for (Note n : notesDisplayed) {
                 if (!n._deleted) {
                     bw.write("Layout start" + "\n");
@@ -975,23 +965,12 @@ public class NoteActivity extends AppCompatActivity {
                 deleteFilesInDir(dir);
             }
 
-            File d = new File(NOTEBOOK_DIRECTORY);
-            String[] children = d.list();
-            for (String child : children) {
-                Log.e("before", child.toString());
-            }
 
             //Delete current notebook file
             File currentNoteBook = new File(NOTEBOOK_DIRECTORY + "/" + currentFolder + ".txt");
-            Log.e("gi", currentNoteBook.toString());
 
             currentNoteBook.delete();
 
-
-            children = d.list();
-            for (String child : children) {
-                Log.e("after", child.toString());
-            }
 
             if (currentFolder.contains("/")) {
                 removeLinkToSelfFromPreviousLayout();
@@ -999,7 +978,7 @@ public class NoteActivity extends AppCompatActivity {
 
             //Call back button to return to the layout above this
             deleting = true;
-            goBackToPreviousLayout();
+            goBackParentLayout();
         } catch (Exception e) {
 
         }
@@ -1077,13 +1056,14 @@ public class NoteActivity extends AppCompatActivity {
 
     }
 
-    public void goBackToPreviousLayout() {
+    //Return to the parent layout to this one
+    public void goBackParentLayout() {
 
         //If not deleting save the layout
         if (!deleting) {
             saveItems();
         }
-
+        //If parent layout will be a noteActivity
         if (currentFolder.contains("/")) {
 
             //Split out the last notebook in the chain
@@ -1103,15 +1083,16 @@ public class NoteActivity extends AppCompatActivity {
 
             return;
         }
-
+        //Else will be a mainmenu activity
         startActivity(new Intent(NoteActivity.this, MainMenuActivity.class));
 
 
     }
 
 
+    //Handles images
     ////####################################################################################################################################
-    //Copied from https://stackoverflow.com/questions/5991319/capture-image-from-camera-and-display-in-activity
+    //Copied and modified from https://stackoverflow.com/questions/5991319/capture-image-from-camera-and-display-in-activity
 
     //Activity result from the camera called from an image cell object
     @Override
@@ -1128,11 +1109,7 @@ public class NoteActivity extends AppCompatActivity {
                 try {
 
                     Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), contentURI);
-//                    String path  = ImageFilePath.getPath(this, data.getData());
-                    // String path = contentURI.getPath().split(":")[1]+".jpg";
-//                    Log.e("path", path);
                     String path = saveImage(bitmap);
-                    Log.e("path", path);
                     setDisplayImage(path, bitmap);
 
                     Toast.makeText(getApplicationContext(), "Image Saved!", Toast.LENGTH_SHORT).show();
@@ -1147,16 +1124,6 @@ public class NoteActivity extends AppCompatActivity {
 
         } else if (requestCode == CAMERA) {
 
-            //TODO: make this faster
-            //Try here
-            //https://stackoverflow.com/questions/32043222/how-to-get-full-size-picture-and-thumbnail-from-camera-in-the-same-intent
-            //Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
-
-            Log.e("processing", "processing");
-            //loading
-//            ProgressDialog dialog = ProgressDialog.show(this, "",
-//                    "Loading. Please wait...", true);
-            //
             Bitmap thumbnail = null;
             try {
                 thumbnail = MediaStore.Images.Media.getBitmap(
@@ -1171,6 +1138,7 @@ public class NoteActivity extends AppCompatActivity {
 
             Bitmap rotatedBitmap = null;
 
+            //Rotate the bit map so it is displayed correctly
             //Check if width > height
             if (thumbnail.getWidth() > thumbnail.getHeight()) {
                 //Rotate the image 90
@@ -1220,7 +1188,7 @@ public class NoteActivity extends AppCompatActivity {
 
     public String saveImage(Bitmap myBitmap) {
 
-        //Use JPEG format, faster and put into byteoutputstream
+        //Use JPEG format, faster and put into byteoutputstream - faster than png
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         myBitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
 
