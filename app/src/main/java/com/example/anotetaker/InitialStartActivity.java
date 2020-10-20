@@ -9,7 +9,6 @@ import android.os.Bundle;
 
 import android.util.Log;
 
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.karumi.dexter.Dexter;
@@ -22,11 +21,9 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
+
 import java.io.InputStreamReader;
 import java.util.List;
 
@@ -44,15 +41,12 @@ public class InitialStartActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = this;
-        //setContentView(R.layout.activity_main_menu);
         requestMultiplePermissions();
-
-
-
-
 
     }
 
+    //Checks that the permissions are enabled, if so it will load the last seen layout
+    //Else it will kill the app
     private void requestMultiplePermissions() {
         Dexter.withActivity(this)
                 .withPermissions(
@@ -65,14 +59,12 @@ public class InitialStartActivity extends AppCompatActivity {
                         if (report.areAllPermissionsGranted()) {  // check if all permissions are granted
                             Toast.makeText(getApplicationContext(), "All permissions are granted by user!", Toast.LENGTH_SHORT).show();
                             loadPreviousLayout();
-                        }
-                        else{
+                        } else {
                             Log.e("bad", "is bad");
                             android.os.Process.killProcess(android.os.Process.myPid());
                         }
 
                         if (report.isAnyPermissionPermanentlyDenied()) {
-
 
 
                         }
@@ -93,14 +85,13 @@ public class InitialStartActivity extends AppCompatActivity {
                 .check();
     }
 
-
+    //Loads the last opened layout
     public void loadPreviousLayout() {
-
 
         final File file = new File("/data/data/com.example.anotetaker/files" + "/" + "lastImageAddedLocation.txt");
         try {
+            //Check if file exists, wont exist for the first time running this app
             if (file.exists()) {
-
 
                 FileInputStream is;
                 BufferedReader reader;
@@ -113,7 +104,7 @@ public class InitialStartActivity extends AppCompatActivity {
 
                 Log.e("lastFile", lastFile);
                 //Checks if we were last in the main menu
-                if(lastFile.equals("MainMenu")){
+                if (lastFile.equals("MainMenu")) {
                     this.startActivity(new Intent(context, MainMenuActivity.class));
                     return;
                 }
@@ -122,7 +113,6 @@ public class InitialStartActivity extends AppCompatActivity {
                 //Open the note book
                 SharedPreferences mPrefs = this.getSharedPreferences("NotebookNameValue", 0);
                 SharedPreferences.Editor editor = mPrefs.edit();
-                Log.e("hello",  lastFile);
                 editor.putString(this.getString(R.string.curWorkingFolder), lastFile);
                 editor.commit();
 
@@ -136,8 +126,6 @@ public class InitialStartActivity extends AppCompatActivity {
         //Any errors will default back to opening main menu
         this.startActivity(new Intent(this, MainMenuActivity.class));
 
-
     }
-
 
 }

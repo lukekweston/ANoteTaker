@@ -41,7 +41,6 @@ import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -55,27 +54,23 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
 
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.FileProvider;
 
-import static androidx.core.content.FileProvider.getUriForFile;
-
+//Activity that all the notes are displayed in
 public class NoteActivity extends AppCompatActivity {
 
+    //Button for adding a new cell
     ImageButton buttonAdd;
 
     public LinearLayout layout, layoutAllNotes;
     public ScrollView scrollView;
 
-
+    //Folder/filelocation that this note is in
     String currentFolder = "";
 
     public static Uri imageUri = null;
@@ -86,14 +81,13 @@ public class NoteActivity extends AppCompatActivity {
     private int GALLERY = 1;
     private static int CAMERA = 2;
 
+    //Flag set for deleting this notebook, stops this note from being saved when killed
     public boolean deleting = false;
 
     public int notesColour = -1;
 
+    //Notes in this display
     public ArrayList<Note> notesDisplayed = new ArrayList<Note>();
-
-    Timer timer;
-    TimerTask autoSaveEvent;
 
 
     public String lastImageAddedLocation = "null";
@@ -127,21 +121,19 @@ public class NoteActivity extends AppCompatActivity {
         String defaultValue = getResources().getString(R.string.workingFolder_default);
         currentFolder = mPrefs.getString(getString(R.string.curWorkingFolder), defaultValue);
 
-
+        //Set the title
         getSupportActionBar().setTitle(currentFolder);
 
-
+        //Get the views that will be used for this layout
         layout = (LinearLayout) findViewById(R.id.layout);
-
-
         layoutAllNotes = (LinearLayout) findViewById(R.id.layoutItems);
         scrollView = (ScrollView) findViewById(R.id.scrollView);
-
         buttonAdd = (ImageButton) findViewById(R.id.buttonAdd);
 
+        //Load the existing items
         loadFolder(currentFolder);
 
-
+        //Set the buttons listener to open a menu to select the type of item to add
         buttonAdd.setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
@@ -151,19 +143,6 @@ public class NoteActivity extends AppCompatActivity {
                 selectNoteTypeDialog();
             }
         });
-
-
-//        Todo make this listener work better
-//        timer = new Timer();
-//        int delay = 0;
-//        int period = 2000;
-//        autoSaveEvent = new TimerTask() {
-//            @Override
-//            public void run() {
-//                saveItems(layoutAllNotes);
-//            }
-//        };
-//        timer.scheduleAtFixedRate(autoSaveEvent, delay, period);
 
 
         //Set the scroll viewlistener for when everything has loaded
@@ -190,27 +169,33 @@ public class NoteActivity extends AppCompatActivity {
     }
 
 
-    public void removeAutoSave() {
-        //timer.cancel();
-    }
-
+    //On pause and stop if not deleting then saveItems
     public void onPause() {
-        if(!deleting) {
+        if (!deleting) {
             saveItems(layoutAllNotes);
         }
-        removeAutoSave();
         super.onPause();
     }
 
     @Override
     protected void onStop() {
-        super.onStop();
-        if(!deleting) {
+        if (!deleting) {
             saveItems(layoutAllNotes);
         }
+        super.onStop();
     }
 
+    //When back button is pressed then return to previous layout method
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            goBackToPreviousLayout();
+            return true;
+        }
+        return false;
+    }
 
+    //Creates a pop up menu for adding a new item
     private void selectNoteTypeDialog() {
         AlertDialog.Builder pictureDialog = new AlertDialog.Builder(this);
         pictureDialog.setTitle("Select Note to add");
@@ -221,21 +206,19 @@ public class NoteActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         switch (which) {
+                            //Add a noteCell
                             case 0:
                                 NoteCell nC = new NoteCell(null, null, null, NoteCell.Type.text, true, notesColour, false, NoteActivity.this, layoutAllNotes);
                                 notesDisplayed.add(nC);
                                 nC.createNote(null);
                                 break;
+                            //NoteCell with bullet points
                             case 1:
                                 nC = new NoteCell(null, null, null, NoteCell.Type.bulletpoint, true, notesColour, false, NoteActivity.this, layoutAllNotes);
                                 notesDisplayed.add(nC);
                                 nC.createNote(null);
                                 break;
-//                            case 2:
-//                                nC = new NoteCell(null, null, null, NoteCell.Type.list, true, notesColour, false, NoteActivity.this, layoutAllNotes);
-//                                notesDisplayed.add(nC);
-//                                nC.createNote(null);
-//                                break;
+                            //Imagecell
                             case 2:
                                 ImageCell iC = new ImageCell(null, null, null, true, notesColour, false, NoteActivity.this, layoutAllNotes);
                                 notesDisplayed.add(iC);
@@ -247,9 +230,9 @@ public class NoteActivity extends AppCompatActivity {
                                 notesDisplayed.add(cLC);
                                 cLC.createNote(null);
                                 break;
-                            case 4:
-                            {
-
+                            //New sub note
+                            case 4: {
+                                //Create the pop up for getting the title of the new sub note book
                                 AlertDialog.Builder alertDialog = new AlertDialog.Builder(NoteActivity.this);
                                 alertDialog.setTitle("New Notebook");
                                 final EditText input = new EditText(NoteActivity.this);
@@ -270,11 +253,22 @@ public class NoteActivity extends AppCompatActivity {
                                 //Set the confirm button
                                 alertDialog.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
-
-                                        NewNoteBookCell nNNB = new NewNoteBookCell(currentFolder + "/" + input.getText().toString().replace("/", "-"), NoteActivity.this, layoutAllNotes);
+                                        //Get the name of the new note book, remove / as it will interfer with the folder structures
+                                        String newNoteBook = currentFolder + "/" + input.getText().toString().replace("/", "-");
+                                        //Check a note book with this name doesnt already exist
+                                        for(Note n : notesDisplayed){
+                                            if(n instanceof NewNoteBookCell){
+                                                //If it does exist, print error toast and return
+                                                if(((NewNoteBookCell) n)._noteBookFile.equals(newNoteBook)){
+                                                    Toast.makeText(getApplicationContext(), "Note book with title " + newNoteBook + " already exists", Toast.LENGTH_LONG).show();
+                                                    return;
+                                                }
+                                            }
+                                        }
+                                        //Else create the new notebook cell
+                                        NewNoteBookCell nNNB = new NewNoteBookCell(newNoteBook, NoteActivity.this, layoutAllNotes);
                                         notesDisplayed.add(nNNB);
                                         nNNB.createNote(null);
-
 
                                     }
                                 });
@@ -297,24 +291,6 @@ public class NoteActivity extends AppCompatActivity {
 
     }
 
-
-    @Override
-    protected void onDestroy() {
-        //saveItems(layoutItems);
-        super.onDestroy();
-
-    }
-
-
-    //Control back button
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            goBackToPreviousLayout();
-            return true;
-        }
-        return false;
-    }
 
 
     //Create the menu
@@ -816,7 +792,6 @@ public class NoteActivity extends AppCompatActivity {
         saveItems(layoutAllNotes);
 
 
-
     }
 
     //Renames all the links in the txt files in the parent directories
@@ -843,7 +818,7 @@ public class NoteActivity extends AppCompatActivity {
     public void renameFilesInSubDirectories(String previousFolder, String renamedFolder, File dir) {
 
         //Error checking
-        if(!dir.exists()){
+        if (!dir.exists()) {
             return;
         }
 
@@ -855,7 +830,7 @@ public class NoteActivity extends AppCompatActivity {
             if (f.isDirectory()) {
                 renameFilesInSubDirectories(previousFolder, renamedFolder, f);
             }
-           //if txt file, update the links
+            //if txt file, update the links
             if (child.endsWith(".txt")) {
                 updateNoteBookLinksInFile(previousFolder, renamedFolder, (dir.toString() + "/" + child));
             }
@@ -870,7 +845,7 @@ public class NoteActivity extends AppCompatActivity {
 
         Log.e("File being updated", fileToBeUpdated);
         String lines = "";
-        final File file = new File( fileToBeUpdated);
+        final File file = new File(fileToBeUpdated);
         //Load and update current file
         try {
             FileInputStream is;
@@ -930,7 +905,7 @@ public class NoteActivity extends AppCompatActivity {
     }
 
     public void saveItems(LinearLayout layoutItems) {
-        Log.e("saveing","saving");
+        Log.e("saveing", "saving");
         saveCurrentLocation();
 
         //todo: make folders and save files as the folder name
@@ -1017,7 +992,6 @@ public class NoteActivity extends AppCompatActivity {
             Log.e("gi", currentNoteBook.toString());
 
             currentNoteBook.delete();
-
 
 
             children = d.list();
@@ -1111,8 +1085,6 @@ public class NoteActivity extends AppCompatActivity {
 
     public void goBackToPreviousLayout() {
 
-        //Remove the auto save and save the layout
-        removeAutoSave();
         //If not deleting save the layout
         if (!deleting) {
             saveItems(layoutAllNotes);

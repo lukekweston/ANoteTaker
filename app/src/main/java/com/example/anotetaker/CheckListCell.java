@@ -19,14 +19,17 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+
+//Creates the cell that all the checklist items will go in
 public class CheckListCell extends Note {
 
-    private static final String TAG = "CheckListCell";
-
+    //List of the checklist items in this cell
     ArrayList<CheckListItem> _checkedItems;
     LinearLayout _layoutItems;
-    RecyclerViewAdapter _adapter;
 
+    //Controls the recycler view
+    RecyclerViewAdapter _adapter;
+    //Checklist items are stored in the recyclerview
     RecyclerView recyclerView;
 
 
@@ -41,8 +44,6 @@ public class CheckListCell extends Note {
         _checkedItems = new ArrayList<CheckListItem>();
         _adapter = new RecyclerViewAdapter(_checkedItems, _c);
     }
-
-
 
 
     //For loading in checklist items
@@ -102,8 +103,6 @@ public class CheckListCell extends Note {
         }
 
 
-
-
         //Create the border
         setBorder();
 
@@ -132,7 +131,7 @@ public class CheckListCell extends Note {
                 //refresh the layout
                 recyclerView.setAdapter(_adapter);
                 _adapter.notifyDataSetChanged();
-                Log.e("hmm","hmm");
+                Log.e("hmm", "hmm");
 
             }
         });

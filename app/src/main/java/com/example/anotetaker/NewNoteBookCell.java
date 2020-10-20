@@ -18,7 +18,7 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 
 
-
+//Cell that will open another sub notebook
 public class NewNoteBookCell extends Note {
 
 
@@ -28,12 +28,14 @@ public class NewNoteBookCell extends Note {
     public NewNoteBookCell(String noteBookFile, Context c, LinearLayout layoutAllNotes){
         _noteBookFile = noteBookFile;
         //Initially creating, border set to -1 (black)
+        //File for the sub layout will not be created, so there will be no border colour to get
         _borderColor = -1;
         _c = c;
         _layoutAllNotes = layoutAllNotes;
     }
 
 
+    //Create the layout
     @Override
     public void createNote(Integer index) {
         _layoutNoteBeingAdded = LayoutInflater.from(_c).inflate(R.layout.activity_open_note_cell, _layoutAllNotes, false);
@@ -77,7 +79,7 @@ public class NewNoteBookCell extends Note {
                 try {
                     ((NoteActivity) _c).saveItems(((NoteActivity) _c).layoutAllNotes);
                     ((NoteActivity) _c).finishAndRemoveTask();
-                    ((NoteActivity) _c).removeAutoSave();
+
                 }
                 catch (Exception e){
                     Log.e("Main Actvity note","Do not need to save");
@@ -95,10 +97,12 @@ public class NewNoteBookCell extends Note {
 
         };
 
+        //Set all the touchable areas on the cell to the openNoteBook listener
         openButton.setOnClickListener(openNotebook);
         noteBookName.setOnClickListener(openNotebook);
 
 
+        //Insert the cell at the right index if not null
         if(index == null) {
             _layoutAllNotes.addView(_layoutNoteBeingAdded);
         }

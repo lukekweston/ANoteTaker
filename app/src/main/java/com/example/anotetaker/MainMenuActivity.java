@@ -5,25 +5,30 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.ScrollView;
+import android.widget.Toast;
+
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
 
+
+//This is the main menu activity, displays the top level of all notebooks
 public class MainMenuActivity extends AppCompatActivity {
 
 
     String NOTEBOOK_DIRECTORY = "/data/data/com.example.anotetaker/files/notebooks";
     LinearLayout menuItems;
+
+    //Keeps track of what cells are displayed/exist in this layout
+    public ArrayList<NewNoteBookCell> notesBooksDisplayed = new ArrayList<NewNoteBookCell>();
 
 
     @Override
@@ -34,11 +39,6 @@ public class MainMenuActivity extends AppCompatActivity {
         saveCurrentLocation();
         setContentView(R.layout.activity_main_menu);
 
-        File d = new File(NOTEBOOK_DIRECTORY);
-        String[] children = d.list();
-        for (String child : children) {
-            Log.e("menu", child.toString());
-        }
 
         //Set the animation for opening this intent
         this.overridePendingTransition(R.anim.anim_slide_in_right, R.anim.anim_slide_out_right);
@@ -51,6 +51,7 @@ public class MainMenuActivity extends AppCompatActivity {
 
         ImageButton addButton = (ImageButton) findViewById(R.id.addBtn);
 
+        //Creates pop up for creating new Notebook
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -76,8 +77,21 @@ public class MainMenuActivity extends AppCompatActivity {
                 alertDialog.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
 
+                        String newNoteBook = input.getText().toString().replace("/", "-");
 
-                        new NewNoteBookCell(input.getText().toString().replace("/", "-"), MainMenuActivity.this, menuItems).createNote(null);
+                        //Check if the notebook with this name already exits
+                        for(NewNoteBookCell n : notesBooksDisplayed){
+                            //If it does display error Toast and return
+                            if(n._noteBookFile.equals(newNoteBook)){
+                                Toast.makeText(getApplicationContext(), "Note book with title " + newNoteBook + " already exists", Toast.LENGTH_LONG).show();
+                                return;
+                            }
+                        }
+                        //If not create the note and add it to the list of items displayed
+                        NewNoteBookCell nC = new NewNoteBookCell(newNoteBook, MainMenuActivity.this, menuItems);
+                        notesBooksDisplayed.add(nC);
+                        nC.createNote(null);
+
 
                     }
                 });
@@ -118,7 +132,7 @@ public class MainMenuActivity extends AppCompatActivity {
             BufferedWriter bw = new BufferedWriter(new FileWriter(noteBookFile));
             bw.write("MainMenu");
             bw.close();
-            Log.e("Main menu saved",":-)");
+            Log.e("Main menu saved", ":-)");
         } catch (Exception e) {
 
         }
@@ -126,10 +140,12 @@ public class MainMenuActivity extends AppCompatActivity {
     }
 
 
+    //Loads the notebooks that are in the main menu and creates newNoteBookcells to link to them
     public void loadNoteBooks() {
 
         File notebookDirectory = new File(NOTEBOOK_DIRECTORY);
-        if (!notebookDirectory.exists()) {  // have the object build the directory structure, if needed.
+        // have the object build the directory structure, if needed, for if something got deleted
+        if (!notebookDirectory.exists()) {
             notebookDirectory.mkdirs();
         }
         final ArrayList<String> notebooks = new ArrayList<String>();
@@ -139,16 +155,18 @@ public class MainMenuActivity extends AppCompatActivity {
         File directory = new File(path);
         File[] files = directory.listFiles();
         Log.d("Files", "Size: " + files.length);
+        //get the .txt (notebook) files
         for (int i = 0; i < files.length; i++) {
             if (files[i].getName().endsWith(".txt")) {
                 notebooks.add(files[i].getName().split(".txt")[0]);
             }
         }
 
-
+        //Create the notebooks, add them to the displayed list and populate the main menu
         for (String nb : notebooks) {
-
-            new NewNoteBookCell(nb, MainMenuActivity.this, menuItems).createNote(null);
+            NewNoteBookCell nC = new NewNoteBookCell(nb, MainMenuActivity.this, menuItems);
+            notesBooksDisplayed.add(nC);
+            nC.createNote(null);
         }
 
 

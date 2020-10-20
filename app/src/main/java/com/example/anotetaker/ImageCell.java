@@ -6,14 +6,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -22,9 +19,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.TransitionOptions;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import java.io.File;
 import java.time.LocalDateTime;
@@ -40,9 +34,10 @@ public class ImageCell extends Note {
     String _fileLocation = null;
     String _date = null;
 
-
+    //Flag for adding the image into the right layout
     public boolean ADDINGIMAGE = false;
-    private ImageView displayImage;  // imageview
+
+    private ImageView displayImage;
     private Button addImageFromFile, addImageFromCamera;
 
 
@@ -65,12 +60,14 @@ public class ImageCell extends Note {
     }
 
 
+    //Creates a note with no title and sets up the border views
     public View ImageCellNoTitle() {
         View layoutBeingAdded = LayoutInflater.from(_c).inflate(R.layout.layout_image_cell, _layoutAllNotes, false);
         _borderViews = new View[]{layoutBeingAdded.findViewById(R.id.layoutImageCellNoTitle), layoutBeingAdded.findViewById(R.id.imageView), layoutBeingAdded.findViewById(R.id.menuButton)};
         return layoutBeingAdded;
     }
 
+    //Creates a note with a title and sets up border views
     public View imageTitle() {
         View layoutBeingAdded = LayoutInflater.from(_c).inflate(R.layout.layout_image_cell_title, _layoutAllNotes, false);
         _borderViews = new View[]{layoutBeingAdded.findViewById(R.id.layoutImageCell), layoutBeingAdded.findViewById(R.id.imageView), layoutBeingAdded.findViewById(R.id.menuButton)};
@@ -79,7 +76,7 @@ public class ImageCell extends Note {
 
 
     //Listener that allows the displayed image to be opened in gallery
-    public View.OnClickListener openGallery(){
+    public View.OnClickListener openGallery() {
         return (new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -98,78 +95,64 @@ public class ImageCell extends Note {
     }
 
 
-
+    //Sets the display image and uses openGallery listener to make it so an image can be opened in gallery
     public void setDisplayImage(final String fileLocation, Bitmap image) {
         //get the width of the image and scale on this so that the image always fills the
         //width of the display it is in
         int width = displayImage.getDrawable().getIntrinsicWidth();
         float rescaleSize = (float) width / (float) image.getWidth();
-        //Rescale the bit map
+        //Rescale the bit map to increase performance
         image = Bitmap.createScaledBitmap(image, Math.round(image.getWidth() * rescaleSize)
                 , Math.round(image.getHeight() * rescaleSize), true);
-        //Glide.with(_c).load(new File(fileLocation)).diskCacheStrategy(DiskCacheStrategy.ALL).thumbnail(0.5f).into(displayImage);
+
         displayImage.setImageBitmap(image);
+
         _fileLocation = fileLocation;
+
+        //Deactivate listeners on buttons and make them invisible
+        addImageFromCamera.setOnClickListener(null);
+        addImageFromFile.setOnClickListener(null);
         addImageFromCamera.setVisibility(View.INVISIBLE);
         addImageFromFile.setVisibility(View.INVISIBLE);
-        ADDINGIMAGE = false;
 
+
+        //Set the opening gallery method
         displayImage.setOnClickListener(openGallery());
 
+        //Image has been added set flag to false
+        ADDINGIMAGE = false;
 
     }
 
 
-
-
+    //Creates the note
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void createNote(Integer index) {
-        Log.e("dd",_noTitle + "");
-
+        //Get the layout type
         _layoutNoteBeingAdded = _noTitle ? ImageCellNoTitle() : imageTitle();
 
-
-        setBorder();
-
-        ImageButton menuButton = _layoutNoteBeingAdded.findViewById(R.id.menuButton);
-        menuButton.setClickable(true);
-
-        addImageFromFile = _layoutNoteBeingAdded.findViewById(R.id.buttonImageFromFile);
-        addImageFromCamera = _layoutNoteBeingAdded.findViewById(R.id.buttonImageFromCamera);
-
-        displayImage = _layoutNoteBeingAdded.findViewById(R.id.imageView);
-
-
-        if (_fileLocation != null) {
-            File imgFile = new File(_fileLocation);
-
-
-            if (imgFile.exists()) {
-                displayImage = _layoutNoteBeingAdded.findViewById(R.id.imageView);
-                Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-
-                //get the width of the image and scale on this so that the image always fills the
-                //width of the display it is in
-                int width = displayImage.getDrawable().getIntrinsicWidth();
-                float rescaleSize = (float) width / (float) myBitmap.getWidth();
-                //Rescale the bit map
-                myBitmap = Bitmap.createScaledBitmap(myBitmap, Math.round(myBitmap.getWidth() * rescaleSize)
-                        , Math.round(myBitmap.getHeight() * rescaleSize), true);
-
-                //Set the bitmap
-                displayImage.setImageBitmap(myBitmap);
-                addImageFromFile.setVisibility(View.INVISIBLE);
-                addImageFromCamera.setVisibility(View.INVISIBLE);
-
-                displayImage.setOnClickListener(openGallery());
-
+        //Creating with title, then set the title
+        if (!_noTitle) {
+            TextView dateTimeCreated = _layoutNoteBeingAdded.findViewById(R.id.DateTimeCreated);
+            dateTimeCreated.setText(_date);
+            if (_title != null) {
+                TextView titleOfNote = _layoutNoteBeingAdded.findViewById(R.id.editTextTitle);
+                titleOfNote.setText(_title);
             }
-            else{
-                Log.e("file not exits", _fileLocation);
-            }
-
         }
 
+        //Make the borders
+        setBorder();
+
+        //Set up the menu
+        ImageButton menuButton = _layoutNoteBeingAdded.findViewById(R.id.menuButton);
+        menuButton.setClickable(true);
+        menuButton.setOnClickListener(menuListener);
+
+
+        //Create buttons and set listeners
+        addImageFromFile = _layoutNoteBeingAdded.findViewById(R.id.buttonImageFromFile);
+        addImageFromCamera = _layoutNoteBeingAdded.findViewById(R.id.buttonImageFromCamera);
 
         addImageFromFile.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -186,49 +169,49 @@ public class ImageCell extends Note {
         });
 
 
-
         //First time creating so get current date time
         if (_date == null) {
             _date = LocalDateTime.now().toLocalDate() + " " + LocalDateTime.now().toLocalTime().toString().split(":")[0] + ":" + LocalDateTime.now().toLocalTime().toString().split(":")[1];
         }
 
 
-        //Creating with title
-        if (! _noTitle) {
+        displayImage = _layoutNoteBeingAdded.findViewById(R.id.imageView);
 
-            TextView dateTimeCreated = _layoutNoteBeingAdded.findViewById(R.id.DateTimeCreated);
-            dateTimeCreated.setText(_date);
-            if(_title != null) {
-                TextView titleOfNote = _layoutNoteBeingAdded.findViewById(R.id.editTextTitle);
-                titleOfNote.setText(_title);
+        //Add image to be displayed
+        if (_fileLocation != null) {
+            //Create file and check it exists
+            File imgFile = new File(_fileLocation);
+            if (imgFile.exists()) {
+                //use _fileLocation and a bitmap created from _fileLocation
+                setDisplayImage(_fileLocation, BitmapFactory.decodeFile(imgFile.getAbsolutePath()));
             }
+            //Image has been deleted or moved, set fileLocation to null and dont display
+            else {
+                Log.e("file not exits", _fileLocation);
+                _fileLocation = null;
+            }
+
         }
 
 
-
-        menuButton.setOnClickListener(menuListener);
-
-
-        if(index == null) {
+        //Add view at the right index
+        if (index == null) {
             _layoutAllNotes.addView(_layoutNoteBeingAdded);
-        }
-        else {
+        } else {
             _layoutAllNotes.addView(_layoutNoteBeingAdded, index);
         }
 
 
-
-
     }
 
-
+    //Starts intent to get image from gallery, intents returned result is returned into NoteActivity
     public void choosePhotoFromGallery() {
         Intent galleryIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         ((Activity) _c).startActivityForResult(galleryIntent, GALLERY);
     }
 
+    //Starts intent to get image from camera, intents returned result is returned into NoteActivity
     void takePhotoFromCamera() {
-//https://www.semicolonworld.com/question/45696/low-picture-image-quality-when-capture-from-camera
         ContentValues values = new ContentValues();
         values.put(MediaStore.Images.Media.TITLE, "New Picture");
         values.put(MediaStore.Images.Media.DESCRIPTION, "From your Camera");
@@ -237,8 +220,6 @@ public class ImageCell extends Note {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, ((NoteActivity) _c).imageUri);
         ((Activity) _c).startActivityForResult(intent, CAMERA);
-
-
 
     }
 
@@ -260,16 +241,15 @@ public class ImageCell extends Note {
     @Override
     public String getReminderTitle() {
         _title = ((EditText) _layoutNoteBeingAdded.findViewById(R.id.editTextTitle)).getText().toString();
-        if(!_title.equals("Title") && !_title.equals(null)){
+        if (!_title.equals("Title") && !_title.equals(null)) {
             return _title;
-        }
-        else{
+        } else {
             return "Reminder for image";
         }
     }
 
     @Override
     public String getTitle() {
-        return ((EditText)_layoutNoteBeingAdded.findViewById(R.id.editTextTitle)).getText().toString();
+        return ((EditText) _layoutNoteBeingAdded.findViewById(R.id.editTextTitle)).getText().toString();
     }
 }

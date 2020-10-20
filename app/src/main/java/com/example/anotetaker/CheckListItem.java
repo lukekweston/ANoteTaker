@@ -16,7 +16,7 @@ public class CheckListItem {
     //Boolean variable to check if the note has been deleted
     public boolean _deleted = false;
 
-    public CheckListItem(Boolean checked, String contents, int borderColor, boolean highlighted){
+    public CheckListItem(Boolean checked, String contents, int borderColor, boolean highlighted) {
         _checked = checked;
         _contents = contents;
         _borderColor = borderColor;
@@ -25,19 +25,18 @@ public class CheckListItem {
     }
 
     //For creating a blank/new checklist item
-    public CheckListItem(int borderColor){
+    public CheckListItem(int borderColor) {
         _borderColor = borderColor;
         createBorder();
     }
 
     //Creates the border for this checklist item
-    public void createBorder(){
+    public void createBorder() {
         _border = new GradientDrawable();
         _border.setColor(0xFFFFFFFF);
-        if(_highlighted){
+        if (_highlighted) {
             _border.setStroke(10, Color.parseColor("#FFFF00"));
-        }
-        else {
+        } else {
             _border.setStroke(10, _borderColor);
         }
 
@@ -50,9 +49,6 @@ public class CheckListItem {
         note += "contents#%^$ " + _contents + "\n";
         return note;
     }
-
-
-
 
 
 }
