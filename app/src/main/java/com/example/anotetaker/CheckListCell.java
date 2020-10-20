@@ -89,17 +89,20 @@ public class CheckListCell extends Note {
             _layoutNoteBeingAdded = createCheckListNoTitle();
             _borderViews = new View[]{_layoutNoteBeingAdded.findViewById(R.id.layoutChecklist),
                     _layoutNoteBeingAdded.findViewById(R.id.layoutBottom), _layoutNoteBeingAdded.findViewById(R.id.menuButton),
-                    _layoutNoteBeingAdded.findViewById(R.id.buttonAdd)};
+                    _layoutNoteBeingAdded.findViewById(R.id.buttonAdd), _layoutNoteBeingAdded.findViewById(R.id.buttonLayout)};
         } else {
             _layoutNoteBeingAdded = createCheckListTitle();
             _borderViews = new View[]{_layoutNoteBeingAdded.findViewById(R.id.layoutTextCell),
-                    _layoutNoteBeingAdded.findViewById(R.id.layoutBottom),
-                    _layoutNoteBeingAdded.findViewById(R.id.menuButton), _layoutNoteBeingAdded.findViewById(R.id.buttonAdd)};
+                    _layoutNoteBeingAdded.findViewById(R.id.layoutBottom), _layoutNoteBeingAdded.findViewById(R.id.menuButton),
+                    _layoutNoteBeingAdded.findViewById(R.id.buttonAdd), _layoutNoteBeingAdded.findViewById(R.id.buttonLayout)};
 
             //Set the date
             TextView dateTimeCreated = _layoutNoteBeingAdded.findViewById(R.id.DateTimeCreated);
             dateTimeCreated.setText(_date);
         }
+
+
+
 
         //Create the border
         setBorder();
@@ -111,6 +114,9 @@ public class CheckListCell extends Note {
         recyclerView.setLayoutManager(new LinearLayoutManager(_c));
         new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerView);
         recyclerView.setAdapter(_adapter);
+        //Set the recyclerview to not be scrolable
+        recyclerView.setHasFixedSize(false);
+        //recyclerView.setNestedScrollingEnabled(false);
 
         //Set up the drop down menu
         ImageButton menuButton = _layoutNoteBeingAdded.findViewById(R.id.menuButton);
@@ -126,6 +132,8 @@ public class CheckListCell extends Note {
                 //refresh the layout
                 recyclerView.setAdapter(_adapter);
                 _adapter.notifyDataSetChanged();
+                Log.e("hmm","hmm");
+
             }
         });
 

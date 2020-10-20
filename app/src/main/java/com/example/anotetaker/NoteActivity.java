@@ -204,7 +204,6 @@ public class NoteActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        Log.e("hello", "stop");
         if(!deleting) {
             saveItems(layoutAllNotes);
         }
@@ -925,6 +924,7 @@ public class NoteActivity extends AppCompatActivity {
     }
 
     public void saveItems(LinearLayout layoutItems) {
+        Log.e("saveing","saving");
         saveCurrentLocation();
 
         //todo: make folders and save files as the folder name
@@ -1096,9 +1096,6 @@ public class NoteActivity extends AppCompatActivity {
                 deleteFilesInDir(f);
             }
             //TODO delete images that are used in these notebooks?
-//            if(child.endsWith(".txt")){
-//                Log.e("notebook", child);
-//            }
 
             new File(dir, child).delete();
         }
