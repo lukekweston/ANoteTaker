@@ -37,6 +37,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.Toast;
 
@@ -247,23 +248,29 @@ public class NoteActivity extends AppCompatActivity {
                                 cLC.createNote(null);
                                 break;
                             case 4:
-                                //TODO: make this pop up better
                             {
-                                AlertDialog.Builder builder = new AlertDialog.Builder(NoteActivity.this);
 
-                                builder.setTitle("New notebook");
+                                AlertDialog.Builder alertDialog = new AlertDialog.Builder(NoteActivity.this);
+                                alertDialog.setTitle("New Notebook");
                                 final EditText input = new EditText(NoteActivity.this);
                                 input.setHint("Notebook name");
+                                //Add a linear layout to pad the view
+                                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                                        LinearLayout.LayoutParams.MATCH_PARENT,
+                                        LinearLayout.LayoutParams.WRAP_CONTENT);
+                                lp.setMargins(36, 36, 36, 36);
+                                input.setLayoutParams(lp);
+                                RelativeLayout container = new RelativeLayout(NoteActivity.this);
+                                RelativeLayout.LayoutParams rlParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+                                container.setLayoutParams(rlParams);
+                                container.addView(input);
 
-                                input.setInputType(InputType.TYPE_CLASS_TEXT);
-                                builder.setView(input);
+                                alertDialog.setView(container);
 
-
-                                builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                                //Set the confirm button
+                                alertDialog.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
 
-
-                                        //addNoteBook(currentFolder + "/" + input.getText().toString().replace("/", "-"));
                                         NewNoteBookCell nNNB = new NewNoteBookCell(currentFolder + "/" + input.getText().toString().replace("/", "-"), NoteActivity.this, layoutAllNotes);
                                         notesDisplayed.add(nNNB);
                                         nNNB.createNote(null);
@@ -272,17 +279,16 @@ public class NoteActivity extends AppCompatActivity {
                                     }
                                 });
 
-                                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                //Cancel, do nothing
+                                alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
                                         // User cancelled the dialog
                                     }
                                 });
+                                alertDialog.show();
 
-
-                                builder.show();
+                                break;
                             }
-
-                            break;
                         }
                     }
                 });
