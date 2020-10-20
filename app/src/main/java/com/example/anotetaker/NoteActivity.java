@@ -339,7 +339,9 @@ public class NoteActivity extends AppCompatActivity {
                 //Check this https://stackoverflow.com/questions/10903754/input-text-dialog-android
 
                 final EditText input = new EditText(this);
-                input.setHint(currentFolder);
+
+                //Gets and sets the hint to the final notebook
+                input.setHint(currentFolder.split("/").length > 0 ? currentFolder.split("/")[currentFolder.split("/").length - 1] : currentFolder);
 //                input.setPadding(
 //                        19, // if you look at android alert_dialog.xml, you will see the message textview have margin 14dp and padding 5dp. This is the reason why I use 19 here
 //                        0,
@@ -355,27 +357,9 @@ public class NoteActivity extends AppCompatActivity {
 
                 builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        String currentNoteBook = currentFolder;
 
-                        //Split out the current level folder if the notebook is many deep
-                        if(currentFolder.contains("/")){
-                            currentFolder = currentFolder.substring(0, currentFolder.lastIndexOf("/")) + "/";
-                        }
-                        else{
-                            currentFolder = "";
-                        }
                         String newNoteBookName = input.getText().toString().replace("/", "-");
-
-                        currentFolder += newNoteBookName;
-
-                        for(Note note : notesDisplayed){
-                            if(note instanceof NewNoteBookCell){
-                                Log.e("notebooke name", ((NewNoteBookCell) note)._noteBookFile);
-                                ((NewNoteBookCell) note)._noteBookFile = ((NewNoteBookCell) note)._noteBookFile.replace(currentNoteBook, newNoteBookName);
-                            }
-                        }
-
-                        saveItems(layoutAllNotes);
+                        rename(newNoteBookName);
 
 
                         // User clicked OK button
@@ -408,7 +392,7 @@ public class NoteActivity extends AppCompatActivity {
                 this.overridePendingTransition(R.anim.anim_none, R.anim.anim_none);
                 //set extra value so the animation will be disabled of a new intent
                 intent.putExtra("activity", "reload");
-             //   timer.cancel();
+                //   timer.cancel();
                 //Was not shutting intent while a task was operating, was causing errors, this fixes it
                 while (true) {
                     try {
@@ -744,8 +728,8 @@ public class NoteActivity extends AppCompatActivity {
                                         }
                                     }
                                 }
-                                if(!added){
-                                    Log.e("hello","hmm");
+                                if (!added) {
+                                    Log.e("hello", "hmm");
                                     CheckListCell cLC = new CheckListCell(title, date, noTitle, notesColour, highlighted, NoteActivity.this, layoutAllNotes);
                                     notesDisplayed.add(cLC);
                                     cLC.createNote(null);
@@ -772,6 +756,150 @@ public class NoteActivity extends AppCompatActivity {
         }
         Log.e("scroll", "scrol.");
         scrollView.fullScroll(View.FOCUS_DOWN);
+
+    }
+
+
+    //renames the current noteBook and all the links associated with this notebook
+    public void rename(String newNoteBookName) {
+
+        String previousFolder = currentFolder;
+
+        //Rename currentNoteBook
+        String[] currentFolderSplit = currentFolder.split("/");
+        currentFolder = currentFolderSplit.length > 0 ?
+                currentFolder.replace(currentFolderSplit[currentFolderSplit.length - 1], newNoteBookName) :
+                newNoteBookName;
+
+
+        //Rename the links in the current notebook
+        for (Note note : notesDisplayed) {
+            if (note instanceof NewNoteBookCell) {
+                ((NewNoteBookCell) note)._noteBookFile = ((NewNoteBookCell) note)._noteBookFile.replace(previousFolder, currentFolder);
+            }
+        }
+
+        //Save updated file
+        saveItems(layoutAllNotes);
+
+        //Rename current directory
+        File dirOld = new File(NOTEBOOK_DIRECTORY + "/" + previousFolder);
+        File dirNew = new File(NOTEBOOK_DIRECTORY + "/" + currentFolder);
+        dirOld.renameTo(dirNew);
+
+
+        //Rename links in sub files
+        renameFilesInSubDirectories(previousFolder, currentFolder, dirNew);
+
+        //Rename links in super files
+        renameFilesInParentDirectories(previousFolder, currentFolder, dirNew.getParentFile());
+
+        //delete the previous file
+        File f = new File(NOTEBOOK_DIRECTORY + "/" + previousFolder + ".txt");
+        f.delete();
+
+        //Update the file name at the top
+        getSupportActionBar().setTitle(currentFolder);
+
+        //Save updated file
+        saveItems(layoutAllNotes);
+
+
+
+    }
+
+    //Renames all the links in the txt files in the parent directories
+    public void renameFilesInParentDirectories(String previousFolder, String renamedFolder, File dir) {
+
+        String[] children = dir.list();
+        for (String child : children) {
+            if (child.endsWith(".txt")) {
+                //Update txt files
+                updateNoteBookLinksInFile(previousFolder, renamedFolder, dir.toString() + "/" + child);
+            }
+        }
+
+        //Check if we have go to the top level
+        if (dir.toString().equals(NOTEBOOK_DIRECTORY)) {
+            return;
+        } else {
+            //If not check the next parent folder
+            renameFilesInParentDirectories(previousFolder, renamedFolder, dir.getParentFile());
+        }
+    }
+
+    //Renames the folder links in all the sub directories
+    public void renameFilesInSubDirectories(String previousFolder, String renamedFolder, File dir) {
+
+        //Error checking
+        if(!dir.exists()){
+            return;
+        }
+
+        String[] children = dir.list();
+
+        for (String child : children) {
+            File f = new File(dir, child);
+            //If a directory call this method again on that level
+            if (f.isDirectory()) {
+                renameFilesInSubDirectories(previousFolder, renamedFolder, f);
+            }
+           //if txt file, update the links
+            if (child.endsWith(".txt")) {
+                updateNoteBookLinksInFile(previousFolder, renamedFolder, (dir.toString() + "/" + child));
+            }
+
+
+        }
+
+    }
+
+
+    public void updateNoteBookLinksInFile(String previousFolder, String renamedFolder, String fileToBeUpdated) {
+
+        Log.e("File being updated", fileToBeUpdated);
+        String lines = "";
+        final File file = new File( fileToBeUpdated);
+        //Load and update current file
+        try {
+            FileInputStream is;
+            BufferedReader reader;
+
+
+            if (file.exists()) {
+                is = new FileInputStream(file);
+                reader = new BufferedReader(new InputStreamReader(is));
+                String line = reader.readLine();
+
+                while (line != null) {
+
+                    //Find the file name lines and update it
+                    if (line.split(" ")[0].equals("filename#%^$")) {
+                        line = line.replace(previousFolder, renamedFolder);
+                    }
+                    lines += line + "\n";
+                    line = reader.readLine();
+
+                }
+                reader.close();
+            }
+        } catch (Exception e) {
+            Log.e("Read update", e.toString());
+        }
+
+
+        //Save the updated file
+        try {
+
+            BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+
+            bw.write(lines);
+            bw.close();
+
+        } catch (Exception e) {
+            Log.e("Write update", e.toString());
+        }
+
 
     }
 
@@ -1128,7 +1256,6 @@ public class NoteActivity extends AppCompatActivity {
         }
         return "";
     }
-
 
 
     ////####################################################################################################################################
