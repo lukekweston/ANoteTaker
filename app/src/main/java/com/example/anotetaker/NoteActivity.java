@@ -140,11 +140,6 @@ public class NoteActivity extends AppCompatActivity {
             }
         });
 
-
-        //Set the scroll viewlistener for when everything has loaded
-        scrollView.addOnLayoutChangeListener(scrollViewListener());
-
-
         //remove text focus of loaded items
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
@@ -152,7 +147,7 @@ public class NoteActivity extends AppCompatActivity {
     }
 
     //Listener for scroll view that moves the scroll to the bottom after it gets updated
-    //This listerner then removes its self to stop its self interfering with adding titles
+    //This listener then removes its self to stop its self interfering with adding titles
     //and check list items
     public View.OnLayoutChangeListener scrollViewListener() {
         return (new View.OnLayoutChangeListener() {
@@ -367,7 +362,6 @@ public class NoteActivity extends AppCompatActivity {
                         NoteActivity.this.finishAndRemoveTask();
                         break;
                     } catch (Exception e) {
-                        Log.e("hmm", "onOptionsItemSelected: ", e);
                     }
 
                 }
@@ -450,9 +444,24 @@ public class NoteActivity extends AppCompatActivity {
                     if (line.split(" ")[0].equals("color") && !line.split(" ")[1].equals("-1")) {
                         notesColour = Integer.parseInt(line.split(" ")[1]);
                         //set the toolbar to the correct color
+                        Log.e("colour", notesColour + "");
                         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(notesColour));
                         buttonAdd.setColorFilter(notesColour);
 
+                    }
+                    //Get the position that the view was last saved in
+                    else if (line.split(" ")[0].equals("lastPosition") && !line.split(" ")[1].equals("-1")) {
+                        final int scrollY = Integer.parseInt(line.split(" ")[1]);
+                        Log.e("last position", scrollY + "");
+                        //Add a listener to update the position to the last position when the views are loaded
+                        scrollView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+                            @Override
+                            public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
+                                Log.e("scroll to", scrollY + "");
+                                scrollView.scrollTo(0, scrollY);
+                                scrollView.removeOnLayoutChangeListener(this);
+                            }
+                        });
                     }
 
                     //Find when a new layout starts
@@ -722,10 +731,9 @@ public class NoteActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.e("Exception", "File load failed: " + e.toString());
         }
-        Log.e("scroll", "scrol.");
-        scrollView.fullScroll(View.FOCUS_DOWN);
 
     }
+
 
 
     //renames the current noteBook and all the links associated with this notebook
@@ -931,6 +939,7 @@ public class NoteActivity extends AppCompatActivity {
             BufferedWriter bw = new BufferedWriter(new FileWriter(noteBookFile));
 
             bw.write("color " + Integer.toString(notesColour) + "\n");
+            bw.write("lastPosition " + Integer.toString(scrollView.getScrollY()) + "\n");
 
 
             //Write into the saved file the information from all of the notes displayed

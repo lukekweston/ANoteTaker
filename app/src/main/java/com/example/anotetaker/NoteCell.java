@@ -524,17 +524,21 @@ public class NoteCell extends Note {
     }
 
     public String getReminderTitle() {
-        _title = ((EditText) _layoutNoteBeingAdded.findViewById(R.id.editTextTitle)).getText().toString();
-        _contents = ((TextView) _layoutNoteBeingAdded.findViewById(R.id.editTextTextMultiLine)).getText().toString();
-        if (!_title.equals("Title")) {
-            return _title;
+
+        if(!_noTitle) {
+            _title = ((EditText) _layoutNoteBeingAdded.findViewById(R.id.editTextTitle)).getText().toString();
+            if (_title != null && !_title.equals("") && !_title.equals("Title") ) {
+                return _title;
+            }
         }
+        _contents = ((TextView) _layoutNoteBeingAdded.findViewById(R.id.editTextTextMultiLine)).getText().toString();
         if (!_contents.equals("") && !_contents.equals(null)) {
-            //Just get the first line
-            return _contents.split("\n")[0];
+            //Just get the first line and delete bullet point if they exist
+            return _contents.split("\n")[0].replace("• ", "");
         } else {
             return "Reminder for note";
         }
+
 
     }
 

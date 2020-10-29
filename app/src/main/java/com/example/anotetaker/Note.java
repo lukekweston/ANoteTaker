@@ -148,8 +148,9 @@ public abstract class Note {
                                     intent.putExtra("allDay", false);
                                     intent.putExtra("rrule", "FREQ=DAILY");
                                     intent.putExtra("endTime", cal.getTimeInMillis() + 60 * 60 * 1000);
-                                    if (_title != null) {
-                                        intent.putExtra("title", getReminderTitle());
+                                    String reminderTitle = getReminderTitle();
+                                    if (reminderTitle != null) {
+                                        intent.putExtra("title", reminderTitle);
                                     } else {
                                         intent.putExtra("title", "Reminder for note");
                                     }

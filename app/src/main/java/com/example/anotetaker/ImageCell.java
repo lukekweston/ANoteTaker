@@ -240,12 +240,15 @@ public class ImageCell extends Note {
 
     @Override
     public String getReminderTitle() {
-        _title = ((EditText) _layoutNoteBeingAdded.findViewById(R.id.editTextTitle)).getText().toString();
-        if (!_title.equals("Title") && !_title.equals(null)) {
-            return _title;
-        } else {
-            return "Reminder for image";
+
+        if (!_noTitle) {
+            _title = ((EditText) _layoutNoteBeingAdded.findViewById(R.id.editTextTitle)).getText().toString();
+            if (_title != null && !_title.equals("") && !_title.equals("Title")) {
+                return _title;
+            }
         }
+        return "Reminder for image";
+
     }
 
     @Override

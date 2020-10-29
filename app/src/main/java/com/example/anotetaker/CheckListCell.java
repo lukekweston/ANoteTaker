@@ -184,12 +184,13 @@ public class CheckListCell extends Note {
 
     //Get the title for creating a reminder
     public String getReminderTitle() {
-        _title = ((EditText) _layoutNoteBeingAdded.findViewById(R.id.editTextTitle)).getText().toString();
-        if (!_title.equals("Title")) {
-            return _title;
-        } else {
-            return "Reminder for checklist";
+        if (!_noTitle) {
+            _title = ((EditText) _layoutNoteBeingAdded.findViewById(R.id.editTextTitle)).getText().toString();
+            if (_title != null && !_title.equals("") && !_title.equals("Title")) {
+                return _title;
+            }
         }
+        return "Reminder for checklist";
 
     }
 
