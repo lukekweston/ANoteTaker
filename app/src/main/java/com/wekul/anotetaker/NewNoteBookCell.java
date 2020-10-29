@@ -1,16 +1,15 @@
-package com.example.anotetaker;
+package com.wekul.anotetaker;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.drawable.GradientDrawable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.wekul.anotetaker.R;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -22,7 +21,7 @@ import java.io.InputStreamReader;
 public class NewNoteBookCell extends Note {
 
 
-    private static final String NOTEBOOK_DIRECTORY = "/data/data/com.example.anotetaker/files/notebooks";
+    private static final String NOTEBOOK_DIRECTORY = "/data/data/com.wekul.anotetaker/files/notebooks";
     String _noteBookFile = null;
 
     public NewNoteBookCell(String noteBookFile, Context c, LinearLayout layoutAllNotes){
@@ -60,7 +59,7 @@ public class NewNoteBookCell extends Note {
                 }
             }
         } catch (Exception e) {
-            Log.e("io exception", e.toString());
+
 
         }
 
@@ -82,11 +81,9 @@ public class NewNoteBookCell extends Note {
 
                 }
                 catch (Exception e){
-                    Log.e("Main Actvity note","Do not need to save");
                 }
                     SharedPreferences mPrefs = _c.getSharedPreferences("NotebookNameValue", 0);
                     SharedPreferences.Editor editor = mPrefs.edit();
-                    Log.e("hello", _c.getString(R.string.curWorkingFolder) + "!"+ (String) noteBookName.getText());
                     editor.putString(_c.getString(R.string.curWorkingFolder), (String) noteBookName.getText());
                     editor.commit();
 

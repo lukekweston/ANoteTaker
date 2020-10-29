@@ -1,11 +1,10 @@
-package com.example.anotetaker;
+package com.wekul.anotetaker;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -24,7 +23,7 @@ import java.util.ArrayList;
 public class MainMenuActivity extends AppCompatActivity {
 
 
-    String NOTEBOOK_DIRECTORY = "/data/data/com.example.anotetaker/files/notebooks";
+    String NOTEBOOK_DIRECTORY = "/data/data/com.wekul.anotetaker/files/notebooks";
     LinearLayout menuItems;
 
     //Keeps track of what cells are displayed/exist in this layout
@@ -128,11 +127,10 @@ public class MainMenuActivity extends AppCompatActivity {
     public void saveCurrentLocation() {
         try {
             //make or edit existing file
-            File noteBookFile = new File("/data/data/com.example.anotetaker/files" + "/" + "lastImageAddedLocation.txt");
+            File noteBookFile = new File("/data/data/com.wekul.anotetaker/files" + "/" + "lastImageAddedLocation.txt");
             BufferedWriter bw = new BufferedWriter(new FileWriter(noteBookFile));
             bw.write("MainMenu");
             bw.close();
-            Log.e("Main menu saved", ":-)");
         } catch (Exception e) {
 
         }
@@ -151,22 +149,22 @@ public class MainMenuActivity extends AppCompatActivity {
         final ArrayList<String> notebooks = new ArrayList<String>();
 
         String path = NOTEBOOK_DIRECTORY;
-        Log.d("Files", "Path: " + path);
         File directory = new File(path);
         File[] files = directory.listFiles();
-        Log.d("Files", "Size: " + files.length);
         //get the .txt (notebook) files
-        for (int i = 0; i < files.length; i++) {
-            if (files[i].getName().endsWith(".txt")) {
-                notebooks.add(files[i].getName().split(".txt")[0]);
+        if(files != null) {
+            for (int i = 0; i < files.length; i++) {
+                if (files[i].getName().endsWith(".txt")) {
+                    notebooks.add(files[i].getName().split(".txt")[0]);
+                }
             }
-        }
 
-        //Create the notebooks, add them to the displayed list and populate the main menu
-        for (String nb : notebooks) {
-            NewNoteBookCell nC = new NewNoteBookCell(nb, MainMenuActivity.this, menuItems);
-            notesBooksDisplayed.add(nC);
-            nC.createNote(null);
+            //Create the notebooks, add them to the displayed list and populate the main menu
+            for (String nb : notebooks) {
+                NewNoteBookCell nC = new NewNoteBookCell(nb, MainMenuActivity.this, menuItems);
+                notesBooksDisplayed.add(nC);
+                nC.createNote(null);
+            }
         }
 
 

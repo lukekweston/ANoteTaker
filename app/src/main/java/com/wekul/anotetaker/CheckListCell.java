@@ -1,15 +1,16 @@
-package com.example.anotetaker;
+package com.wekul.anotetaker;
 
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Build;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.wekul.anotetaker.R;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -138,7 +139,7 @@ public class CheckListCell extends Note {
                 //refresh the layout
                 recyclerView.setAdapter(_adapter);
                 _adapter.notifyDataSetChanged();
-                Log.e("hmm", "hmm");
+
 
             }
         });

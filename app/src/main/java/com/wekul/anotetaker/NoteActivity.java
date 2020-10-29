@@ -9,7 +9,7 @@ makes code spagehtti for adding an image
  */
 
 
-package com.example.anotetaker;
+package com.wekul.anotetaker;
 
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
@@ -37,6 +37,8 @@ import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.Toast;
 
+
+import com.wekul.anotetaker.R;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -72,8 +74,8 @@ public class NoteActivity extends AppCompatActivity {
     public static Uri imageUri = null;
 
 
-    private static final String IMAGE_DIRECTORY = "/data/data/com.example.anotetaker/files/images";
-    private static final String NOTEBOOK_DIRECTORY = "/data/data/com.example.anotetaker/files/notebooks";
+    private static final String IMAGE_DIRECTORY = "/data/data/com.wekul.anotetaker/files/images";
+    private static final String NOTEBOOK_DIRECTORY = "/data/data/com.wekul.anotetaker/files/notebooks";
     private int GALLERY = 1;
     private static int CAMERA = 2;
 
@@ -434,7 +436,7 @@ public class NoteActivity extends AppCompatActivity {
             final File file = new File(NOTEBOOK_DIRECTORY + "/" + currentFolder + ".txt");
             //Check file actually exists
             if (file.exists()) {
-                Log.e("loading", "loading");
+
                 is = new FileInputStream(file);
                 reader = new BufferedReader(new InputStreamReader(is));
                 String line = reader.readLine();
@@ -444,7 +446,7 @@ public class NoteActivity extends AppCompatActivity {
                     if (line.split(" ")[0].equals("color") && !line.split(" ")[1].equals("-1")) {
                         notesColour = Integer.parseInt(line.split(" ")[1]);
                         //set the toolbar to the correct color
-                        Log.e("colour", notesColour + "");
+
                         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(notesColour));
                         buttonAdd.setColorFilter(notesColour);
 
@@ -452,12 +454,10 @@ public class NoteActivity extends AppCompatActivity {
                     //Get the position that the view was last saved in
                     else if (line.split(" ")[0].equals("lastPosition") && !line.split(" ")[1].equals("-1")) {
                         final int scrollY = Integer.parseInt(line.split(" ")[1]);
-                        Log.e("last position", scrollY + "");
                         //Add a listener to update the position to the last position when the views are loaded
                         scrollView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
                             @Override
                             public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
-                                Log.e("scroll to", scrollY + "");
                                 scrollView.scrollTo(0, scrollY);
                                 scrollView.removeOnLayoutChangeListener(this);
                             }
@@ -489,7 +489,7 @@ public class NoteActivity extends AppCompatActivity {
                                 //Loop till the end of the layout note
                                 while (!line.equals("Layout end")) {
                                     line = reader.readLine();
-                                    Log.e("line", line);
+
 
                                     //Get if the note is highlighted
                                     if (line.split(" ")[0].equals("highlighted#%^$")) {
@@ -523,7 +523,7 @@ public class NoteActivity extends AppCompatActivity {
                                     //get the type of the note
                                     if (line.split(" ")[0].equals("type#%^$")) {
                                         keepFillingData = false;
-                                        Log.e("split", line.split(" ")[1]);
+
                                         if (line.split(" ")[1].equals("text")) {
                                             type = NoteCell.Type.text;
                                         } else if (line.split(" ")[1].equals("bulletpoint")) {
@@ -729,7 +729,7 @@ public class NoteActivity extends AppCompatActivity {
 
             }
         } catch (Exception e) {
-            Log.e("Exception", "File load failed: " + e.toString());
+
         }
 
     }
@@ -837,7 +837,7 @@ public class NoteActivity extends AppCompatActivity {
     //Updates the links in the current file
     public void updateNoteBookLinksInFile(String previousFolder, String renamedFolder, String fileToBeUpdated) {
 
-        Log.e("File being updated", fileToBeUpdated);
+
         String lines = "";
         final File file = new File(fileToBeUpdated);
         //Load and update current file
@@ -864,7 +864,7 @@ public class NoteActivity extends AppCompatActivity {
                 reader.close();
             }
         } catch (Exception e) {
-            Log.e("Read update", e.toString());
+
         }
 
 
@@ -877,7 +877,7 @@ public class NoteActivity extends AppCompatActivity {
             bw.close();
 
         } catch (Exception e) {
-            Log.e("Write update", e.toString());
+
         }
 
 
@@ -888,7 +888,7 @@ public class NoteActivity extends AppCompatActivity {
     public void saveCurrentLocation() {
         try {
             //make or edit existing file
-            File noteBookFile = new File("/data/data/com.example.anotetaker/files" + "/" + "lastImageAddedLocation.txt");
+            File noteBookFile = new File("/data/data/com.wekul.anotetaker/files" + "/" + "lastImageAddedLocation.txt");
             BufferedWriter bw = new BufferedWriter(new FileWriter(noteBookFile));
             bw.write(currentFolder);
             bw.close();
@@ -901,6 +901,7 @@ public class NoteActivity extends AppCompatActivity {
     //Saves all the items that are displayed in the display
     public void saveItems() {
 
+
         //Save the location we are in for loading
         saveCurrentLocation();
 
@@ -908,10 +909,11 @@ public class NoteActivity extends AppCompatActivity {
 
         try {
 
+            Log.e("file", fileName);
+
             //Check directory exists
             if (fileName.contains("/")) {
-                Log.e("dir", fileName);
-                Log.e("dir", NOTEBOOK_DIRECTORY + "/" + fileName.split("/")[0]);
+
 
                 //Get path to file ( splits off the last element, the file name)
                 String filePath = "";
@@ -919,8 +921,6 @@ public class NoteActivity extends AppCompatActivity {
                 for (int i = 0; i < filePathSplit.length - 1; i++) {
                     filePath += "/" + filePathSplit[i];
                 }
-                Log.e("dir", filePath);
-
 
                 File noteBookDirectory = new File(NOTEBOOK_DIRECTORY + filePath);
                 if (!noteBookDirectory.exists()) {  // have the object build the directory structure, if needed.
@@ -957,7 +957,8 @@ public class NoteActivity extends AppCompatActivity {
 
 
         } catch (Exception e) {
-            Log.e("Exception", "File write failed: " + e.toString());
+
+
         }
 
 
@@ -967,7 +968,7 @@ public class NoteActivity extends AppCompatActivity {
     //Deletes current notebook and sub notebooks
     public void deleteNoteBook() {
         try {
-            Log.e("delete", NOTEBOOK_DIRECTORY + "/" + currentFolder);
+
             //Delete sub notebooks
             File dir = new File(NOTEBOOK_DIRECTORY + "/" + currentFolder);
             if (dir.exists() && dir.isDirectory()) {
@@ -997,9 +998,8 @@ public class NoteActivity extends AppCompatActivity {
 
     //Removes the link from the previous layout by renaming the filnename in the newnotebookcell to !@#$deleted$#@!
     public void removeLinkToSelfFromPreviousLayout() {
-        Log.e("previous", currentFolder);
+
         String previousFolder = NOTEBOOK_DIRECTORY + "/" + currentFolder.substring(0, currentFolder.lastIndexOf("/")) + ".txt";
-        Log.e("previous folder", previousFolder);
         String newFile = "";
         //Load and change the file
         try {
@@ -1011,15 +1011,12 @@ public class NoteActivity extends AppCompatActivity {
                 reader = new BufferedReader(new InputStreamReader(is));
                 String line = reader.readLine();
                 while (line != null) {
-                    Log.e("line", line);
                     newFile += line + "\n";
                     if (line.equals("LayoutNewNoteBookCell")) {
                         while (!line.equals("Layout end")) {
                             line = reader.readLine();
-                            Log.e("hmm", line);
                             if (line.split(" ")[0].equals("filename#%^$") && line.equals("filename#%^$ " + currentFolder)) {
 
-                                Log.e(currentFolder, line.split(" ")[1]);
                                 newFile += "filename#%^$" + " !@#$deleted$#@!" + "\n";
 
                             } else {
@@ -1142,7 +1139,6 @@ public class NoteActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-            Log.e("thumbnail", Integer.toString(thumbnail.getWidth()));
 
 
             Bitmap rotatedBitmap = null;
@@ -1218,7 +1214,7 @@ public class NoteActivity extends AppCompatActivity {
                     new String[]{f.getPath()},
                     new String[]{"image/jpeg"}, null);
             fo.close();
-            Log.d("TAG", "File Saved::---&gt;" + f.getAbsolutePath());
+
 
             lastImageAddedLocation = f.getAbsolutePath();
             fo.close();

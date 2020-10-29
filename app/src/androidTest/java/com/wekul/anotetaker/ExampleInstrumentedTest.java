@@ -1,4 +1,4 @@
-package com.example.anotetaker;
+package com.wekul.anotetaker;
 
 import android.content.Context;
 

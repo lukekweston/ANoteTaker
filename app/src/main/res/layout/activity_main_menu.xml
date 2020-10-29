@@ -8,7 +8,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?android:attr/selectableItemBackground"
-    tools:context=".MainMenuActivity"
+    tools:context="com.wekul.anotetaker.MainMenuActivity"
     android:orientation="vertical">
 
 

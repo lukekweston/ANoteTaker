@@ -1,4 +1,4 @@
-package com.example.anotetaker;
+package com.wekul.anotetaker;
 
 import android.Manifest;
 
@@ -7,10 +7,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
-import android.util.Log;
 
 import android.widget.Toast;
 
+import com.wekul.anotetaker.R;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
@@ -60,7 +60,6 @@ public class InitialStartActivity extends AppCompatActivity {
                             Toast.makeText(getApplicationContext(), "All permissions are granted by user!", Toast.LENGTH_SHORT).show();
                             loadPreviousLayout();
                         } else {
-                            Log.e("bad", "is bad");
                             android.os.Process.killProcess(android.os.Process.myPid());
                         }
 
@@ -88,7 +87,7 @@ public class InitialStartActivity extends AppCompatActivity {
     //Loads the last opened layout
     public void loadPreviousLayout() {
 
-        final File file = new File("/data/data/com.example.anotetaker/files" + "/" + "lastImageAddedLocation.txt");
+        final File file = new File("/data/data/com.wekul.anotetaker/files" + "/" + "lastImageAddedLocation.txt");
         try {
             //Check if file exists, wont exist for the first time running this app
             if (file.exists()) {
@@ -96,13 +95,11 @@ public class InitialStartActivity extends AppCompatActivity {
                 FileInputStream is;
                 BufferedReader reader;
 
-                Log.e("loading", "loading");
                 is = new FileInputStream(file);
                 reader = new BufferedReader(new InputStreamReader(is));
                 String lastFile = reader.readLine();
                 is.close();
 
-                Log.e("lastFile", lastFile);
                 //Checks if we were last in the main menu
                 if (lastFile.equals("MainMenu")) {
                     this.startActivity(new Intent(context, MainMenuActivity.class));

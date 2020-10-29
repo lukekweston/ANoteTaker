@@ -1,4 +1,4 @@
-package com.example.anotetaker;
+package com.wekul.anotetaker;
 
 import android.app.Activity;
 import android.content.Context;
@@ -7,7 +7,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
-import android.util.Log;
+
 import android.view.View;
 
 import android.widget.ImageButton;
@@ -176,7 +176,6 @@ public abstract class Note {
                                     int i;
                                     for (i = 0; i < _layoutAllNotes.getChildCount(); i++) {
                                         if (_layoutAllNotes.getChildAt(i) == _layoutNoteBeingAdded) {
-                                            Log.e("int i = ", Integer.toString(i));
                                             break;
                                         }
                                     }
@@ -201,7 +200,6 @@ public abstract class Note {
                                     //Get the index of note being changed
                                     for (i = 0; i < _layoutAllNotes.getChildCount(); i++) {
                                         if (_layoutAllNotes.getChildAt(i) == _layoutNoteBeingAdded) {
-                                            Log.e("int i = ", Integer.toString(i));
                                             break;
                                         }
                                     }

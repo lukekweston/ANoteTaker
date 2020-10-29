@@ -1,4 +1,4 @@
-package com.example.anotetaker;
+package com.wekul.anotetaker;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.os.Build;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +14,8 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+
+import com.wekul.anotetaker.R;
 
 import java.util.ArrayList;
 
@@ -52,7 +53,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     //Sets up all the layouts/listeners for a checklist item
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
-        Log.e(TAG, "onBindViewHolder: called");
+
 
         CheckListItem cLI = _checkListItems.get(position);
         //Listener for the check box button
@@ -117,7 +118,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 public void onTextChanged(CharSequence s, int start, int before, int count) { }
                 @Override
                 public void afterTextChanged(Editable s) {
-                    Log.e("text", s.toString());
                     //update saved value
                     _checkListItems.get(position)._contents = s.toString().replace("\n", "");
                     //is the string has a new line character meaning enter has been pressed, set the text and make it uneditable

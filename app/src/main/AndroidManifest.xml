@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.anotetaker">
+    package="com.wekul.anotetaker">
 
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -26,24 +26,24 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <activity android:name=".InitialStartActivity"
+        <activity android:name="com.wekul.anotetaker.InitialStartActivity"
             android:screenOrientation = "portrait">
         <intent-filter>
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
     </activity>
-        <activity android:name=".MainMenuActivity"
+        <activity android:name="com.wekul.anotetaker.MainMenuActivity"
             android:screenOrientation = "portrait">
 
         </activity>
 
-        <activity android:name=".NoteActivity"
+        <activity android:name="com.wekul.anotetaker.NoteActivity"
             android:screenOrientation = "portrait"
-            android:parentActivityName=".MainMenuActivity">
+            android:parentActivityName="com.wekul.anotetaker.MainMenuActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainMenuActivity" />
+                android:value="com.wekul.anotetaker.MainMenuActivity" />
 
         </activity>
 

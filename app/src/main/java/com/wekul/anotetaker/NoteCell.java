@@ -1,17 +1,19 @@
-package com.example.anotetaker;
+package com.wekul.anotetaker;
 
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.wekul.anotetaker.R;
 
 import java.time.LocalDateTime;
 
@@ -259,7 +261,6 @@ public class NoteCell extends Note {
                             //For deleting the just the new line character between lines (deletes 2nd bullet point)
                             if(line.contains("• ") && line.replace("• ","").length() != line.length() -2){
                                 line = "• " + line.replace("• ","");
-                                Log.e("not equal", "not equal");
                             }
 
                             output += line + "\n";
@@ -293,7 +294,7 @@ public class NoteCell extends Note {
                     }
                 }
                 catch(Exception e){
-                    Log.e("Cursor broke", "cursor broke");
+
                 }
                 //Add the listener back
                 contents.addTextChangedListener(this);
@@ -371,8 +372,7 @@ public class NoteCell extends Note {
 //                                        } else {
 //                                            line = lineNumber + ". " + line.substring(3, line.length());
 //                                        }
-//                                        Log.e("line", line);
-//                                        Log.e("number", lineNumber);
+//
 ////                                    if (line.equals("") || line.equals(lineNumber + ".") || line.equals(". ") || line.equals(lineNumber + " ")) {
 ////                                        line = lineNumber + ". ";
 ////                                        cursorPosition += 3;
@@ -401,7 +401,7 @@ public class NoteCell extends Note {
 //            }
 //
 //                    //String is smaller or character is being replaced
-//                Log.e("output", output);
+//
 //                    if (textAll.length() <= previous.length()) {
 //                        String[] lines = textAll.split("\n");
 //                        output = "";
@@ -414,13 +414,13 @@ public class NoteCell extends Note {
 //                                break;
 //                            }
 //                            if (index < 10) {
-//                                Log.e("line", line);
-//                                Log.e("index", index +"");
+//
+//
 //                                if(line.length() <= 2) {
 //                                    continue;
 //                                }
 //                                if(line.length() >= 3 && !line.substring(0,3).equals(lineNumber +". ")) {
-//                                    Log.e("substring", line.substring(0,3));
+//
 //                                        if(output.length() > 1){
 //                                            output = output.substring(0, output.length() - 1) + line.substring(3, line.length());
 //                                            continue;
@@ -473,7 +473,7 @@ public class NoteCell extends Note {
 ////                            //For deleting the just the new line character between lines (deletes 2nd bullet point)
 ////                            if(line.contains("• ") && line.replace("• ","").length() != line.length() -2){
 ////                                line = "• " + line.replace("• ","");
-////                                Log.e("not equal", "not equal");
+////
 ////                            }
 ////
 ////                            output += line + "\n";
@@ -524,7 +524,7 @@ public class NoteCell extends Note {
             file += "title#%^$ " + ((EditText) _layoutNoteBeingAdded.findViewById(R.id.editTextTitle)).getText() + "\n";
         }
         file += "date#%^$ " + _date + "\n";
-        Log.e("type", _type.name());
+
         file += "type#%^$ " + _type.name() + "\n";
         file += "contents#%^$ " + ((TextView) _layoutNoteBeingAdded.findViewById(R.id.editTextTextMultiLine)).getText() + "\n";
         file += "noTitle#%^$ " + _noTitle + "\n";

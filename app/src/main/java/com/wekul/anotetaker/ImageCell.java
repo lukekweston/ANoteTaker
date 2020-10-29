@@ -1,4 +1,4 @@
-package com.example.anotetaker;
+package com.wekul.anotetaker;
 
 import android.app.Activity;
 import android.content.ContentValues;
@@ -10,7 +10,6 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -21,11 +20,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 
+import com.wekul.anotetaker.R;
+
 import java.io.File;
 import java.time.LocalDateTime;
 
 import androidx.annotation.RequiresApi;
-import androidx.core.content.FileProvider;
 
 import static androidx.core.content.FileProvider.getUriForFile;
 
@@ -53,7 +53,6 @@ public class ImageCell extends Note {
         _noTitle = noTitle;
         _borderColor = borderColor;
         _highlighted = highlighted;
-        Log.e("highlighted", _highlighted + "");
         _c = c;
         _layoutAllNotes = layoutAllNotes;
 
@@ -81,7 +80,6 @@ public class ImageCell extends Note {
         return (new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.e("file location", _fileLocation);
                 Intent intent = new Intent();
                 intent.setAction(Intent.ACTION_VIEW);
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -199,7 +197,6 @@ public class ImageCell extends Note {
             }
             //Image has been deleted or moved, set fileLocation to null and dont display
             else {
-                Log.e("file not exits", _fileLocation);
                 _fileLocation = null;
             }
 
