@@ -1,6 +1,7 @@
 package com.example.anotetaker;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -100,6 +101,12 @@ public class CheckListCell extends Note {
             //Set the date
             TextView dateTimeCreated = _layoutNoteBeingAdded.findViewById(R.id.DateTimeCreated);
             dateTimeCreated.setText(_date);
+            //check if the date will fit in the title, if not do not display it
+            Configuration configuration = _c.getResources().getConfiguration();
+            int screenWidthDp = configuration.screenWidthDp;
+            if(screenWidthDp < THRESHOLDFORDATEDISPLAYED){
+                dateTimeCreated.setVisibility(View.INVISIBLE);
+            }
         }
 
 

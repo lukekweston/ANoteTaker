@@ -24,6 +24,8 @@ import androidx.appcompat.app.AlertDialog;
 //Parent class to all the cells that are in the note
 public abstract class Note {
 
+    public final int THRESHOLDFORDATEDISPLAYED = 380;
+
     //Color of the border
     public int _borderColor;
     //Border drawable that will be drawn on all borderviews that take a border

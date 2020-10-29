@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -135,6 +136,16 @@ public class ImageCell extends Note {
         if (!_noTitle) {
             TextView dateTimeCreated = _layoutNoteBeingAdded.findViewById(R.id.DateTimeCreated);
             dateTimeCreated.setText(_date);
+
+            //check if the date will fit in the title, if not do not display it
+            Configuration configuration = _c.getResources().getConfiguration();
+            int screenWidthDp = configuration.screenWidthDp;
+            if(screenWidthDp < THRESHOLDFORDATEDISPLAYED){
+                dateTimeCreated.setVisibility(View.INVISIBLE);
+            }
+
+
+
             if (_title != null) {
                 TextView titleOfNote = _layoutNoteBeingAdded.findViewById(R.id.editTextTitle);
                 titleOfNote.setText(_title);
@@ -173,6 +184,7 @@ public class ImageCell extends Note {
         if (_date == null) {
             _date = LocalDateTime.now().toLocalDate() + " " + LocalDateTime.now().toLocalTime().toString().split(":")[0] + ":" + LocalDateTime.now().toLocalTime().toString().split(":")[1];
         }
+
 
 
         displayImage = _layoutNoteBeingAdded.findViewById(R.id.imageView);

@@ -1,6 +1,7 @@
 package com.example.anotetaker;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -72,6 +73,14 @@ public class NoteCell extends Note {
             _date = LocalDateTime.now().toLocalDate() + " " + LocalDateTime.now().toLocalTime().toString().split(":")[0] + ":" + LocalDateTime.now().toLocalTime().toString().split(":")[1];
             dateTimeCreated.setText(_date);
         }
+
+        //check if the date will fit in the title, if not do not display it
+        Configuration configuration = _c.getResources().getConfiguration();
+        int screenWidthDp = configuration.screenWidthDp;
+        if(screenWidthDp < THRESHOLDFORDATEDISPLAYED){
+            dateTimeCreated.setVisibility(View.INVISIBLE);
+        }
+
 
         //Fill out contents
         EditText contentsOnNote = _layoutNoteBeingAdded.findViewById(R.id.editTextTextMultiLine);
