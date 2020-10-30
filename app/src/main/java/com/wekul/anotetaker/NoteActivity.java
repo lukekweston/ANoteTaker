@@ -12,12 +12,16 @@ makes code spagehtti for adding an image
 package com.wekul.anotetaker;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.drawable.ColorDrawable;
+import android.media.ExifInterface;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
@@ -48,6 +52,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -746,7 +751,7 @@ public class NoteActivity extends AppCompatActivity {
         currentFolder = currentFolderSplit.length > 0 ?
                 currentFolder.replaceAll(currentFolderSplit[currentFolderSplit.length - 1]+"$", newNoteBookName) :
                 newNoteBookName;
-        
+
         //Rename the links in the current notebook
         int i = 0;
         for (Note note : notesDisplayed) {
@@ -1099,6 +1104,22 @@ public class NoteActivity extends AppCompatActivity {
     ////####################################################################################################################################
     //Copied and modified from https://stackoverflow.com/questions/5991319/capture-image-from-camera-and-display-in-activity
 
+    //Get path from contentURI
+    public String getRealPathFromURI(Context context, Uri contentUri) {
+        Cursor cursor = null;
+        try {
+            String[] proj = { MediaStore.Images.Media.DATA };
+            cursor = context.getContentResolver().query(contentUri,  proj, null, null, null);
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
     //Activity result from the camera called from an image cell object
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -1114,8 +1135,16 @@ public class NoteActivity extends AppCompatActivity {
                 try {
 
                     Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), contentURI);
-                    String path = saveImage(bitmap);
-                    setDisplayImage(path, bitmap);
+                    String path1 = getRealPathFromURI(this, contentURI);
+                    bitmap = handleSamplingAndRotationBitmap(this, contentURI);
+                    Log.e("path", path1);
+//                    String path = saveImage(bitmap);
+//                    Log.e("path 2", path);
+//                    if(path.contains("anotetakerapp")){
+//
+//
+//                    }
+                    setDisplayImage(path1, bitmap);
 
                     Toast.makeText(getApplicationContext(), "Image Saved!", Toast.LENGTH_SHORT).show();
                     saveItems();
@@ -1137,27 +1166,33 @@ public class NoteActivity extends AppCompatActivity {
 
                 e.printStackTrace();
             }
-
-
-
             Bitmap rotatedBitmap = null;
 
-            //Rotate the bit map so it is displayed correctly
-            //Check if width > height
-            if (thumbnail.getWidth() > thumbnail.getHeight()) {
-                //Rotate the image 90
-                Matrix matrix = new Matrix();
-                matrix.postRotate(90);
-                //rotated bitmap
-                rotatedBitmap = Bitmap.createBitmap(thumbnail, 0, 0, thumbnail.getWidth(), thumbnail.getHeight(), matrix, true);
+            try {
+                rotatedBitmap = handleSamplingAndRotationBitmap(this, imageUri);
             }
-            //Else dont rotate
-            else {
-                rotatedBitmap = thumbnail;
+            catch (Exception e){
+                e.printStackTrace();
             }
 
 
-            //displayImage.setImageBitmap(rotatedBitmap);
+
+//            //Rotate the bit map so it is displayed correctly
+//            //Check if width > height
+//            if (thumbnail.getWidth() > thumbnail.getHeight()) {
+//                //Rotate the image 90
+//                Matrix matrix = new Matrix();
+//                matrix.postRotate(90);
+//                //rotated bitmap
+//                rotatedBitmap = Bitmap.createBitmap(thumbnail, 0, 0, thumbnail.getWidth(), thumbnail.getHeight(), matrix, true);
+//            }
+//            //Else dont rotate
+//            else {
+//                rotatedBitmap = thumbnail;
+//            }
+
+
+            //Dont save the rotated image, save originial
             String fileLocation = saveImage(rotatedBitmap);
 
             setDisplayImage(fileLocation, rotatedBitmap);
@@ -1203,7 +1238,7 @@ public class NoteActivity extends AppCompatActivity {
         }
 
         try {
-            File f = new File(IMAGE_DIRECTORY + "/" + Calendar.getInstance().getTimeInMillis() + ".jpg");
+            File f = new File(IMAGE_DIRECTORY + "/" + Calendar.getInstance().getTimeInMillis() +".jpg");
             f.createNewFile();
 
             FileOutputStream fo = new FileOutputStream(f);
@@ -1226,6 +1261,132 @@ public class NoteActivity extends AppCompatActivity {
 
 
     ////####################################################################################################################################
+
+    ///#######################################################################################################################################
+    //Handle image rotation
+    //https://stackoverflow.com/questions/14066038/why-does-an-image-captured-using-camera-intent-gets-rotated-on-some-devices-on-a
+
+    /**
+     * This method is responsible for solving the rotation issue if exist. Also scale the images to
+     * 1024x1024 resolution
+     *
+     * @param context       The current context
+     * @param selectedImage The Image URI
+     * @return Bitmap image results
+     * @throws IOException
+     */
+    public static Bitmap handleSamplingAndRotationBitmap(Context context, Uri selectedImage)
+            throws IOException {
+        int MAX_HEIGHT = 1024;
+        int MAX_WIDTH = 1024;
+
+        // First decode with inJustDecodeBounds=true to check dimensions
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        InputStream imageStream = context.getContentResolver().openInputStream(selectedImage);
+        BitmapFactory.decodeStream(imageStream, null, options);
+        imageStream.close();
+
+        // Calculate inSampleSize
+        options.inSampleSize = calculateInSampleSize(options, MAX_WIDTH, MAX_HEIGHT);
+
+        // Decode bitmap with inSampleSize set
+        options.inJustDecodeBounds = false;
+        imageStream = context.getContentResolver().openInputStream(selectedImage);
+        Bitmap img = BitmapFactory.decodeStream(imageStream, null, options);
+
+        img = rotateImageIfRequired(context, img, selectedImage);
+        return img;
+    }
+
+    /**
+     * Calculate an inSampleSize for use in a {@link BitmapFactory.Options} object when decoding
+     * bitmaps using the decode* methods from {@link BitmapFactory}. This implementation calculates
+     * the closest inSampleSize that will result in the final decoded bitmap having a width and
+     * height equal to or larger than the requested width and height. This implementation does not
+     * ensure a power of 2 is returned for inSampleSize which can be faster when decoding but
+     * results in a larger bitmap which isn't as useful for caching purposes.
+     *
+     * @param options   An options object with out* params already populated (run through a decode*
+     *                  method with inJustDecodeBounds==true
+     * @param reqWidth  The requested width of the resulting bitmap
+     * @param reqHeight The requested height of the resulting bitmap
+     * @return The value to be used for inSampleSize
+     */
+    private static int calculateInSampleSize(BitmapFactory.Options options,
+                                             int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+
+            // Calculate ratios of height and width to requested height and width
+            final int heightRatio = Math.round((float) height / (float) reqHeight);
+            final int widthRatio = Math.round((float) width / (float) reqWidth);
+
+            // Choose the smallest ratio as inSampleSize value, this will guarantee a final image
+            // with both dimensions larger than or equal to the requested height and width.
+            inSampleSize = heightRatio < widthRatio ? heightRatio : widthRatio;
+
+            // This offers some additional logic in case the image has a strange
+            // aspect ratio. For example, a panorama may have a much larger
+            // width than height. In these cases the total pixels might still
+            // end up being too large to fit comfortably in memory, so we should
+            // be more aggressive with sample down the image (=larger inSampleSize).
+
+            final float totalPixels = width * height;
+
+            // Anything more than 2x the requested pixels we'll sample down further
+            final float totalReqPixelsCap = reqWidth * reqHeight * 2;
+
+            while (totalPixels / (inSampleSize * inSampleSize) > totalReqPixelsCap) {
+                inSampleSize++;
+            }
+        }
+        return inSampleSize;
+    }
+
+    /**
+     * Rotate an image if required.
+     *
+     * @param img           The image bitmap
+     * @param selectedImage Image URI
+     * @return The resulted Bitmap after manipulation
+     */
+    private static Bitmap rotateImageIfRequired(Context context, Bitmap img, Uri selectedImage) throws IOException {
+
+        InputStream input = context.getContentResolver().openInputStream(selectedImage);
+        ExifInterface ei;
+        if (Build.VERSION.SDK_INT > 23)
+            ei = new ExifInterface(input);
+        else
+            ei = new ExifInterface(selectedImage.getPath());
+
+        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+
+        switch (orientation) {
+            case ExifInterface.ORIENTATION_ROTATE_90:
+                return rotateImage(img, 90);
+            case ExifInterface.ORIENTATION_ROTATE_180:
+                return rotateImage(img, 180);
+            case ExifInterface.ORIENTATION_ROTATE_270:
+                return rotateImage(img, 270);
+            default:
+                return img;
+        }
+    }
+
+    public static Bitmap rotateImage(Bitmap img, int degree) {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(degree);
+        Bitmap rotatedImg = Bitmap.createBitmap(img, 0, 0, img.getWidth(), img.getHeight(), matrix, true);
+        img.recycle();
+        return rotatedImg;
+    }
+
+
 }
 
 

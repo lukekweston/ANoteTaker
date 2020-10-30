@@ -7,9 +7,12 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -23,6 +26,7 @@ import android.widget.TextView;
 import com.wekul.anotetaker.R;
 
 import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 
 import androidx.annotation.RequiresApi;
@@ -80,13 +84,13 @@ public class ImageCell extends Note {
         return (new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 Intent intent = new Intent();
                 intent.setAction(Intent.ACTION_VIEW);
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 Uri photoURI = getUriForFile(_c, "com.mydomain.fileprovider", (new File(_fileLocation)));
                 intent.setDataAndType(photoURI, "image/*");
                 _c.startActivity(intent);
-
             }
 
         });
@@ -192,8 +196,14 @@ public class ImageCell extends Note {
             //Create file and check it exists
             File imgFile = new File(_fileLocation);
             if (imgFile.exists()) {
-                //use _fileLocation and a bitmap created from _fileLocation
-                setDisplayImage(_fileLocation, BitmapFactory.decodeFile(imgFile.getAbsolutePath()));
+                //Try set the orentation of the image correctly
+                try{
+                    setDisplayImage(_fileLocation, getOreintation(BitmapFactory.decodeFile(imgFile.getAbsolutePath())));
+                }
+                catch (Exception e) {
+                    //use _fileLocation and a bitmap created from _fileLocation
+                    setDisplayImage(_fileLocation, BitmapFactory.decodeFile(imgFile.getAbsolutePath()));
+                }
             }
             //Image has been deleted or moved, set fileLocation to null and dont display
             else {
@@ -211,6 +221,31 @@ public class ImageCell extends Note {
         }
 
 
+    }
+
+    public Bitmap getOreintation(Bitmap img) throws IOException {
+
+        ExifInterface exif = new ExifInterface(_fileLocation);
+
+        int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
+
+        switch (orientation) {
+            case ExifInterface.ORIENTATION_ROTATE_90:
+                return rotateImage(img, 90);
+            case ExifInterface.ORIENTATION_ROTATE_180:
+                return rotateImage(img, 180);
+            case ExifInterface.ORIENTATION_ROTATE_270:
+                return rotateImage(img, 270);
+            default:
+                return img;
+        }
+    }
+    private static Bitmap rotateImage(Bitmap img, int degree) {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(degree);
+        Bitmap rotatedImg = Bitmap.createBitmap(img, 0, 0, img.getWidth(), img.getHeight(), matrix, true);
+        img.recycle();
+        return rotatedImg;
     }
 
     //Starts intent to get image from gallery, intents returned result is returned into NoteActivity
