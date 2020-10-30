@@ -63,6 +63,8 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import static androidx.core.content.FileProvider.getUriForFile;
+
 //Activity that all the notes are displayed in
 public class NoteActivity extends AppCompatActivity {
 

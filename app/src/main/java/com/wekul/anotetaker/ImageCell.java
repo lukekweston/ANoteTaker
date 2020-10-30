@@ -7,13 +7,12 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
-import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
+
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -23,8 +22,7 @@ import android.widget.TextView;
 
 
 import java.io.File;
-import java.io.IOException;
-import java.net.URI;
+
 import java.time.LocalDateTime;
 
 import androidx.annotation.RequiresApi;
@@ -82,7 +80,6 @@ public class ImageCell extends Note {
         return (new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 Intent intent = new Intent();
                 intent.setAction(Intent.ACTION_VIEW);
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -133,10 +130,9 @@ public class ImageCell extends Note {
             //check if the date will fit in the title, if not do not display it
             Configuration configuration = _c.getResources().getConfiguration();
             int screenWidthDp = configuration.screenWidthDp;
-            if(screenWidthDp < THRESHOLDFORDATEDISPLAYED){
+            if (screenWidthDp < THRESHOLDFORDATEDISPLAYED) {
                 dateTimeCreated.setVisibility(View.INVISIBLE);
             }
-
 
 
             if (_title != null) {
@@ -179,7 +175,6 @@ public class ImageCell extends Note {
         }
 
 
-
         displayImage = _layoutNoteBeingAdded.findViewById(R.id.imageView);
 
         //Add image to be displayed
@@ -188,11 +183,10 @@ public class ImageCell extends Note {
             File imgFile = new File(_fileLocation);
             if (imgFile.exists()) {
                 //Try set the orentation and scale of the image correctly
-                try{
+                try {
 
-                    setDisplayImage(_fileLocation, ((NoteActivity)_c).handleSamplingAndRotationBitmap(_c, Uri.fromFile(imgFile)));
-                }
-                catch (Exception e) {
+                    setDisplayImage(_fileLocation, ((NoteActivity) _c).handleSamplingAndRotationBitmap(_c, Uri.fromFile(imgFile)));
+                } catch (Exception e) {
                     //use _fileLocation and a bitmap created from _fileLocation
                     setDisplayImage(_fileLocation, BitmapFactory.decodeFile(imgFile.getAbsolutePath()));
                 }
