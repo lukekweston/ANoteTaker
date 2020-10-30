@@ -744,10 +744,9 @@ public class NoteActivity extends AppCompatActivity {
         //Rename currentNoteBook
         String[] currentFolderSplit = currentFolder.split("/");
         currentFolder = currentFolderSplit.length > 0 ?
-                currentFolder.replace(currentFolderSplit[currentFolderSplit.length - 1], newNoteBookName) :
+                currentFolder.replaceAll(currentFolderSplit[currentFolderSplit.length - 1]+"$", newNoteBookName) :
                 newNoteBookName;
-
-
+        
         //Rename the links in the current notebook
         int i = 0;
         for (Note note : notesDisplayed) {
