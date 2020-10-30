@@ -27,7 +27,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -913,7 +912,6 @@ public class NoteActivity extends AppCompatActivity {
 
         try {
 
-            Log.e("file", fileName);
 
             //Check directory exists
             if (fileName.contains("/")) {
@@ -1135,16 +1133,12 @@ public class NoteActivity extends AppCompatActivity {
                 try {
 
                     Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), contentURI);
-                    String path1 = getRealPathFromURI(this, contentURI);
+                    String path = getRealPathFromURI(this, contentURI);
                     bitmap = handleSamplingAndRotationBitmap(this, contentURI);
-                    Log.e("path", path1);
+
 //                    String path = saveImage(bitmap);
-//                    Log.e("path 2", path);
-//                    if(path.contains("anotetakerapp")){
-//
-//
-//                    }
-                    setDisplayImage(path1, bitmap);
+
+                    setDisplayImage(path, bitmap);
 
                     Toast.makeText(getApplicationContext(), "Image Saved!", Toast.LENGTH_SHORT).show();
                     saveItems();

@@ -12,7 +12,6 @@ import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -23,10 +22,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 
-import com.wekul.anotetaker.R;
-
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.time.LocalDateTime;
 
 import androidx.annotation.RequiresApi;
@@ -100,13 +98,6 @@ public class ImageCell extends Note {
 
     //Sets the display image and uses openGallery listener to make it so an image can be opened in gallery
     public void setDisplayImage(final String fileLocation, Bitmap image) {
-        //get the width of the image and scale on this so that the image always fills the
-        //width of the display it is in
-        int width = displayImage.getDrawable().getIntrinsicWidth();
-        float rescaleSize = (float) width / (float) image.getWidth();
-        //Rescale the bit map to increase performance
-        image = Bitmap.createScaledBitmap(image, Math.round(image.getWidth() * rescaleSize)
-                , Math.round(image.getHeight() * rescaleSize), true);
 
         displayImage.setImageBitmap(image);
 
@@ -196,9 +187,10 @@ public class ImageCell extends Note {
             //Create file and check it exists
             File imgFile = new File(_fileLocation);
             if (imgFile.exists()) {
-                //Try set the orentation of the image correctly
+                //Try set the orentation and scale of the image correctly
                 try{
-                    setDisplayImage(_fileLocation, getOreintation(BitmapFactory.decodeFile(imgFile.getAbsolutePath())));
+
+                    setDisplayImage(_fileLocation, ((NoteActivity)_c).handleSamplingAndRotationBitmap(_c, Uri.fromFile(imgFile)));
                 }
                 catch (Exception e) {
                     //use _fileLocation and a bitmap created from _fileLocation
@@ -221,31 +213,6 @@ public class ImageCell extends Note {
         }
 
 
-    }
-
-    public Bitmap getOreintation(Bitmap img) throws IOException {
-
-        ExifInterface exif = new ExifInterface(_fileLocation);
-
-        int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
-
-        switch (orientation) {
-            case ExifInterface.ORIENTATION_ROTATE_90:
-                return rotateImage(img, 90);
-            case ExifInterface.ORIENTATION_ROTATE_180:
-                return rotateImage(img, 180);
-            case ExifInterface.ORIENTATION_ROTATE_270:
-                return rotateImage(img, 270);
-            default:
-                return img;
-        }
-    }
-    private static Bitmap rotateImage(Bitmap img, int degree) {
-        Matrix matrix = new Matrix();
-        matrix.postRotate(degree);
-        Bitmap rotatedImg = Bitmap.createBitmap(img, 0, 0, img.getWidth(), img.getHeight(), matrix, true);
-        img.recycle();
-        return rotatedImg;
     }
 
     //Starts intent to get image from gallery, intents returned result is returned into NoteActivity
