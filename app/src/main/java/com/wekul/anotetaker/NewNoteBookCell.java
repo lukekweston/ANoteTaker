@@ -1,5 +1,6 @@
 package com.wekul.anotetaker;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -88,6 +89,7 @@ public class NewNoteBookCell extends Note {
                     editor.commit();
 
                     _c.startActivity(new Intent(_c, NoteActivity.class));
+
 
 
             }

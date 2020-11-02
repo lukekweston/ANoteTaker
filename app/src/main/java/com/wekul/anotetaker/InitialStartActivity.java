@@ -122,6 +122,7 @@ public class InitialStartActivity extends AppCompatActivity {
         }
         //Any errors will default back to opening main menu
         this.startActivity(new Intent(this, MainMenuActivity.class));
+        this.finish();
 
     }
 

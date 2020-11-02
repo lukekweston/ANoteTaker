@@ -24,8 +24,12 @@ import android.widget.TextView;
 import java.io.File;
 
 import java.time.LocalDateTime;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import androidx.annotation.RequiresApi;
+import androidx.core.app.ShareCompat;
+import androidx.core.content.FileProvider;
 
 import static androidx.core.content.FileProvider.getUriForFile;
 
@@ -77,18 +81,30 @@ public class ImageCell extends Note {
 
     //Listener that allows the displayed image to be opened in gallery
     public View.OnClickListener openGallery() {
-        return (new View.OnClickListener() {
+        return new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent();
-                intent.setAction(Intent.ACTION_VIEW);
+                displayImage.setOnClickListener(null);
+
+
+                Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 Uri photoURI = getUriForFile(_c, "com.mydomain.fileprovider", (new File(_fileLocation)));
                 intent.setDataAndType(photoURI, "image/*");
+
+
+
                 _c.startActivity(intent);
+
+                displayImage.setOnClickListener(this);
+
+
+
+
+
             }
 
-        });
+        };
 
     }
 
@@ -261,3 +277,5 @@ public class ImageCell extends Note {
         return ((EditText) _layoutNoteBeingAdded.findViewById(R.id.editTextTitle)).getText().toString();
     }
 }
+
+
