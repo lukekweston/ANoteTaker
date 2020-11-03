@@ -3,8 +3,14 @@ package com.wekul.anotetaker;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -35,7 +41,7 @@ public class MainMenuActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
 
-        saveCurrentLocation();
+
         setContentView(R.layout.activity_main_menu);
 
 
@@ -46,6 +52,20 @@ public class MainMenuActivity extends AppCompatActivity {
 
 
         loadNoteBooks();
+
+        //Save the location after 1 second
+        final Handler handler = new Handler(Looper.getMainLooper());
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                //Do something after 100ms
+                saveCurrentLocation();
+            }
+        }, 1000);
+
+
+
+
 
 
         ImageButton addButton = (ImageButton) findViewById(R.id.addBtn);
@@ -126,12 +146,16 @@ public class MainMenuActivity extends AppCompatActivity {
     //Saves that we are in the main menu
     public void saveCurrentLocation() {
         try {
+            Log.e("Saved main menu", "ok");
             //make or edit existing file
             File noteBookFile = new File("/data/data/com.wekul.anotetaker/files" + "/" + "lastImageAddedLocation.txt");
+            noteBookFile.delete();
             BufferedWriter bw = new BufferedWriter(new FileWriter(noteBookFile));
             bw.write("MainMenu");
             bw.close();
+            Log.e("Saved main menu", "good");
         } catch (Exception e) {
+            Log.e("Saved main menu", "failed");
 
         }
 
@@ -168,6 +192,18 @@ public class MainMenuActivity extends AppCompatActivity {
         }
 
 
+    }
+
+
+    //Close the app if the back button is pressed when in the mainmenu
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            saveCurrentLocation();
+            this.finishAffinity();
+            System.exit(0);
+            return true;
+        }
+        return false;
     }
 
 

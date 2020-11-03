@@ -27,6 +27,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -896,6 +897,7 @@ public class NoteActivity extends AppCompatActivity {
             File noteBookFile = new File("/data/data/com.wekul.anotetaker/files" + "/" + "lastImageAddedLocation.txt");
             BufferedWriter bw = new BufferedWriter(new FileWriter(noteBookFile));
             bw.write(currentFolder);
+            Log.e("Saved activity", "good");
             bw.close();
         } catch (Exception e) {
 
