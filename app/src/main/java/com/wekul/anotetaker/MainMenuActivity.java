@@ -9,7 +9,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
+
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.EditText;
@@ -146,16 +146,13 @@ public class MainMenuActivity extends AppCompatActivity {
     //Saves that we are in the main menu
     public void saveCurrentLocation() {
         try {
-            Log.e("Saved main menu", "ok");
             //make or edit existing file
             File noteBookFile = new File("/data/data/com.wekul.anotetaker/files" + "/" + "lastImageAddedLocation.txt");
             noteBookFile.delete();
             BufferedWriter bw = new BufferedWriter(new FileWriter(noteBookFile));
             bw.write("MainMenu");
             bw.close();
-            Log.e("Saved main menu", "good");
         } catch (Exception e) {
-            Log.e("Saved main menu", "failed");
 
         }
 

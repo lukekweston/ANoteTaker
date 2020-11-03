@@ -85,6 +85,7 @@ public class NoteActivity extends AppCompatActivity {
     private static final String NOTEBOOK_DIRECTORY = "/data/data/com.wekul.anotetaker/files/notebooks";
     private int GALLERY = 1;
     private static int CAMERA = 2;
+    private static int REMINDER = 3;
 
     //Flag set for deleting this notebook, stops this note from being saved when killed
     public boolean deleting = false;
@@ -897,7 +898,6 @@ public class NoteActivity extends AppCompatActivity {
             File noteBookFile = new File("/data/data/com.wekul.anotetaker/files" + "/" + "lastImageAddedLocation.txt");
             BufferedWriter bw = new BufferedWriter(new FileWriter(noteBookFile));
             bw.write(currentFolder);
-            Log.e("Saved activity", "good");
             bw.close();
         } catch (Exception e) {
 

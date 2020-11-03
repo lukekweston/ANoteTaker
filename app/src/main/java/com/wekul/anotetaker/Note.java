@@ -43,6 +43,10 @@ public abstract class Note {
     //Date/time that this cell was created at
     public String _date;
 
+    //Boolean to show that the reminder has been set for this note
+    public boolean _reminderSet = false;
+    public int REMINDER =3;
+
     //Enum to select the type of note displayed in a note cell
     enum Type {text, bulletpoint, list}
 
@@ -148,7 +152,6 @@ public abstract class Note {
                                     intent.setType("vnd.android.cursor.item/event");
                                     intent.putExtra("beginTime", cal.getTimeInMillis());
                                     intent.putExtra("allDay", false);
-                                    intent.putExtra("rrule", "FREQ=DAILY");
                                     intent.putExtra("endTime", cal.getTimeInMillis() + 60 * 60 * 1000);
                                     String reminderTitle = getReminderTitle();
                                     if (reminderTitle != null) {
@@ -158,6 +161,7 @@ public abstract class Note {
                                     }
 
                                     ((Activity) _c).startActivity(intent);
+
                                     break;
                                 //Highlight note
                                 case 1:
