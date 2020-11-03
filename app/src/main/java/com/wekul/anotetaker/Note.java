@@ -42,10 +42,7 @@ public abstract class Note {
     public boolean _noTitle = false;
     //Date/time that this cell was created at
     public String _date;
-
-    //Boolean to show that the reminder has been set for this note
-    public boolean _reminderSet = false;
-    public int REMINDER =3;
+    
 
     //Enum to select the type of note displayed in a note cell
     enum Type {text, bulletpoint, list}
