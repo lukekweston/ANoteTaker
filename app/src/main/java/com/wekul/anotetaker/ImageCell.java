@@ -10,6 +10,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -74,7 +75,7 @@ public class ImageCell extends Note {
     //Creates a note with a title and sets up border views
     public View imageTitle() {
         View layoutBeingAdded = LayoutInflater.from(_c).inflate(R.layout.layout_image_cell_title, _layoutAllNotes, false);
-        _borderViews = new View[]{layoutBeingAdded.findViewById(R.id.layoutImageCell), layoutBeingAdded.findViewById(R.id.imageView), layoutBeingAdded.findViewById(R.id.menuButton)};
+        _borderViews = new View[]{layoutBeingAdded.findViewById(R.id.layoutImageCell), layoutBeingAdded.findViewById(R.id.imageView), layoutBeingAdded.findViewById(R.id.menuButton), layoutBeingAdded.findViewById(R.id.layoutTitleBox)};
         return layoutBeingAdded;
     }
 
@@ -143,18 +144,24 @@ public class ImageCell extends Note {
             TextView dateTimeCreated = _layoutNoteBeingAdded.findViewById(R.id.DateTimeCreated);
             dateTimeCreated.setText(_date);
 
-            //check if the date will fit in the title, if not do not display it
+
+            TextView titleOfNote = _layoutNoteBeingAdded.findViewById(R.id.editTextTitle);
+            if (_title != null) {
+                Log.e("Text Height", titleOfNote.getTextSize() + "");
+                titleOfNote.setText(_title);
+            }
+
+            //check if the date will fit in the title, if not do not display it or if the text height is too large
             Configuration configuration = _c.getResources().getConfiguration();
             int screenWidthDp = configuration.screenWidthDp;
-            if (screenWidthDp < THRESHOLDFORDATEDISPLAYED) {
+            Log.e("Screen width", screenWidthDp +"");
+            Log.e("Threshold", THRESHOLDFORDATEDISPLAYED +"");
+            if (screenWidthDp < THRESHOLDFORDATEDISPLAYED || titleOfNote.getTextSize() > THRESHOLDFORTEXTSIZE) {
                 dateTimeCreated.setVisibility(View.INVISIBLE);
             }
 
 
-            if (_title != null) {
-                TextView titleOfNote = _layoutNoteBeingAdded.findViewById(R.id.editTextTitle);
-                titleOfNote.setText(_title);
-            }
+
         }
 
         //Make the borders

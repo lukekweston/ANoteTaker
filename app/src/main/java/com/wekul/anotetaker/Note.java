@@ -25,6 +25,7 @@ import androidx.appcompat.app.AlertDialog;
 public abstract class Note {
 
     public final int THRESHOLDFORDATEDISPLAYED = 380;
+    public final float THRESHOLDFORTEXTSIZE = 47.0f;
 
     //Color of the border
     public int _borderColor;
@@ -42,7 +43,7 @@ public abstract class Note {
     public boolean _noTitle = false;
     //Date/time that this cell was created at
     public String _date;
-    
+
 
     //Enum to select the type of note displayed in a note cell
     enum Type {text, bulletpoint, list}

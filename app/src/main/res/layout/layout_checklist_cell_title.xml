@@ -16,83 +16,83 @@
         tools:layout_editor_absoluteX="0dp"
         tools:layout_editor_absoluteY="dp">
 
-        <EditText
-            android:id="@+id/editTextTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:layout_marginBottom="8dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
-            android:clipToPadding="false"
-            android:singleLine="true"
-            android:maxLines="1"
-            android:ems="10"
-            android:hint="Title"
-            android:text=""
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <ImageButton
-            android:id="@+id/menuButton"
-            android:layout_width="31dp"
-            android:layout_height="57dp"
-            android:layout_gravity="right"
-            android:layout_marginRight="10dp"
-            android:layout_weight="1"
-            android:background="@android:color/transparent"
-            android:elevation="2dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/optionsmenu"/>
-
-        <TextView
-            android:id="@+id/DateTimeCreated"
-            android:layout_width="134dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="28dp"
-            android:layout_marginTop="16dp"
-            android:text="TextView"
-            app:layout_constraintStart_toEndOf="@+id/editTextTitle"
-            app:layout_constraintTop_toTopOf="parent" />
-
-
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/middleLayout"
+            android:id="@+id/layoutTitleBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/border"
             android:orientation="vertical"
-            app:layout_constraintTop_toTopOf="parent"
             tools:ignore="MissingConstraints"
-            tools:layout_editor_absoluteX="0dp">
+            tools:layout_editor_absoluteX="0dp"
+            tools:layout_editor_absoluteY="0dp">
+
+
+            <EditText
+                android:id="@+id/editTextTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="4dp"
+                android:clipToPadding="false"
+                android:ems="9"
+                android:hint="Title"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:text=""
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageButton
+                android:id="@+id/menuButton"
+                android:layout_width="31dp"
+                android:layout_height="57dp"
+                android:layout_gravity="right"
+                android:layout_marginRight="10dp"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:elevation="2dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="1.0"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/optionsmenu" />
+
+            <TextView
+                android:id="@+id/DateTimeCreated"
+                android:layout_width="134dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="20dp"
+                android:layout_marginTop="16dp"
+                android:text="TextView"
+
+                app:layout_constraintEnd_toEndOf="@+id/menuButton"
+                app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <RelativeLayout
-                android:id="@+id/layoutBottom"
+
+
+
+
+        <RelativeLayout
+            android:id="@+id/layoutBottom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/border"
+            app:layout_constraintTop_toBottomOf="@+id/layoutTitleBox"
+            >
+
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginTop="56dp"
-                android:background="@drawable/border"
-                android:orientation="vertical"
-                app:layout_constraintTop_toTopOf="@+id/middleLayout"
-                tools:layout_editor_absoluteX="28dp">
-
-                <LinearLayout
-                    android:id="@+id/layoutItems"
-                    android:layout_width="411dp"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical" />
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recyclerView"
-                    android:scrollbars="vertical"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_marginTop="0dp"
+                android:scrollbars="vertical" />
 
 
-            </RelativeLayout>
+        </RelativeLayout>
 
         <LinearLayout
             android:id="@+id/buttonLayout"

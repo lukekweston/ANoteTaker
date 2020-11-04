@@ -64,6 +64,8 @@ public class CheckListCell extends Note {
     public View createCheckListTitle() {
         final View layoutNoteBeingAdded = LayoutInflater.from(_c).inflate(R.layout.layout_checklist_cell_title, _layoutAllNotes, false);
 
+
+
         //Check if title has been set
         if (_title != null) {
             TextView titleOnNote = layoutNoteBeingAdded.findViewById(R.id.editTextTitle);
@@ -96,15 +98,17 @@ public class CheckListCell extends Note {
             _layoutNoteBeingAdded = createCheckListTitle();
             _borderViews = new View[]{_layoutNoteBeingAdded.findViewById(R.id.layoutTextCell),
                     _layoutNoteBeingAdded.findViewById(R.id.layoutBottom), _layoutNoteBeingAdded.findViewById(R.id.menuButton),
-                    _layoutNoteBeingAdded.findViewById(R.id.buttonAdd), _layoutNoteBeingAdded.findViewById(R.id.buttonLayout)};
+                    _layoutNoteBeingAdded.findViewById(R.id.buttonAdd), _layoutNoteBeingAdded.findViewById(R.id.buttonLayout), _layoutNoteBeingAdded.findViewById(R.id.layoutTitleBox)};
 
             //Set the date
             TextView dateTimeCreated = _layoutNoteBeingAdded.findViewById(R.id.DateTimeCreated);
             dateTimeCreated.setText(_date);
+            TextView titleOnNote = _layoutNoteBeingAdded.findViewById(R.id.editTextTitle);
+
             //check if the date will fit in the title, if not do not display it
             Configuration configuration = _c.getResources().getConfiguration();
             int screenWidthDp = configuration.screenWidthDp;
-            if(screenWidthDp < THRESHOLDFORDATEDISPLAYED){
+            if (screenWidthDp < THRESHOLDFORDATEDISPLAYED || titleOnNote.getTextSize() > THRESHOLDFORTEXTSIZE) {
                 dateTimeCreated.setVisibility(View.INVISIBLE);
             }
         }

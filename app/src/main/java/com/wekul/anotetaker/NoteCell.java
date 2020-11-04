@@ -60,41 +60,49 @@ public class NoteCell extends Note {
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void createNote(Integer index) {
 
+        //Set the date on intial creation
+        if(_date == null){
+            _date = LocalDateTime.now().toLocalDate() + " " + LocalDateTime.now().toLocalTime().toString().split(":")[0] + ":" + LocalDateTime.now().toLocalTime().toString().split(":")[1];
+        }
+
         if (_noTitle) {
             _layoutNoteBeingAdded = createNoteCellNoTitle();
+
+            //setup views for border
+            _borderViews = new View[]{_layoutNoteBeingAdded.findViewById(R.id.layoutTextCell), _layoutNoteBeingAdded.findViewById(R.id.editTextTextMultiLine),
+                    _layoutNoteBeingAdded.findViewById(R.id.menuButton)};
         } else {
             _layoutNoteBeingAdded = createNoteCellTitle();
-        }
 
+            //setup views for border
+            _borderViews = new View[]{_layoutNoteBeingAdded.findViewById(R.id.layoutTextCell), _layoutNoteBeingAdded.findViewById(R.id.editTextTextMultiLine),
+                    _layoutNoteBeingAdded.findViewById(R.id.menuButton), _layoutNoteBeingAdded.findViewById(R.id.layoutTitleBox)};
 
-        //Add date
-        TextView dateTimeCreated = _layoutNoteBeingAdded.findViewById(R.id.DateTimeCreated);
-        if (_date != null) {
+            //Add date
+            TextView dateTimeCreated = _layoutNoteBeingAdded.findViewById(R.id.DateTimeCreated);
             dateTimeCreated.setText(_date);
-        } else {
-            _date = LocalDateTime.now().toLocalDate() + " " + LocalDateTime.now().toLocalTime().toString().split(":")[0] + ":" + LocalDateTime.now().toLocalTime().toString().split(":")[1];
-            dateTimeCreated.setText(_date);
+
+            TextView titleOnNote = _layoutNoteBeingAdded.findViewById(R.id.editTextTitle);
+            //check if the date will fit in the title, if not do not display it
+            Configuration configuration = _c.getResources().getConfiguration();
+            int screenWidthDp = configuration.screenWidthDp;
+            if (screenWidthDp < THRESHOLDFORDATEDISPLAYED || titleOnNote.getTextSize() > THRESHOLDFORTEXTSIZE) {
+                dateTimeCreated.setVisibility(View.INVISIBLE);
+            }
+
         }
 
-        //check if the date will fit in the title, if not do not display it
-        Configuration configuration = _c.getResources().getConfiguration();
-        int screenWidthDp = configuration.screenWidthDp;
-        if(screenWidthDp < THRESHOLDFORDATEDISPLAYED){
-            dateTimeCreated.setVisibility(View.INVISIBLE);
-        }
 
 
         //Fill out contents
         EditText contentsOnNote = _layoutNoteBeingAdded.findViewById(R.id.editTextTextMultiLine);
 
 
-        final ConstraintLayout note = _layoutNoteBeingAdded.findViewById(R.id.layoutTextCell);
 
         ImageButton menuButton = _layoutNoteBeingAdded.findViewById(R.id.menuButton);
         menuButton.setOnClickListener(menuListener);
 
-        //setup views for border
-        _borderViews = new View[]{note, contentsOnNote, menuButton};
+
 
         //Set up the border
         setBorder();

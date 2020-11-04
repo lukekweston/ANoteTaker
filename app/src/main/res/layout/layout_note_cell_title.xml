@@ -23,30 +23,32 @@
 
 
 
-        <FrameLayout
-            android:id="@+id/frameLayout"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layoutTitleBox"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
-            tools:layout_editor_absoluteX="2dp"
-            tools:layout_editor_absoluteY="2dp">
+            android:layout_height="wrap_content"
+            android:background="@drawable/border"
+            android:orientation="vertical"
+            tools:ignore="MissingConstraints"
+            tools:layout_editor_absoluteX="0dp"
+            tools:layout_editor_absoluteY="0dp">
+
 
             <EditText
-            android:id="@+id/editTextTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:layout_marginBottom="8dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
-            android:clipToPadding="false"
-            android:singleLine="true"
-            android:maxLines="1"
-
-            android:ems="10"
-
-            android:hint="Title"
-            android:text=""
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+                android:id="@+id/editTextTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="4dp"
+                android:clipToPadding="false"
+                android:ems="9"
+                android:hint="Title"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:text=""
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <ImageButton
                 android:id="@+id/menuButton"
@@ -59,27 +61,26 @@
                 android:elevation="2dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="1.0"
-
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/optionsmenu"/>
+                app:srcCompat="@drawable/optionsmenu" />
 
             <TextView
                 android:id="@+id/DateTimeCreated"
                 android:layout_width="134dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="250dp"
+                android:layout_marginEnd="20dp"
                 android:layout_marginTop="16dp"
                 android:text="TextView"
-                app:layout_constraintStart_toEndOf="@+id/editTextTitle"
+
+                app:layout_constraintEnd_toEndOf="@+id/menuButton"
                 app:layout_constraintTop_toTopOf="parent" />
 
-        </FrameLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <EditText
             android:id="@+id/editTextTextMultiLine"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
             android:background="@drawable/border"
             android:clipToPadding="false"
             android:ems="10"
@@ -87,7 +88,7 @@
             android:inputType="textMultiLine"
             android:padding="10dp"
             android:minLines="2"
-            app:layout_constraintTop_toBottomOf="@+id/frameLayout"
+            app:layout_constraintTop_toBottomOf="@+id/layoutTitleBox"
             tools:layout_editor_absoluteX="0dp" />
 
 
