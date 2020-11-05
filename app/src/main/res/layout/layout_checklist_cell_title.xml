@@ -3,23 +3,17 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layoutTextCell"
+    android:background="@drawable/border"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layoutTextCell"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/border"
-        android:orientation="vertical"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="dp">
+
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layoutTitleBox"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:background="@drawable/border"
             android:orientation="vertical"
             tools:ignore="MissingConstraints"
@@ -49,6 +43,7 @@
                 android:layout_height="57dp"
                 android:layout_gravity="right"
                 android:layout_marginRight="10dp"
+                android:layout_marginBottom="15dp"
                 android:layout_weight="1"
                 android:background="@android:color/transparent"
                 android:elevation="2dp"
@@ -72,15 +67,28 @@
 
 
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@+id/layoutTitleBox"
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="dp">
+
+
 
 
         <RelativeLayout
             android:id="@+id/layoutBottom"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+
             android:background="@drawable/border"
-            app:layout_constraintTop_toBottomOf="@+id/layoutTitleBox"
-            >
+            android:orientation="vertical"
+
+            tools:layout_editor_absoluteX="28dp">
 
 
             <androidx.recyclerview.widget.RecyclerView
@@ -88,7 +96,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
-                android:layout_marginTop="0dp"
                 android:scrollbars="vertical" />
 
 

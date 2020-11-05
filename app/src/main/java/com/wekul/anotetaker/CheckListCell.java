@@ -5,9 +5,11 @@ import android.content.res.Configuration;
 import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 
@@ -16,6 +18,7 @@ import java.util.ArrayList;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -96,8 +99,9 @@ public class CheckListCell extends Note {
                     _layoutNoteBeingAdded.findViewById(R.id.buttonAdd), _layoutNoteBeingAdded.findViewById(R.id.buttonLayout)};
         } else {
             _layoutNoteBeingAdded = createCheckListTitle();
-            _borderViews = new View[]{_layoutNoteBeingAdded.findViewById(R.id.layoutTextCell),
-                    _layoutNoteBeingAdded.findViewById(R.id.layoutBottom), _layoutNoteBeingAdded.findViewById(R.id.menuButton),
+//
+            _borderViews = new View[]{ _layoutNoteBeingAdded.findViewById(R.id.layoutTextCell),
+                    _layoutNoteBeingAdded.findViewById(R.id.layoutBottom),  _layoutNoteBeingAdded.findViewById(R.id.menuButton),
                     _layoutNoteBeingAdded.findViewById(R.id.buttonAdd), _layoutNoteBeingAdded.findViewById(R.id.buttonLayout), _layoutNoteBeingAdded.findViewById(R.id.layoutTitleBox)};
 
             //Set the date
@@ -109,8 +113,13 @@ public class CheckListCell extends Note {
             Configuration configuration = _c.getResources().getConfiguration();
             int screenWidthDp = configuration.screenWidthDp;
             if (screenWidthDp < THRESHOLDFORDATEDISPLAYED || titleOnNote.getTextSize() > THRESHOLDFORTEXTSIZE) {
+
+
                 dateTimeCreated.setVisibility(View.INVISIBLE);
             }
+
+
+
         }
 
 

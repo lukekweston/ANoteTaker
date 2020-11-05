@@ -42,7 +42,6 @@
             android:layout_marginTop="56dp"
             android:background="@drawable/border"
             android:orientation="vertical"
-            app:layout_constraintTop_toTopOf="@+id/middleLayout"
             tools:layout_editor_absoluteX="28dp">
 
             <LinearLayout

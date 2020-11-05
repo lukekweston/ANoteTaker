@@ -1,11 +1,13 @@
 package com.wekul.anotetaker;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -23,6 +25,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 
 
 //This is the main menu activity, displays the top level of all notebooks
@@ -160,6 +164,7 @@ public class MainMenuActivity extends AppCompatActivity {
 
 
     //Loads the notebooks that are in the main menu and creates newNoteBookcells to link to them
+    @RequiresApi(api = Build.VERSION_CODES.N)
     public void loadNoteBooks() {
 
         File notebookDirectory = new File(NOTEBOOK_DIRECTORY);
@@ -172,6 +177,9 @@ public class MainMenuActivity extends AppCompatActivity {
         String path = NOTEBOOK_DIRECTORY;
         File directory = new File(path);
         File[] files = directory.listFiles();
+
+
+
         //get the .txt (notebook) files
         if(files != null) {
             for (int i = 0; i < files.length; i++) {
