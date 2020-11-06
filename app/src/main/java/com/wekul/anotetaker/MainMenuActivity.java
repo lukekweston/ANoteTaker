@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.EditText;
@@ -24,6 +25,7 @@ import android.widget.Toast;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -40,6 +42,7 @@ public class MainMenuActivity extends AppCompatActivity {
     public ArrayList<NewNoteBookCell> notesBooksDisplayed = new ArrayList<NewNoteBookCell>();
 
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -114,6 +117,18 @@ public class MainMenuActivity extends AppCompatActivity {
                         NewNoteBookCell nC = new NewNoteBookCell(newNoteBook, MainMenuActivity.this, menuItems);
                         notesBooksDisplayed.add(nC);
                         nC.createNote(null);
+
+
+                        //Create empty notebook that is saved
+                        File noteBookFile = new File(NOTEBOOK_DIRECTORY + "/" + newNoteBook + ".txt");
+                        try {
+                            noteBookFile.createNewFile();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+
+
 
 
                     }

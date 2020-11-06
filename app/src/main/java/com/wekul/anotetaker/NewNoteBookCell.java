@@ -130,4 +130,8 @@ public class NewNoteBookCell extends Note {
     public String getTitle(){
         return null;
     }
+
+    public void saveNewNote(){
+        ((NoteActivity) _c).saveItems();
+    }
 }
