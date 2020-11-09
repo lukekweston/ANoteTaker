@@ -200,7 +200,7 @@ public class NoteActivity extends AppCompatActivity {
     private void selectNoteTypeDialog() {
         AlertDialog.Builder pictureDialog = new AlertDialog.Builder(this);
         pictureDialog.setTitle("Select Note to add");
-        String[] pictureDialogItems = {"Text note", "Text note - bullet point", "Image", "Add Checklist", "Exta notebook"};
+        String[] pictureDialogItems = {"Text note", "Text note - bullet point", "Image", "Add checklist", "Extra notebook"};
         pictureDialog.setItems(pictureDialogItems,
                 new DialogInterface.OnClickListener() {
                     @RequiresApi(api = Build.VERSION_CODES.O)

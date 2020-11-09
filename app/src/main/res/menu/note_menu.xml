@@ -3,7 +3,7 @@
 <item android:id="@+id/rename_notebook"
     android:title="Rename Notebook" />
 <item android:id="@+id/setColour"
-    android:title="Set Notebook colour" />
+    android:title="Set Notebook Colour" />
 <item android:id="@+id/setReminder"
     android:title="Set Reminder" />
 <item android:id="@+id/delete"

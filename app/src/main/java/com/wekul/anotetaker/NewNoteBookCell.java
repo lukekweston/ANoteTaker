@@ -131,7 +131,4 @@ public class NewNoteBookCell extends Note {
         return null;
     }
 
-    public void saveNewNote(){
-        ((NoteActivity) _c).saveItems();
-    }
 }
